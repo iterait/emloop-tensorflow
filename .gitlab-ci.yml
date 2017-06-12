@@ -24,7 +24,7 @@
 # Install and run tests
 .install_and_run_tests: &installAndRunTests
   script:
-  - pip3 install -e git@gitlab.com:Cognexa/cxflow.git@plugins
+  - pip3 install -e git+https://petrbel@gitlab.com/Cognexa/cxflow.git@plugins
   - pip3 install .
   - python3 setup.py test
 
