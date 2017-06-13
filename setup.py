@@ -26,7 +26,8 @@ setup(name='cxflow-tensorflow',
       license='MIT',
       packages=[
           'cxflow_tensorflow',
-          'cxflow_tensorflow.third_party'
+          'cxflow_tensorflow.third_party',
+          'cxflow_tensorflow.third_party.tensorflow'
       ],
       include_package_data=True,
       zip_safe=False,
