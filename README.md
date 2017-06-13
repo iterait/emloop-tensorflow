@@ -1,11 +1,11 @@
 # cxflow-tensorflow
 
-TODO
+TensorFlow backend for cxflow framework.
 
 ## Development Status
 
 - [![Build Status](https://gitlab.com/Cognexa/cxflow-tensorflow/badges/master/build.svg)](https://gitlab.com/Cognexa/cxflow-tensorflow/builds/)
-- [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
+- [![Development Status](https://img.shields.io/badge/status-CX%20PoC-yellow.svg?style=flat)]()
 - [![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
 
 ## Testing
