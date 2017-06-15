@@ -13,10 +13,10 @@ from typing import Dict, Callable, List, Mapping, Any
 
 import tensorflow as tf
 
-from cxflow.datasets.abstract_dataset import AbstractDataset
+from cxflow import AbstractNet
+from cxflow.datasets import AbstractDataset
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from cxflow.utils.reflection import create_object_from_config, get_class_module
-from cxflow.nets.abstract_net import AbstractNet
 
 TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
 

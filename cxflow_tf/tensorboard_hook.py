@@ -6,7 +6,7 @@ import logging
 import numpy as np
 import tensorflow as tf
 
-from cxflow.hooks.abstract_hook import AbstractHook
+from cxflow.hooks import AbstractHook
 from .tf_net import BaseTFNet
 
 
