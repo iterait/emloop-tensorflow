@@ -1,11 +1,10 @@
 from pip.req import parse_requirements
 from setuptools import setup
 
-setup(name='cxflow-tensorflow',
+setup(name='cxflow-tf',
       version='0.1',
-      description='TensorFlow support for cxflow',
-      long_description='Trainer of TensorFlow models that automatically manages the whole process of training,'
-                       'saving and restoring models and much more',
+      description='TensorFlow plugin for cxflow.',
+      long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -25,12 +24,12 @@ setup(name='cxflow-tensorflow',
       author_email='me@petrbel.cz',
       license='MIT',
       packages=[
-          'cxflow_tensorflow',
-          'cxflow_tensorflow.third_party',
-          'cxflow_tensorflow.third_party.tensorflow'
+          'cxflow_tf',
+          'cxflow_tf.third_party',
+          'cxflow_tf.third_party.tensorflow'
       ],
       include_package_data=True,
       zip_safe=False,
-      test_suite='cxflow_tensorflow.tests',
+      test_suite='cxflow_tf.tests',
       install_requires=[str(ir.req) for ir in parse_requirements('requirements.txt', session='hack')],
      )
