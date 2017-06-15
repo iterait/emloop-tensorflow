@@ -7,7 +7,8 @@ from os import path
 import numpy as np
 import tensorflow as tf
 from cxflow_tf import BaseTFNet, BaseTFNetRestore, create_optimizer
-from cxflow.tests.test_core import CXTestCaseWithDirAndNet
+
+from cxflow_tf.tests.test_core import CXTestCaseWithDirAndNet
 
 
 class DummyNet(BaseTFNet):

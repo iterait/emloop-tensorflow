@@ -1,2 +1,2 @@
 from .tensorboard_hook import TensorBoardHook
-from .tf_net import BaseTFNet, BaseTFNetRestore
+from .tf_net import BaseTFNet, BaseTFNetRestore, create_activation, create_optimizer
