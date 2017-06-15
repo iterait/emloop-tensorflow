@@ -6,7 +6,7 @@ from os import path
 
 import numpy as np
 import tensorflow as tf
-from cxflow_ft import BaseTFNet, BaseTFNetRestore, create_optimizer
+from cxflow_tf import BaseTFNet, BaseTFNetRestore, create_optimizer
 from cxflow.tests.test_core import CXTestCaseWithDirAndNet
 
 
