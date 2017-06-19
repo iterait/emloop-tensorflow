@@ -8,9 +8,22 @@ import shutil
 
 import numpy as np
 import tensorflow as tf
-from cxflow_tf import BaseTFNet, BaseTFNetRestore, create_optimizer
 
+from cxflow.tests.main_loop_test import SimpleDataset
+from cxflow.main_loop import MainLoop
+from cxflow.hooks import EpochStopperHook
+
+from cxflow_tf import BaseTFNet, BaseTFNetRestore, create_optimizer
 from cxflow_tf.tests.test_core import CXTestCaseWithDirAndNet
+
+
+def create_simple_main_loop(epochs: int, tmpdir: str):
+    dataset = SimpleDataset()
+    net = TrainableNet(dataset=dataset, log_dir=tmpdir,  # pylint: disable=redefined-variable-type
+                       io={'in': ['input', 'target'], 'out': ['output']})
+    mainloop = MainLoop(net=net, dataset=dataset, hooks=[EpochStopperHook(epoch_limit=epochs)],
+                        skip_zeroth_epoch=False)
+    return dataset, net, mainloop
 
 
 class DummyNet(BaseTFNet):
@@ -208,6 +221,20 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
             trainable_net.run(batch, train=True)
         after_value = trainable_net.var.eval(session=trainable_net.session)
         self.assertTrue(np.allclose([0]*10, after_value))
+
+    def test_mainloop_net_training(self):
+        """Test the net is being trained properly."""
+        _, net, mainloop = create_simple_main_loop(130, self.tmpdir)
+        mainloop.run()
+        after_value = net.graph.get_tensor_by_name('var:0').eval(session=net.session)
+        self.assertTrue(np.allclose([0]*10, after_value, atol=0.01))
+
+    def test_mainloop_zero_epoch_not_training(self):
+        """Test the net is not being trained in the zeroth epoch."""
+        _, net, mainloop = create_simple_main_loop(0, self.tmpdir)
+        mainloop.run()
+        after_value = net.graph.get_tensor_by_name('var:0').eval(session=net.session)
+        self.assertTrue(np.allclose([2]*10, after_value, atol=0.01))
 
 
 class BasetTFNetRestoreTest(CXTestCaseWithDirAndNet):
