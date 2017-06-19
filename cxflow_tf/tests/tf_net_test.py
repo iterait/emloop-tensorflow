@@ -9,8 +9,8 @@ import shutil
 import numpy as np
 import tensorflow as tf
 
+from cxflow import MainLoop
 from cxflow.tests.main_loop_test import SimpleDataset
-from cxflow.main_loop import MainLoop
 from cxflow.hooks import EpochStopperHook
 
 from cxflow_tf import BaseTFNet, BaseTFNetRestore, create_optimizer
