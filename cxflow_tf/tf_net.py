@@ -9,56 +9,13 @@ which is able to restore arbitrary cxflow nets from tf checkpoint.
 import logging
 from os import path
 from abc import abstractmethod, ABCMeta
-from typing import Dict, Callable, List, Mapping, Any
+from typing import List, Mapping
 
 import tensorflow as tf
 
 from cxflow import AbstractNet, AbstractDataset
-from cxflow.utils.reflection import create_object_from_config, get_class_module
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
-
-TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
-
-
-def create_optimizer(optimizer_config: Dict[str, Any]):
-    """
-    Create tf optimizer according to the given config.
-
-    When `module` entry is not present in the optimizer_config,
-    the function attempts to find it under the TF_OPTIMIZER_MODULE.
-    :param optimizer_config: dict with at least `class` and `learning_rate` entries
-    :return: optimizer
-    """
-    assert 'learning_rate' in optimizer_config
-    assert 'class' in optimizer_config
-    kwargs = optimizer_config.copy()
-    learning_rate = kwargs.pop('learning_rate')
-    if 'module' not in kwargs:
-        optimizer_module = get_class_module(TF_OPTIMIZERS_MODULE, optimizer_config['class'])
-        if optimizer_module is not None:
-            optimizer_config['module'] = optimizer_module
-        else:
-            raise ValueError('Can\'t find the optimizer module for class `{}` under `{}`. Please specify it explicitly.'
-                             .format(optimizer_config['class'], TF_OPTIMIZERS_MODULE))
-    else:
-        kwargs.pop('module')
-    kwargs.pop('class')
-    return create_object_from_config(optimizer_config, args=(learning_rate,), kwargs=kwargs)
-
-
-def create_activation(activation_name: str) -> Callable[[tf.Tensor], tf.Tensor]:
-    """
-    Create tf activation with the given name.
-    :param activation_name: one of {Relu, Identity, Softmax}
-    :return: activation
-    """
-    if activation_name == 'ReLU':
-        return tf.nn.relu
-    if activation_name == 'Identity':
-        return tf.identity
-
-    raise NotImplementedError
 
 
 class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
