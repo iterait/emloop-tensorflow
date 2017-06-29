@@ -9,7 +9,7 @@ which is able to restore arbitrary cxflow nets from tf checkpoint.
 import logging
 from os import path
 from abc import abstractmethod, ABCMeta
-from typing import List, Mapping
+from typing import List, Mapping, Optional
 
 import tensorflow as tf
 
@@ -26,7 +26,8 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
     """
 
     def __init__(self,   # pylint: disable=too-many-arguments
-                 dataset: AbstractDataset, log_dir: str, io: dict, device: str='/cpu:0', threads: int=4, **kwargs):
+                 dataset: Optional[AbstractDataset], log_dir: str, io: dict, device: str='/cpu:0',
+                 threads: int=4, **kwargs):
         """
         Create new cxflow trainable tf net.
 
