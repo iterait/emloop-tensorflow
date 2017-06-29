@@ -25,6 +25,7 @@ setup(name='cxflow-tf',
       license='MIT',
       packages=[
           'cxflow_tf',
+          'cxflow_tf.hooks',
           'cxflow_tf.third_party',
           'cxflow_tf.third_party.tensorflow'
       ],
