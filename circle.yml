@@ -1,0 +1,9 @@
+machine:
+  services:
+    - docker
+
+test:
+  override:
+    - docker info
+    - docker build --rm=false -t cxflow-tensorflow-archlinux -f Dockerfiles/archlinux .
+    - docker build --rm=false -t cxflow-tensorflow-ubuntu -f Dockerfiles/ubuntu .

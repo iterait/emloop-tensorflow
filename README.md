@@ -3,7 +3,7 @@
 TensorFlow backend for cxflow framework.
 
 ## Development Status
-- [![Build Status](https://gitlab.com/Cognexa/cxflow-tensorflow/badges/master/build.svg)](https://gitlab.com/Cognexa/cxflow-tensorflow/builds/)
+- [![CircleCI](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master.svg?style=shield)](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master)
 - [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
 - [![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
 
