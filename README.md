@@ -1,27 +1,33 @@
 # cxflow-tensorflow
 
-TensorFlow backend for cxflow framework.
+TensorFlow adapter for [cxflow framework](https://github.com/cognexa/cxflow) allowing to train nets defined in tensorflow.
 
 ## Development Status
 - [![CircleCI](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master.svg?style=shield)](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master)
 - [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
 - [![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
 
-## Requirements
-The main dependency is cxflow (see [Cognexa/cxflow](https://github.com/Cognexa/cxflow)
-for installation guide).
-Other requirements are listed in `requirements.txt`.
-
 ## Installation
-Installation to a [virtualenv](https://docs.python.org/3/library/venv.html) is suggested, however, completely optional. 
 
-### Standard Installation
-1. Install **cxflow-tensorflow** `$ pip install git+https://github.com/Cognexa/cxflow-tensorflow.git`
+1. Install tensorflow according to the [official instructions](https://www.tensorflow.org/install/)
 
-### Development Installation
-1. Clone the **cxflow-tensorflow** repository `$ git clone git@github.com:Cognexa/cxflow-tensorflow.git`
-2. Enter the directory `$ cd cxflow-tensorflow`
-3. Install **cxflow-tensorflow**: `$ pip install -e .`
+2. Install cxflow-tensorflow with pip
+```
+pip install git+https://github.com/Cognexa/cxflow-tensorflow.git
+```
+
+## Development Installation
+
+1. Install tensorflow according to the [official instructions](https://www.tensorflow.org/install/)
+
+2. Clone the **cxflow-tensorflow** repository
+```
+git clone git@github.com:Cognexa/cxflow-tensorflow.git && cd cxflow-tensorflow
+```
+3. Install **cxflow-tensorflow** in editable mode
+```
+pip install -e .
+```
 
 ## Usage
 When `cxflow-tensorflow` installed, the following classes are available:
@@ -34,6 +40,11 @@ When `cxflow-tensorflow` installed, the following classes are available:
 ### Hooks
 
 - `cxflow_tf.TensorBoardHook`
+- `cxflow_tf.LRDecayHook`
+
+### Additional utils
+
+Additional helper and util functions in `cxflow_tf.utils` module.
 
 ## Testing
 Unit tests might be run by `$ python setup.py test`.

@@ -1,13 +1,1 @@
-# common/   System packages (usually with `python-` prefix)
-# ---------------------------------------------------------
-numpy>=1.12.0
-pip>=9.0.0
-
-# aur/      Less common system packages (usually with `python-` prefix)
-# ---------------------------------------------------------------------
-tensorflow>=1.1
-
-# pip       The following options are not available or broken
-# ----------------------------------------------------------
-typing>=3.5.3.0
-cxflow>=0.6
+git+https://github.com/Cognexa/cxflow-tensorflow.git
