@@ -19,7 +19,6 @@ references:
     run:
       name: Install.
       command: |
-        pip3 install -r requirements.txt
         pip3 install .
 
   test: &test

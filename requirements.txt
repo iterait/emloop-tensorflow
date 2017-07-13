@@ -1,2 +1,2 @@
-tensorflow
-git+https://github.com/Cognexa/cxflow.git
+tensorflow>=1.2.0
+cxflow>=0.6
