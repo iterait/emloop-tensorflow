@@ -19,7 +19,6 @@ references:
     run:
       name: Install.
       command: |
-        pip3 install tensorflow
         pip3 install .
 
   test: &test

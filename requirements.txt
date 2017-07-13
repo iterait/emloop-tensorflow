@@ -1,1 +1,2 @@
+tensorflow
 git+https://github.com/Cognexa/cxflow.git
