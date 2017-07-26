@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(name='cxflow-tf',
       version='0.1',
-      description='TensorFlow plugin for cxflow.',
+      description='TensorFlow extension for cxflow.',
       long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
         'Development Status :: 4 - Beta',
@@ -20,8 +20,8 @@ setup(name='cxflow-tf',
       ],
       keywords='tensorflow wrapper',
       url='https://github.com/Cognexa/cxflow-tensorflow',
-      author='Petr Belohlavek',
-      author_email='me@petrbel.cz',
+      author='Cognexa Solutions s.r.o.',
+      author_email='info@cognexa.com',
       license='MIT',
       packages=[
           'cxflow_tf',
