@@ -8,8 +8,9 @@ which is able to restore arbitrary cxflow nets from tf checkpoint.
 """
 import logging
 from os import path
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta
 from typing import List, Mapping, Optional
+from glob import glob
 
 import tensorflow as tf
 
@@ -20,14 +21,15 @@ from .third_party.tensorflow.freeze_graph import freeze_graph
 
 class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
     """
-    Base tensorflow network enforcing uniform net API which is trainable in cxflow main loop.
+    Base TensorFlow network enforcing uniform net API which is trainable in cxflow main loop.
 
-    All tf nets should be derived from this class and override _create_net method.
+    All tf nets should be derived from this class and override `_create_net` method.
+    Optionally, `_restore_net` might be overriden.
     """
 
-    def __init__(self,   # pylint: disable=too-many-arguments
-                 dataset: Optional[AbstractDataset], log_dir: str, io: dict, device: str='/cpu:0',
-                 threads: int=4, **kwargs):
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 dataset: Optional[AbstractDataset], log_dir: str, io: dict, device: str='/cpu:0', threads: int=4,
+                 restore_from: Optional[str] = None, restore_model_name: Optional[str] = None, **kwargs):
         """
         Create new cxflow trainable tf net.
 
@@ -36,6 +38,8 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
         :param io: net `in`put and `out`put names; `out`put names cannot be empty
         :param device: tf device to be trained on
         :param threads: number of threads to be used by tf
+        :param restore_from: path to directory from which the model is restored
+        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
         :param kwargs: additional kwargs which are passed to the _create_net method
         """
         assert 'in' in io
@@ -61,7 +65,10 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
 
             with self._graph.as_default():
                 logging.debug('Creating net')
-                self._create_net(**kwargs)
+                if restore_from is not None:
+                    self._restore_network(restore_from=restore_from, restore_model_name=restore_model_name)
+                else:
+                    self._create_net(**kwargs)
 
                 logging.debug('Finding train_op in the created graph')
                 try:
@@ -173,7 +180,52 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
 
         return checkpoint_path
 
-    @abstractmethod
+    def _restore_checkpoint(self, checkpoint_name: str) -> None:
+        """
+        Given the checkpoint name (including the path to it), restore the network.
+
+        :param checkpoint_name: name in form of `*.ckpt`, e.g. `model_3.ckpt`.
+        """
+        logging.debug('Loading meta graph')
+        saver = tf.train.import_meta_graph(checkpoint_name + '.meta')
+        logging.debug('Restoring model')
+        saver.restore(self._session, checkpoint_name)
+
+    def _restore_network(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
+        """
+        Restore TF net from the given checkpoint.
+        :param restore_from: path to directory from which the model is restored
+        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
+        """
+
+        logging.info('Restoring model from `{}`'.format(restore_from))
+        assert path.isdir(restore_from), '`BaseTFNet` expect `restore_from` to be an existing directory.'
+        meta_files = glob('{}/*.ckpt.meta'.format(restore_from))
+
+        if len(meta_files) == 0:
+            raise ValueError('No `{}/*.ckpt.meta` files found.'.format(restore_from))
+        elif len(meta_files) == 1:
+            logging.info('Restoring model from checkpoint metafile`{}`'.format(meta_files[0]))
+            self._restore_checkpoint(meta_files[0][:-5])
+        else:
+            logging.info('Multiple checkpoint metafiles found.')
+
+            if restore_model_name is None:
+                raise ValueError('There are multiple checkpoint metafiles found in the directory {}. However, config '
+                                 'lacks `net.restore_model_name`. Please, specify it.'.format(restore_from))
+
+            logging.info('Restoring model from checkpoint `{}` located in directory `{}`'.format(restore_model_name,
+                                                                                                 restore_from))
+            self._restore_checkpoint(path.join(restore_from, restore_model_name))
+
+    @property
+    def restore_fallback_module(self) -> str:
+        return 'cxflow_tf'
+
+    @property
+    def restore_fallback_class(self) -> str:
+        return 'BaseTFNet'
+
     def _create_net(self, **kwargs) -> None:
         """
         Create network according to the given config.
@@ -183,26 +235,9 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
         -------------------------------------------------------
         1. define training op named as 'train_op'
         2. input/output tensors have to be named according to net.io config
-        3. initialize/restore variables through self._session
+        3. initialize variables through self._session
         -------------------------------------------------------
 
         :param kwargs: net configuration
         """
-        pass
-
-
-class BaseTFNetRestore(BaseTFNet):
-    """
-    Generic tf net restore class used when no custom restore class is provided.
-    """
-
-    def _create_net(self, restore_from: str, **kwargs) -> None:
-        """
-        Restore tf net from the given checkpoint.
-        :param restore_from: path to the checkpoint
-        :param kwargs: additional **kwargs are ignored
-        """
-        logging.debug('Loading meta graph')
-        saver = tf.train.import_meta_graph(restore_from + '.meta')
-        logging.debug('Restoring model')
-        saver.restore(self._session, restore_from)
+        raise NotImplementedError('`_create_net` method must be implemented in order to construct a new network.')
