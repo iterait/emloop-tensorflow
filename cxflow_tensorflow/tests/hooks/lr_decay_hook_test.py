@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from cxflow_tensorflow import LRDecayHook
 
-from ..tf_net_test import TrainableNet, SimpleDataset, EpochStopperHook, MainLoop
+from ..net_test import TrainableNet, SimpleDataset, EpochStopperHook, MainLoop
 
 
 class LRNet(TrainableNet):

@@ -5,7 +5,7 @@ import logging
 
 import tensorflow as tf
 from cxflow.hooks.abstract_hook import AbstractHook
-from cxflow_tensorflow import BaseTFNet
+from cxflow_tensorflow import BaseNet
 
 
 class LRDecayHook(AbstractHook):
@@ -34,7 +34,7 @@ class LRDecayHook(AbstractHook):
 
     LR_DECAY_TYPES = {'multiply', 'add'}
 
-    def __init__(self, net: BaseTFNet,
+    def __init__(self, net: BaseNet,
                  decay_value=0.98, variable_name='learning_rate', decay_type='multiply', **kwargs):
         """
         Create new LRDecayHook.
@@ -43,9 +43,9 @@ class LRDecayHook(AbstractHook):
         :param variable_name: variable name to be modified
         :param decay_type: decay type, one of {'multiply', 'add'}
         """
-        if not isinstance(net, BaseTFNet):
+        if not isinstance(net, BaseNet):
             raise TypeError('Invalid net class `{}`. '
-                            'Only to nets derived from `cxflow_tensorflow.BaseTFNet` are allowed. '.format(type(net)))
+                            'Only to nets derived from `cxflow_tensorflow.BaseNet` are allowed. '.format(type(net)))
 
         if decay_type not in LRDecayHook.LR_DECAY_TYPES:
             raise ValueError('Unrecognized LR decay type `{}`. '
