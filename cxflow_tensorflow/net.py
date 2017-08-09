@@ -1,9 +1,8 @@
 """
 Module with cxflow trainable nets defined in tensorflow.
 
-Provides BaseTFNet which manages net config, api and unifies tf graph <=> cxflow touch points.
+Provides BaseNet which manages net config, api and unifies tf graph <=> cxflow touch points.
 
-Furthermore, this module exposes BaseTFNetRestore class
 which is able to restore arbitrary cxflow nets from tf checkpoint.
 """
 import logging
@@ -19,7 +18,7 @@ from cxflow import AbstractNet, AbstractDataset
 from .third_party.tensorflow.freeze_graph import freeze_graph
 
 
-class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
+class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
     """
     Base TensorFlow network enforcing uniform net API which is trainable in cxflow main loop.
 
@@ -204,7 +203,7 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
-        assert path.isdir(restore_from), '`BaseTFNet` expect `restore_from` to be an existing directory.'
+        assert path.isdir(restore_from), '`BaseNet` expect `restore_from` to be an existing directory.'
         meta_files = glob('{}/*.ckpt.meta'.format(restore_from))
 
         if len(meta_files) == 0:
@@ -225,11 +224,11 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
 
     @property
     def restore_fallback_module(self) -> str:
-        return 'cxflow_tf'
+        return 'cxflow_tensorflow'
 
     @property
     def restore_fallback_class(self) -> str:
-        return 'BaseTFNet'
+        return 'BaseNet'
 
     def _create_net(self, **kwargs) -> None:
         """

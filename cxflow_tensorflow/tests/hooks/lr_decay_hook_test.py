@@ -1,13 +1,13 @@
 """
-Test module for cxflow_tf.hooks.LRDecayHook.
+Test module for cxflow_tensorflow.hooks.LRDecayHook.
 """
 
 import tensorflow as tf
 from unittest import TestCase
 
-from cxflow_tf import LRDecayHook
+from cxflow_tensorflow import LRDecayHook
 
-from ..tf_net_test import TrainableNet, SimpleDataset, EpochStopperHook, MainLoop
+from ..net_test import TrainableNet, SimpleDataset, EpochStopperHook, MainLoop
 
 
 class LRNet(TrainableNet):

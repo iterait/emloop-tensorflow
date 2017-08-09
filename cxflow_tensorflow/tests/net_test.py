@@ -1,5 +1,5 @@
 """
-Test module for base tensorflow nets (cxflow.nets.tf_net).
+Test module for base tensorflow nets (cxflow.nets.net).
 """
 import os
 from os import path
@@ -13,8 +13,8 @@ from cxflow import MainLoop
 from cxflow.tests.main_loop_test import SimpleDataset
 from cxflow.hooks import EpochStopperHook
 
-from cxflow_tf import BaseTFNet, create_optimizer
-from cxflow_tf.tests.test_core import CXTestCaseWithDirAndNet
+from cxflow_tensorflow import BaseNet, create_optimizer
+from cxflow_tensorflow.tests.test_core import CXTestCaseWithDirAndNet
 
 
 def create_simple_main_loop(epochs: int, tmpdir: str):
@@ -26,7 +26,7 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
     return dataset, net, mainloop
 
 
-class DummyNet(BaseTFNet):
+class DummyNet(BaseNet):
     """Dummy tf net with empty graph."""
 
     def _create_net(self, **kwargs):
@@ -39,7 +39,7 @@ class DummyNet(BaseTFNet):
         tf.no_op(name='train_op')
 
 
-class TrainOpNet(BaseTFNet):
+class TrainOpNet(BaseNet):
     """Dummy tf net with train op saved in self."""
 
     def _create_net(self, **kwargs):
@@ -52,7 +52,7 @@ class TrainOpNet(BaseTFNet):
         self.defined_train_op = tf.no_op(name='train_op')
 
 
-class NoTrainOpNet(BaseTFNet):
+class NoTrainOpNet(BaseNet):
     """Dummy tf net without train op."""
 
     def _create_net(self, **kwargs):
@@ -65,7 +65,7 @@ class NoTrainOpNet(BaseTFNet):
         tf.no_op(name='not_a_train_op')
 
 
-class SimpleNet(BaseTFNet):
+class SimpleNet(BaseNet):
     """Simple net with input and output tensors."""
 
     def _create_net(self, **kwargs):
@@ -86,7 +86,7 @@ class SimpleNet(BaseTFNet):
         self.session.run(tf.global_variables_initializer())
 
 
-class TrainableNet(BaseTFNet):
+class TrainableNet(BaseNet):
     """Trainable tf net."""
 
     def _create_net(self, **kwargs):
@@ -108,9 +108,9 @@ class TrainableNet(BaseTFNet):
         self.session.run(tf.global_variables_initializer())
 
 
-class BasetTFNetTest(CXTestCaseWithDirAndNet):
+class BaseNetTest(CXTestCaseWithDirAndNet):
     """
-    Test case for BaseTFNet.
+    Test case for BaseNet.
 
     Note: do not forget to reset the default graph after every net creation!
     """
@@ -242,7 +242,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         tf.reset_default_graph()
 
         # test restoring
-        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_net = BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
         var = restored_net.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_net.session)
@@ -264,8 +264,8 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         tf.reset_default_graph()
 
         # test restoring
-        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir,
-                                 restore_model_name=checkpoint_path, **trainable_io)
+        restored_net = BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir,
+                               restore_model_name=checkpoint_path, **trainable_io)
 
         var = restored_net.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_net.session)
@@ -287,7 +287,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
 
         # test restoring
         with self.assertRaises(ValueError):
-            BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+            BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
     def test_restore_0(self):
         """Test restore from directory with no checkpoints."""
@@ -303,7 +303,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
 
         # test restoring
         with self.assertRaises(ValueError):
-            BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+            BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
     def test_restore_and_train(self):
         """Test net training after restoring."""
@@ -315,7 +315,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         tf.reset_default_graph()
 
         # restored the net
-        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_net = BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
         # test whether it can be trained
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
@@ -328,7 +328,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
 
 class TFBaseNetSaverTest(CXTestCaseWithDirAndNet):
     """
-    Test case for correct usage of tensorflow saver in BaseTFNet.
+    Test case for correct usage of tensorflow saver in BaseNet.
     """
 
     def test_keep_checkpoints(self):
@@ -358,9 +358,9 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
 
     def test_two_nets_created(self):
         """
-        Test if one can create and train two BaseTFNets.
+        Test if one can create and train two BaseNets.
 
-        This is regression test for issue #83 (One can not create and use more than one instance of BaseTFNet).
+        This is regression test for issue #83 (One can not create and use more than one instance of BaseNet).
         """
 
         trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
@@ -384,9 +384,9 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
 
     def test_two_nets_restored(self):
         """
-        Test if one can `_restore_network` and use two BaseTFNets.
+        Test if one can `_restore_network` and use two BaseNets.
 
-        This is regression test for issue #83 (One can not create and use more than one instance of BaseTFNet).
+        This is regression test for issue #83 (One can not create and use more than one instance of BaseNet).
         """
         tmpdir2 = tempfile.mkdtemp()
 
@@ -401,8 +401,8 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
         checkpoint_path2 = net2.save('')
 
         # test if one can `_restore_network` two nets and use them at the same time
-        restored_net1 = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
-        restored_net2 = BaseTFNet(dataset=None, log_dir='', restore_from=tmpdir2, **trainable_io)
+        restored_net1 = BaseNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_net2 = BaseNet(dataset=None, log_dir='', restore_from=tmpdir2, **trainable_io)
 
         trained_value = restored_net1.graph.get_tensor_by_name('var:0').eval(session=restored_net1.session)
         self.assertTrue(np.allclose([0]*10, trained_value))

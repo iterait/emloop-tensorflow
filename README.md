@@ -12,7 +12,7 @@ TensorFlow extension for [cxflow framework](https://github.com/cognexa/cxflow) a
 
 2. Install cxflow-tensorflow with pip
 ```
-pip install cxflow-tf
+pip install cxflow-tensorflow
 ```
 
 ## Usage
@@ -20,17 +20,17 @@ After installation, the following classes are available:
 
 ### Nets
 
-- `cxflow_tf.BaseTFNet`
-- `cxflow_tf.BaseTFNetRestore`
+- `cxflow_tensorflow.BaseTFNet`
+- `cxflow_tensorflow.BaseTFNetRestore`
 
 ### Hooks
 
-- `cxflow_tf.TensorBoardHook`
-- `cxflow_tf.LRDecayHook`
+- `cxflow_tensorflow.TensorBoardHook`
+- `cxflow_tensorflow.LRDecayHook`
 
 ### Additional utils
 
-Additional helper and util functions in `cxflow_tf.utils` module.
+Additional helper and util functions in `cxflow_tensorflow.utils` module.
 
 ## Testing
 Unit tests might be run by `$ python setup.py test`.
