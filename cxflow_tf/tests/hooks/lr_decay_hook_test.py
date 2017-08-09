@@ -27,7 +27,7 @@ class LRDecayHookTest(TestCase):
     def test_invalid_config(self):
         """ Test LRDecayHook invalid configurations."""
 
-        net = LRNet(dataset=None, log_dir='', io={'in': ['input', 'target'], 'out': ['output']})
+        net = LRNet(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
         self.assertRaises(TypeError, LRDecayHook, net=42)
         self.assertRaises(ValueError, LRDecayHook, net, decay_value=-1)
@@ -40,7 +40,7 @@ class LRDecayHookTest(TestCase):
         decay_value = 0.9
         repeats = 13
 
-        net = LRNet(dataset=None, log_dir='', io={'in': ['input', 'target'], 'out': ['output']})
+        net = LRNet(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = LRDecayHook(net, decay_value=decay_value)
 
         hook.after_epoch()
@@ -56,7 +56,7 @@ class LRDecayHookTest(TestCase):
         decay_value = 0.01
         repeats = 17
 
-        net = LRNet(dataset=None, log_dir='', io={'in': ['input', 'target'], 'out': ['output']})
+        net = LRNet(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = LRDecayHook(net, decay_value=decay_value, decay_type='add')
 
         hook.after_epoch()

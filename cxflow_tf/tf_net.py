@@ -28,31 +28,36 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
     """
 
     def __init__(self,  # pylint: disable=too-many-arguments
-                 dataset: Optional[AbstractDataset], log_dir: str, io: dict, device: str='/cpu:0', threads: int=4,
-                 restore_from: Optional[str] = None, restore_model_name: Optional[str] = None, **kwargs):
+                 dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
+                 device: str='/cpu:0', threads: int=4, restore_from: Optional[str]=None,
+                 restore_model_name: Optional[str]=None, **kwargs):
         """
-        Create new cxflow trainable tf net.
+        Create a cxflow trainable TensorFlow net.
+
+        In case `restore_from` is not `None`, the network will be restored from a checkpoint. See `_restore_network`
+        for more information.
 
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
-        :param io: net `in`put and `out`put names; `out`put names cannot be empty
+        :param inputs: net input names
+        :param outputs: net output names
         :param device: tf device to be trained on
         :param threads: number of threads to be used by tf
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
         :param kwargs: additional kwargs which are passed to the _create_net method
         """
-        assert 'in' in io
-        assert 'out' in io
-        assert io['out']
+        super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
+
+        assert outputs
         assert threads > 0
 
         self._dataset = dataset
         self._log_dir = log_dir
         self._train_op = None
         self._graph = self._saver = None
-        self._input_names = io['in']
-        self._output_names = io['out']
+        self._input_names = inputs
+        self._output_names = outputs
         self._tensors = {}
 
         with tf.device(device):

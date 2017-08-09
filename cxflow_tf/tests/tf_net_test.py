@@ -20,7 +20,7 @@ from cxflow_tf.tests.test_core import CXTestCaseWithDirAndNet
 def create_simple_main_loop(epochs: int, tmpdir: str):
     dataset = SimpleDataset()
     net = TrainableNet(dataset=dataset, log_dir=tmpdir,  # pylint: disable=redefined-variable-type
-                       io={'in': ['input', 'target'], 'out': ['output']})
+                       inputs=['input', 'target'], outputs=['output'])
     mainloop = MainLoop(net=net, dataset=dataset, hooks=[EpochStopperHook(epoch_limit=epochs)],
                         skip_zeroth_epoch=False)
     return dataset, net, mainloop
@@ -118,62 +118,54 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
     def test_init_asserts(self):
         """Test if the init arguments are correctly asserted."""
 
-        good_io = {'in': [], 'out': ['dummy']}
-        DummyNet(dataset=None, log_dir='', io=good_io)
+        good_io = {'inputs': [], 'outputs': ['dummy']}
+        DummyNet(dataset=None, log_dir='', **good_io)
         tf.reset_default_graph()
 
         # test assertion on missing in/out
-        missing_in = {'out': ['dummy']}
-        missing_out = {'in': []}
-        empty_out = {'in': [], 'out': []}
-        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', io=missing_in)
-        tf.reset_default_graph()
-        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', io=missing_out)
-        tf.reset_default_graph()
-        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', io=empty_out)
+        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', inputs=['a'], outputs=[])
         tf.reset_default_graph()
 
         # test assertion on negative thread count
-        DummyNet(dataset=None, log_dir='', io=good_io, threads=2)
-        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', io=good_io, threads=-2)
+        DummyNet(dataset=None, log_dir='', threads=2, **good_io)
+        self.assertRaises(AssertionError, DummyNet, dataset=None, log_dir='', threads=-2, **good_io)
         tf.reset_default_graph()
 
     def test_finding_train_op(self):
         """Test finding train op in graph."""
 
-        good_io = {'in': [], 'out': ['dummy']}
+        good_io = {'inputs': [], 'outputs': ['dummy']}
 
         # test whether train_op is found correctly
-        trainop_net = TrainOpNet(dataset=None, log_dir='', io=good_io)
+        trainop_net = TrainOpNet(dataset=None, log_dir='', **good_io)
         self.assertEqual(trainop_net.defined_train_op, trainop_net.train_op)
         tf.reset_default_graph()
 
         # test whether an error is raised when no train_op is defined
-        self.assertRaises(ValueError, NoTrainOpNet, dataset=None, log_dir='', io=good_io)
+        self.assertRaises(ValueError, NoTrainOpNet, dataset=None, log_dir='', **good_io)
         tf.reset_default_graph()
 
     def test_io_mapping(self):
         """Test if net.io is translated to output/input names."""
 
-        good_io = {'in': ['input', 'second_input'], 'out': ['output', 'sum']}
-        net = SimpleNet(dataset=None, log_dir='', io=good_io)
-        self.assertListEqual(net.input_names, good_io['in'])
-        self.assertListEqual(net.output_names, good_io['out'])
+        good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
+        net = SimpleNet(dataset=None, log_dir='', **good_io)
+        self.assertListEqual(net.input_names, good_io['inputs'])
+        self.assertListEqual(net.output_names, good_io['outputs'])
         tf.reset_default_graph()
 
         # test if an error is raised when certain input/output tensor is not found
-        missing_input_tensor = {'in': ['input', 'second_input', 'third_input'], 'out': ['output', 'sum']}
-        missing_output_tensor = {'in': ['input', 'second_input'], 'out': ['output', 'sum', 'sub']}
-        self.assertRaises(ValueError, SimpleNet, dataset=None, log_dir='', io=missing_input_tensor)
+        self.assertRaises(ValueError, SimpleNet, dataset=None, log_dir='',
+                          inputs=['input', 'second_input', 'third_input'], outputs=['output', 'sum'])
         tf.reset_default_graph()
-        self.assertRaises(ValueError, SimpleNet, dataset=None, log_dir='', io=missing_output_tensor)
+        self.assertRaises(ValueError, SimpleNet, dataset=None, log_dir='', inputs=['input', 'second_input'],
+                          outputs=['output', 'sum', 'sub'])
         tf.reset_default_graph()
 
     def test_get_tensor_by_name(self):
         """Test if _get_tensor_by_name works properly."""
 
-        good_io = {'in': ['input', 'second_input'], 'out': ['output', 'sum']}
-        net = SimpleNet(dataset=None, log_dir='', io=good_io)
+        net = SimpleNet(dataset=None, log_dir='', inputs=['input', 'second_input'], outputs=['output', 'sum'])
         self.assertEqual(net.get_tensor_by_name('sum'), net.sum)
         self.assertRaises(KeyError, net.get_tensor_by_name, name='not_in_graph')
         tf.reset_default_graph()
@@ -181,21 +173,20 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
     def test_run(self):
         """Test tf net run."""
 
-        good_io = {'in': ['input', 'second_input'], 'out': ['output', 'sum']}
-        net = SimpleNet(dataset=None, log_dir='', io=good_io)
+        good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
+        net = SimpleNet(dataset=None, log_dir='', **good_io)
         valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
 
         # test if outputs are correctly returned
         results = net.run(batch=valid_batch, train=False)
-        for output_name in good_io['out']:
+        for output_name in good_io['outputs']:
             self.assertTrue(output_name in results)
         self.assertTrue(np.allclose(results['output'], [2]*10))
         self.assertTrue(np.allclose(results['sum'], [3]*10))
         tf.reset_default_graph()
 
         # test variables update if and only if train=True
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir='', io=trainable_io)
+        trainable_net = TrainableNet(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # single run with train=False
@@ -240,8 +231,8 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         """Test restore from directory with one valid checkpoint."""
 
         # test net saving
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_net.run(batch, train=True)
@@ -251,7 +242,7 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         tf.reset_default_graph()
 
         # test restoring
-        restored_net = BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir)
+        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
         var = restored_net.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_net.session)
@@ -261,8 +252,8 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         """Test restore from directory with two checkpoints and a specification of which one to restore from."""
 
         # test net saving
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_net.run(batch, train=True)
@@ -273,8 +264,8 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         tf.reset_default_graph()
 
         # test restoring
-        restored_net = BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir,
-                                 restore_model_name=checkpoint_path)
+        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir,
+                                 restore_model_name=checkpoint_path, **trainable_io)
 
         var = restored_net.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_net.session)
@@ -284,8 +275,8 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
         """Test restore from directory with two checkpoints and no specification of which one to restore from."""
 
         # test net saving
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_net.run(batch, train=True)
@@ -296,14 +287,14 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
 
         # test restoring
         with self.assertRaises(ValueError):
-            BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir)
+            BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
     def test_restore_0(self):
         """Test restore from directory with no checkpoints."""
 
         # test net saving
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_net.run(batch, train=True)
@@ -312,19 +303,19 @@ class BasetTFNetTest(CXTestCaseWithDirAndNet):
 
         # test restoring
         with self.assertRaises(ValueError):
-            BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir)
+            BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
     def test_restore_and_train(self):
         """Test net training after restoring."""
 
         # save a net that is not trained
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        trainable_net = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
         trainable_net.save('')
         tf.reset_default_graph()
 
         # restored the net
-        restored_net = BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir)
+        restored_net = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
 
         # test whether it can be trained
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
@@ -346,7 +337,7 @@ class TFBaseNetSaverTest(CXTestCaseWithDirAndNet):
 
         This is regression test for issue #71 (tensorflow saver is keeping only the last 5 checkpoints).
         """
-        dummy_net = SimpleNet(dataset=None, log_dir=self.tmpdir, io={'in': [], 'out': ['output']})
+        dummy_net = SimpleNet(dataset=None, log_dir=self.tmpdir, inputs=[], outputs=['output'])
 
         checkpoints = []
         for i in range(20):
@@ -372,9 +363,9 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
         This is regression test for issue #83 (One can not create and use more than one instance of BaseTFNet).
         """
 
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        net1 = TrainableNet(dataset=None, log_dir='', io=trainable_io)
-        net2 = TrainableNet(dataset=None, log_dir='', io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        net1 = TrainableNet(dataset=None, log_dir='', **trainable_io)
+        net2 = TrainableNet(dataset=None, log_dir='', **trainable_io)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # test if one can train one net while the other remains intact
@@ -399,9 +390,9 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
         """
         tmpdir2 = tempfile.mkdtemp()
 
-        trainable_io = {'in': ['input', 'target'], 'out': ['output']}
-        net1 = TrainableNet(dataset=None, log_dir=self.tmpdir, io=trainable_io)
-        net2 = TrainableNet(dataset=None, log_dir=tmpdir2, io=trainable_io)
+        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
+        net1 = TrainableNet(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        net2 = TrainableNet(dataset=None, log_dir=tmpdir2, **trainable_io)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             net1.run(batch, train=True)
@@ -410,8 +401,8 @@ class TFBaseNetManagementTest(CXTestCaseWithDirAndNet):
         checkpoint_path2 = net2.save('')
 
         # test if one can `_restore_network` two nets and use them at the same time
-        restored_net1 = BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=self.tmpdir)
-        restored_net2 = BaseTFNet(dataset=None, log_dir='', io=trainable_io, restore_from=tmpdir2)
+        restored_net1 = BaseTFNet(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_net2 = BaseTFNet(dataset=None, log_dir='', restore_from=tmpdir2, **trainable_io)
 
         trained_value = restored_net1.graph.get_tensor_by_name('var:0').eval(session=restored_net1.session)
         self.assertTrue(np.allclose([0]*10, trained_value))
