@@ -225,7 +225,7 @@ class BaseTFNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-in
 
     @property
     def restore_fallback_module(self) -> str:
-        return 'cxflow_tf'
+        return 'cxflow_tensorflow'
 
     @property
     def restore_fallback_class(self) -> str:

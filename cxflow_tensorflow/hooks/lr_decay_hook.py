@@ -5,7 +5,7 @@ import logging
 
 import tensorflow as tf
 from cxflow.hooks.abstract_hook import AbstractHook
-from cxflow_tf import BaseTFNet
+from cxflow_tensorflow import BaseTFNet
 
 
 class LRDecayHook(AbstractHook):
@@ -45,7 +45,7 @@ class LRDecayHook(AbstractHook):
         """
         if not isinstance(net, BaseTFNet):
             raise TypeError('Invalid net class `{}`. '
-                            'Only to nets derived from `cxflow_tf.BasetFNet` are allowed. '.format(type(net)))
+                            'Only to nets derived from `cxflow_tensorflow.BaseTFNet` are allowed. '.format(type(net)))
 
         if decay_type not in LRDecayHook.LR_DECAY_TYPES:
             raise ValueError('Unrecognized LR decay type `{}`. '

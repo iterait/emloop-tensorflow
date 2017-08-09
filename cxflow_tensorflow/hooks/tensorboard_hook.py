@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow.hooks import AbstractHook
-from cxflow_tf.tf_net import BaseTFNet
+from cxflow_tensorflow.tf_net import BaseTFNet
 
 
 class TensorBoardHook(AbstractHook):

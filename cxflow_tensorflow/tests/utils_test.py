@@ -5,8 +5,8 @@ Test module for utils module.
 import numpy as np
 import tensorflow as tf
 
-from cxflow_tf.tests.test_core import CXTestCaseWithDir
-from cxflow_tf import repeat, create_optimizer
+from cxflow_tensorflow.tests.test_core import CXTestCaseWithDir
+from cxflow_tensorflow import repeat, create_optimizer
 
 
 class UtilsTest(CXTestCaseWithDir):

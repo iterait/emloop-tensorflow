@@ -13,8 +13,8 @@ from cxflow import MainLoop
 from cxflow.tests.main_loop_test import SimpleDataset
 from cxflow.hooks import EpochStopperHook
 
-from cxflow_tf import BaseTFNet, create_optimizer
-from cxflow_tf.tests.test_core import CXTestCaseWithDirAndNet
+from cxflow_tensorflow import BaseTFNet, create_optimizer
+from cxflow_tensorflow.tests.test_core import CXTestCaseWithDirAndNet
 
 
 def create_simple_main_loop(epochs: int, tmpdir: str):
