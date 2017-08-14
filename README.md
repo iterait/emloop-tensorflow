@@ -4,7 +4,7 @@
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)]()
 [![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
 
-TensorFlow extension for [cxflow framework](https://github.com/cognexa/cxflow) allowing to train nets defined in TensorFlow.
+TensorFlow extension for [cxflow framework](https://github.com/cognexa/cxflow) allowing to train models defined in TensorFlow.
 
 ## Installation
 
@@ -18,10 +18,10 @@ pip install cxflow-tensorflow
 ## Usage
 After installation, the following classes are available:
 
-### Nets
+### Models
 
-- `cxflow_tensorflow.BaseTFNet`
-- `cxflow_tensorflow.BaseTFNetRestore`
+- `cxflow_tensorflow.BaseTFModel`
+- `cxflow_tensorflow.BaseTFModelRestore`
 
 ### Hooks
 

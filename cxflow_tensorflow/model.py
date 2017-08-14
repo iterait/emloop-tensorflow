@@ -1,9 +1,9 @@
 """
-Module with cxflow trainable nets defined in tensorflow.
+Module with cxflow trainable models defined in tensorflow.
 
-Provides BaseNet which manages net config, api and unifies tf graph <=> cxflow touch points.
+Provides BaseModel which manages model config, api and unifies tf graph <=> cxflow touch points.
 
-which is able to restore arbitrary cxflow nets from tf checkpoint.
+which is able to restore arbitrary cxflow models from tf checkpoint.
 """
 import logging
 from os import path
@@ -13,17 +13,17 @@ from glob import glob
 
 import tensorflow as tf
 
-from cxflow import AbstractNet, AbstractDataset
+from cxflow import AbstractModel, AbstractDataset
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
 
 
-class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
+class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
     """
-    Base TensorFlow network enforcing uniform net API which is trainable in cxflow main loop.
+    Base TensorFlow model enforcing uniform model API which is trainable in cxflow main loop.
 
-    All tf nets should be derived from this class and override `_create_net` method.
-    Optionally, `_restore_net` might be overriden.
+    All tf models should be derived from this class and override `_create_model` method.
+    Optionally, `_restore_model` might be overriden.
     """
 
     def __init__(self,  # pylint: disable=too-many-arguments
@@ -31,20 +31,20 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
                  device: str='/cpu:0', threads: int=4, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, **kwargs):
         """
-        Create a cxflow trainable TensorFlow net.
+        Create a cxflow trainable TensorFlow model.
 
-        In case `restore_from` is not `None`, the network will be restored from a checkpoint. See `_restore_network`
+        In case `restore_from` is not `None`, the model will be restored from a checkpoint. See `_restore_model`
         for more information.
 
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
-        :param inputs: net input names
-        :param outputs: net output names
+        :param inputs: model input names
+        :param outputs: model output names
         :param device: tf device to be trained on
         :param threads: number of threads to be used by tf
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
-        :param kwargs: additional kwargs which are passed to the _create_net method
+        :param kwargs: additional kwargs which are passed to the _create_model method
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
@@ -68,11 +68,11 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
                                        graph=self._graph)
 
             with self._graph.as_default():
-                logging.debug('Creating net')
+                logging.debug('Creating model')
                 if restore_from is not None:
-                    self._restore_network(restore_from=restore_from, restore_model_name=restore_model_name)
+                    self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
                 else:
-                    self._create_net(**kwargs)
+                    self._create_model(**kwargs)
 
                 logging.debug('Finding train_op in the created graph')
                 try:
@@ -98,12 +98,12 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as net inputs."""
+        """List of tf tensor names listed as model inputs."""
         return self._input_names
 
     @property
     def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as net outputs."""
+        """List of tf tensor names listed as model outputs."""
         return self._output_names
 
     @property
@@ -118,14 +118,14 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
     @property
     def train_op(self) -> tf.Operation:
-        """Net train op."""
+        """Model train op."""
         return self._train_op
 
     def get_tensor_by_name(self, name) -> tf.Tensor:
         """
         Get the tf tensor with the given name.
 
-        Only tensor previously defined as net inputs/outputs in net.io can be accessed.
+        Only tensor previously defined as model inputs/outputs in model.io can be accessed.
         :param name: tensor name
         :return: tf tensor
         """
@@ -136,8 +136,8 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
     def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
         """
-        Feed-forward the net with the given batch as feed_dict.
-        Fetch and return all the net outputs as a dict.
+        Feed-forward the model with the given batch as feed_dict.
+        Fetch and return all the model outputs as a dict.
         :param batch: batch dict source_name->values
         :param train: flag whether parameters update (train_op) should be included in fetches
         :return: outputs dict
@@ -186,7 +186,7 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
     def _restore_checkpoint(self, checkpoint_name: str) -> None:
         """
-        Given the checkpoint name (including the path to it), restore the network.
+        Given the checkpoint name (including the path to it), restore the model.
 
         :param checkpoint_name: name in form of `*.ckpt`, e.g. `model_3.ckpt`.
         """
@@ -195,15 +195,15 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
         logging.debug('Restoring model')
         saver.restore(self._session, checkpoint_name)
 
-    def _restore_network(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
+    def _restore_model(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
         """
-        Restore TF net from the given checkpoint.
+        Restore TF model from the given checkpoint.
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
-        assert path.isdir(restore_from), '`BaseNet` expect `restore_from` to be an existing directory.'
+        assert path.isdir(restore_from), '`BaseModel` expect `restore_from` to be an existing directory.'
         meta_files = glob('{}/*.ckpt.meta'.format(restore_from))
 
         if len(meta_files) == 0:
@@ -216,7 +216,7 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
             if restore_model_name is None:
                 raise ValueError('There are multiple checkpoint metafiles found in the directory {}. However, config '
-                                 'lacks `net.restore_model_name`. Please, specify it.'.format(restore_from))
+                                 'lacks `model.restore_model_name`. Please, specify it.'.format(restore_from))
 
             logging.info('Restoring model from checkpoint `{}` located in directory `{}`'.format(restore_model_name,
                                                                                                  restore_from))
@@ -228,20 +228,20 @@ class BaseNet(AbstractNet, metaclass=ABCMeta):   # pylint: disable=too-many-inst
 
     @property
     def restore_fallback_class(self) -> str:
-        return 'BaseNet'
+        return 'BaseModel'
 
-    def _create_net(self, **kwargs) -> None:
+    def _create_model(self, **kwargs) -> None:
         """
-        Create network according to the given config.
+        Create model according to the given config.
 
         -------------------------------------------------------
         cxflow framework requires the following
         -------------------------------------------------------
         1. define training op named as 'train_op'
-        2. input/output tensors have to be named according to net.io config
+        2. input/output tensors have to be named according to model.io config
         3. initialize variables through self._session
         -------------------------------------------------------
 
-        :param kwargs: net configuration
+        :param kwargs: model configuration
         """
-        raise NotImplementedError('`_create_net` method must be implemented in order to construct a new network.')
+        raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')

@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow.hooks import AbstractHook
-from cxflow_tensorflow.net import BaseNet
+from cxflow_tensorflow.model import BaseModel
 
 
 class TensorBoardHook(AbstractHook):
@@ -29,21 +29,21 @@ class TensorBoardHook(AbstractHook):
 
     UNKNOWN_TYPE_ACTIONS = {'error', 'warn', 'ignore'}
 
-    def __init__(self, net: BaseNet, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore', **kwargs):
+    def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore', **kwargs):
         """
         Create new TensorBoard logging hook.
 
-        :param net: a BaseNet being trained
+        :param model: a BaseModel being trained
         :param output_dir: output dir to save the tensorboard logs
         :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list)
         """
-        assert isinstance(net, BaseNet)
+        assert isinstance(model, BaseModel)
 
-        super().__init__(net=net, output_dir=output_dir, **kwargs)
+        super().__init__(model=model, output_dir=output_dir, **kwargs)
         self._on_unknown_type = on_unknown_type
 
         logging.debug('Creating TensorBoard writer')
-        self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=net.graph, flush_secs=flush_secs)
+        self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=model.graph, flush_secs=flush_secs)
 
     def _log_to_tensorboard(self, epoch_id: int, epoch_data: AbstractHook.EpochData):
         """

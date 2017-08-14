@@ -3,7 +3,7 @@ import tensorflow as tf
 from cxflow.tests.test_core import CXTestCaseWithDir
 
 
-class CXTestCaseWithDirAndNet(CXTestCaseWithDir):
+class CXTestCaseWithDirAndModel(CXTestCaseWithDir):
     """Cxflow test case with temp dir and tf cleanup."""
 
     def __init__(self, *args, **kwargs):
