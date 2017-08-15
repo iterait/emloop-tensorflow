@@ -28,6 +28,10 @@ After installation, the following classes are available:
 - `cxflow_tensorflow.TensorBoardHook`
 - `cxflow_tensorflow.LRDecayHook`
 
+### Metric utils
+- `cxflow_tensorflow.bin_dice` computing Dice score for binary classification
+- `cxflow_tensorflow.bin_stats` computing f1, precision and recall scores for binary classification
+
 ### Additional utils
 
 Additional helper and util functions in `cxflow_tensorflow.utils` module.
