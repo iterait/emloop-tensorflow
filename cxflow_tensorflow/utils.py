@@ -29,7 +29,7 @@ def create_optimizer(optimizer_config: Dict[str, Any]):
     assert 'class' in optimizer_config
     kwargs = optimizer_config.copy()
     learning_rate = kwargs.pop('learning_rate')
-    learning_rate = tf.Variable(learning_rate, name='learning_rate')
+    learning_rate = tf.Variable(learning_rate, name='learning_rate', trainable=False)
     if 'module' not in kwargs:
         optimizer_module = get_class_module(TF_OPTIMIZERS_MODULE, optimizer_config['class'])
         if optimizer_module is not None:
