@@ -16,6 +16,8 @@ import tensorflow as tf
 from cxflow import AbstractModel, AbstractDataset
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
+from .third_party.tensorflow.average_gradients import average_gradients
+from .utils import create_optimizer
 
 
 class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
@@ -28,8 +30,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
-                 device: str='/cpu:0', threads: int=4, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, **kwargs):
+                 n_gpus: int=1, threads: int=4, restore_from: Optional[str]=None,
+                 restore_model_name: Optional[str]=None, optimizer=None, **kwargs):
         """
         Create a cxflow trainable TensorFlow model.
 
@@ -57,44 +59,49 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         self._graph = self._saver = None
         self._input_names = inputs
         self._output_names = outputs
-        self._tensors = {}
+        self._io_tensors = {}
+        self._optimizer_config = optimizer
 
-        with tf.device(device):
-            logging.debug('Creating session')
-            self._graph = tf.Graph()
-            self._session = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
-                                                             intra_op_parallelism_threads=threads,
-                                                             allow_soft_placement=True),
-                                       graph=self._graph)
+        logging.debug('Creating session')
+        self._graph = tf.Graph()
+        config_proto = tf.ConfigProto(inter_op_parallelism_threads=threads, intra_op_parallelism_threads=threads,
+                                      allow_soft_placement=True)
+        self._session = tf.Session(config=config_proto, graph=self._graph)
 
-            with self._graph.as_default():
-                logging.debug('Creating model')
-                if restore_from is not None:
-                    self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-                else:
-                    self._create_model(**kwargs)
+        devices = ['/gpu:{}'.format(i) for i in range(n_gpus)] + (['/cpu:0'] if n_gpus == 0 else [])
 
-                logging.debug('Finding train_op in the created graph')
-                try:
-                    self._train_op = self._graph.get_operation_by_name('train_op')
-                except (KeyError, ValueError, TypeError) as ex:
-                    raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
+        # if restore_from is not None:
+        #     self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
 
-                logging.debug('Finding io tensors in the created graph')
-                for tensor_name in set(self._input_names + self._output_names):
-                    full_name = tensor_name + ':0'
-                    try:
-                        tensor = self._graph.get_tensor_by_name(full_name)
-                    except (KeyError, ValueError, TypeError) as ex:
-                        raise ValueError('Tensor `{}` defined as input/output was not found. It has to be named `{}`.'
-                                         .format(tensor_name, full_name)) from ex
+        losses = []
 
-                    if tensor_name not in self._tensors:
-                        self._tensors[tensor_name] = tensor
+        with self._graph.as_default():
+            with tf.variable_scope(tf.get_variable_scope()):
+                for i, device in enumerate(devices):
+                    with tf.device(device):
+                        logging.debug('Creating model on `{}`'.format(device))
+                        self._create_model(**kwargs)
 
-                if not self._saver:
-                    logging.debug('Creating Saver')
-                    self._saver = tf.train.Saver(max_to_keep=100000000)
+                        logging.debug('Finding io tensors')
+                        for tensor_name in set(self._input_names + self._output_names):
+                            full_name = tensor_name + ('' if i == 0 else '_{}'.format(i)) + ':0'
+                            try:
+                                tensor = self._graph.get_tensor_by_name(full_name)
+                            except (KeyError, ValueError, TypeError) as ex:
+                                raise ValueError('Tensor `{}` defined as input/output was not found. '
+                                                 'It has to be named `{}`.'.format(tensor_name, full_name)) from ex
+                            assert tensor_name not in self._io_tensors
+                            self._io_tensors[tensor_name] = tensor
+
+                            if tensor_name == 'loss':
+                                losses.append(tensor)
+                        assert losses, 'Model has to define loss tensor.'
+                    tf.get_variable_scope().reuse_variables()
+
+        self._train_op = self._create_train_op(losses)
+        if not self._saver:
+            logging.debug('Creating Saver')
+            self._saver = tf.train.Saver(max_to_keep=100000000)
 
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
@@ -129,8 +136,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         :param name: tensor name
         :return: tf tensor
         """
-        if name in self._tensors:
-            return self._tensors[name]
+        if name in self._io_tensors:
+            return self._io_tensors[name]
         else:
             raise KeyError('Tensor named `{}` is not within accessible tensors.'.format(name))
 
@@ -230,18 +237,19 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     def restore_fallback_class(self) -> str:
         return 'BaseModel'
 
+    def _create_train_op(self, losses: List[tf.Tensor]) -> tf.Operation:
+        """
+        TODO: docstring
+        :param kwargs: model configuration
+        """
+        optimizer = create_optimizer(self._optimizer_config)
+        grads_and_vars = average_gradients([optimizer.compute_gradients(loss) for loss in losses])
+        return optimizer.apply_gradients(grads_and_vars)
+
+
     def _create_model(self, **kwargs) -> None:
         """
-        Create model according to the given config.
-
-        -------------------------------------------------------
-        cxflow framework requires the following
-        -------------------------------------------------------
-        1. define training op named as 'train_op'
-        2. input/output tensors have to be named according to model.io config
-        3. initialize variables through self._session
-        -------------------------------------------------------
-
+        TODO: docstring
         :param kwargs: model configuration
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
