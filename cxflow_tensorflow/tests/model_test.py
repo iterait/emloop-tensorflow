@@ -11,7 +11,7 @@ import tensorflow as tf
 
 from cxflow import MainLoop
 from cxflow.tests.main_loop_test import SimpleDataset
-from cxflow.hooks import EpochStopperHook
+from cxflow.hooks import StopAfter
 
 from cxflow_tensorflow import BaseModel, create_optimizer
 from cxflow_tensorflow.tests.test_core import CXTestCaseWithDirAndModel
@@ -21,7 +21,7 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
     dataset = SimpleDataset()
     model = TrainableModel(dataset=dataset, log_dir=tmpdir,  # pylint: disable=redefined-variable-type
                            inputs=['input', 'target'], outputs=['output'])
-    mainloop = MainLoop(model=model, dataset=dataset, hooks=[EpochStopperHook(epoch_limit=epochs)],
+    mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=epochs)],
                         skip_zeroth_epoch=False)
     return dataset, model, mainloop
 
@@ -35,7 +35,7 @@ class DummyModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-        # defining a dummy train_op as otherwise we would not be able to create the model
+    def _create_train_op(self, _):
         tf.no_op(name='train_op')
 
 
@@ -48,8 +48,8 @@ class TrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-        # defining a dummy train_op as otherwise we would not be able to create the model
-        self.defined_train_op = tf.no_op(name='train_op')
+    def _create_train_op(self, _):
+        tf.no_op(name='train_op')
 
 
 class NoTrainOpModel(BaseModel):
@@ -61,8 +61,8 @@ class NoTrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-        # defining an op that is not named `train_op`
-        tf.no_op(name='not_a_train_op')
+    def _create_train_op(self, _):
+        pass
 
 
 class SimpleModel(BaseModel):
@@ -80,10 +80,10 @@ class SimpleModel(BaseModel):
 
         self.sum = tf.add(self.input1, self.input2, name='sum')
 
-        # defining a dummy train_op as otherwise we would not be able to create the model
-        self.defined_train_op = tf.no_op(name='train_op')
-
         self.session.run(tf.global_variables_initializer())
+
+    def _create_train_op(self, _):
+        tf.no_op(name='train_op')
 
 
 class TrainableModel(BaseModel):
@@ -99,13 +99,16 @@ class TrainableModel(BaseModel):
 
         self.output = tf.multiply(self.input, self.var, name='output')
 
-        loss = tf.reduce_mean(tf.squared_difference(self.target, self.output))
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output))
 
-        # defining a dummy train_op as otherwise we would not be able to create the model
-        create_optimizer({'module': 'tensorflow.python.training.adam',
-                          'class': 'AdamOptimizer', 'learning_rate': 0.1}).minimize(loss, name='train_op')
+
 
         self.session.run(tf.global_variables_initializer())
+
+    def _create_train_op(self, _):
+        # defining a dummy train_op as otherwise we would not be able to create the model
+        create_optimizer({'module': 'tensorflow.python.training.adam',
+                          'class': 'AdamOptimizer', 'learning_rate': 0.1}).minimize(self.loss, name='train_op')
 
 
 class BaseModelTest(CXTestCaseWithDirAndModel):
@@ -115,22 +118,6 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
     Note: do not forget to reset the default graph after every model creation!
     """
 
-    def test_init_asserts(self):
-        """Test if the init arguments are correctly asserted."""
-
-        good_io = {'inputs': [], 'outputs': ['dummy']}
-        DummyModel(dataset=None, log_dir='', **good_io)
-        tf.reset_default_graph()
-
-        # test assertion on missing in/out
-        self.assertRaises(AssertionError, DummyModel, dataset=None, log_dir='', inputs=['a'], outputs=[])
-        tf.reset_default_graph()
-
-        # test assertion on negative thread count
-        DummyModel(dataset=None, log_dir='', threads=2, **good_io)
-        self.assertRaises(AssertionError, DummyModel, dataset=None, log_dir='', threads=-2, **good_io)
-        tf.reset_default_graph()
-
     def test_finding_train_op(self):
         """Test finding train op in graph."""
 
@@ -138,7 +125,6 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
 
         # test whether train_op is found correctly
         trainop_model = TrainOpModel(dataset=None, log_dir='', **good_io)
-        self.assertEqual(trainop_model.defined_train_op, trainop_model.train_op)
         tf.reset_default_graph()
 
         # test whether an error is raised when no train_op is defined
@@ -160,14 +146,6 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         tf.reset_default_graph()
         self.assertRaises(ValueError, SimpleModel, dataset=None, log_dir='', inputs=['input', 'second_input'],
                           outputs=['output', 'sum', 'sub'])
-        tf.reset_default_graph()
-
-    def test_get_tensor_by_name(self):
-        """Test if _get_tensor_by_name works properly."""
-
-        model = SimpleModel(dataset=None, log_dir='', inputs=['input', 'second_input'], outputs=['output', 'sum'])
-        self.assertEqual(model.get_tensor_by_name('sum'), model.sum)
-        self.assertRaises(KeyError, model.get_tensor_by_name, name='not_in_graph')
         tf.reset_default_graph()
 
     def test_run(self):
