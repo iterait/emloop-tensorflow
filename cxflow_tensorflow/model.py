@@ -9,7 +9,7 @@ import math
 import logging
 from os import path
 from abc import ABCMeta
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Iterable
 from glob import glob
 
 import tensorflow as tf
@@ -50,6 +50,12 @@ class GraphTower:
     """
 
     def __init__(self, id_: int, inputs: List[str], outputs: List[str]):
+        """
+        Create new GraphTower.
+        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
+        :param inputs: tower input names
+        :param outputs: tower output names
+        """
         self._id = id_
         self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
         self._input_names = inputs
@@ -88,30 +94,37 @@ class GraphTower:
             self._outputs[output_name] = self._find_or_raise(output_name)
 
     @property
-    def loss(self):
-        return self['loss']
+    def loss(self) -> tf.Tensor:
+        """Return the loss tensor."""
+        return self[BaseModel.LOSS_NAME]
 
     @property
-    def inputs(self):
+    def inputs(self) -> Iterable[tf.Tensor]:
+        """Return an iterable collection of input tensors."""
         return self._inputs.values()
 
     @property
-    def outputs(self):
+    def outputs(self) -> Iterable[tf.Tensor]:
+        """Return an iterable collection of output tensors."""
         return self._outputs.values()
 
     @property
-    def input_names(self):
+    def input_names(self) -> List[str]:
+        """Return list of the input names."""
         return self._input_names
 
     @property
-    def output_names(self):
+    def output_names(self) -> List[str]:
+        """Return list of the output names."""
         return self._output_names
 
     @property
-    def batch_size(self):
+    def batch_size(self) -> tf.Tensor:
+        """Return the current batch size."""
         return tf.shape(self[self._input_names[0]])[0]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> tf.Tensor:
+        """Return input/output tensor with the given name."""
         if item in self._outputs:
             return self._outputs[item]
         elif item in self._inputs:
@@ -119,11 +132,13 @@ class GraphTower:
         else:
             raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
 
-    def __enter__(self):
+    def __enter__(self) -> None:
+        """Enter with tf.device(...): env."""
         self._device = tf.device(self._device_name)
         self._device.__enter__()
 
-    def __exit__(self, *args):
+    def __exit__(self, *args) -> None:
+        """Exit with tf.device(...): env."""
         self._device.__exit__(*args)
 
 
@@ -134,6 +149,9 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     All tf models should be derived from this class and override `_create_model` method.
     Optionally, `_restore_model` might be overriden.
     """
+
+    TRAIN_OP_NAME = 'train_op'
+    LOSS_NAME = 'train_op'
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
@@ -149,10 +167,11 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
         :param outputs: model output names
-        :param device: tf device to be trained on
+        :param n_gpus: number of GPUs to use
         :param threads: number of threads to be used by tf
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
+        :param optimizer: optimizer configuration dict
         :param kwargs: additional kwargs which are passed to the _create_model method
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
@@ -170,14 +189,14 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         self._graph = tf.Graph()
         self._session = tf.Session(graph=self._graph)
         with self._graph.as_default():
-            if restore_from is not None:
-                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-            else:
+            if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope()) as scope:
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
                         scope.reuse_variables()
+            else:
+                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -192,7 +211,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
             logging.debug('\tFinding train_op in the created graph')
             try:
-                self._train_op = self._graph.get_operation_by_name('train_op')
+                self._train_op = self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME)
             except (KeyError, ValueError, TypeError) as ex:
                 raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
 
@@ -326,20 +345,38 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def _create_train_op(self, optimizer_config: Optional[dict]) -> None:
         """
-        TODO: docstring
-        :param kwargs: model configuration
+        Create the train op used for training.
+
+        By default the train op is constructed in the following way:
+            - optimizer is created from the `model.optimizer` configuration dict
+            - gradients are computed in the respective towers
+            - gradients are averaged and applied
+
+        This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.
+        :param optimizer_config: optimizer configuration dict
         """
+        if optimizer_config is None:
+            raise ValueError('Optimizer config was not specified although it is required for creating the train op. '
+                             'Please specify the configuration in `model.optimizer`.')
         grads_and_vars = []
         optimizer = create_optimizer(optimizer_config)
         for tower in self._towers:
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tower.loss))
 
-        optimizer.apply_gradients(average_gradients(grads_and_vars), name='train_op')
+        optimizer.apply_gradients(average_gradients(grads_and_vars), name=BaseModel.TRAIN_OP_NAME)
 
     def _create_model(self, **kwargs) -> None:
         """
-        TODO: docstring
-        :param kwargs: model configuration
+        Create the model.
+
+        Every model has to define:
+            - loss as a tensor named BaseMode.LOSS_NAME
+            - input placeholders and output tensors named according to the specified input and output names
+
+        To support multi-GPU training, all the variables must be created
+        through tf.get_variable and appropriate variable scopes.
+        
+        :param kwargs: model configuration as specified in `model` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
