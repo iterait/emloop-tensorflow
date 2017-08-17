@@ -1,21 +1,143 @@
 """
-Module with cxflow trainable models defined in tensorflow.
+Module with cxflow trainable models defined in TensorFlow, which are restorable from their corresponding checkpoints.
 
-Provides BaseModel which manages model config, api and unifies tf graph <=> cxflow touch points.
-
-which is able to restore arbitrary cxflow models from tf checkpoint.
+Provides `BaseModel` which manages model config, API and unifies the TF graph <=> cxflow touch points.
 """
+import math
 import logging
 from os import path
 from abc import ABCMeta
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Iterable
 from glob import glob
 
 import tensorflow as tf
+import numpy as np
 
 from cxflow import AbstractModel, AbstractDataset
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
+from .third_party.tensorflow.average_gradients import average_gradients
+from .utils import create_optimizer
+
+
+class GraphTower:
+    """
+    GraphTower is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
+    It allows to work with multiple copies of the same sub-graph distributed on multiple devices
+    with only one set of input and output names.
+
+    ---------------------------------------------
+    USAGE
+    ---------------------------------------------
+    1. create the desired number of GraphTowers:
+        towers = [GraphTower(i, inputs, outputs) for i in range(4)]
+    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):
+        for tower in towers:
+            with tower:
+                # define the TF graph with the respective inputs and outputs
+    3. find the input placeholders and output variables:
+        for tower in towers:
+            tower.find_io_tensors()
+    4. access the io tensors, loss etc.
+        towers[3]['my_input']  # my_input placeholder which is actually named 'my_input_3:0'
+
+    ---------------------------------------------
+    WARNING
+    ---------------------------------------------
+    The sub-graphs must be defined in the order corresponding to the tower ids!
+    """
+
+    def __init__(self, id_: int, inputs: List[str], outputs: List[str]):
+        """
+        Create new GraphTower.
+        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
+        :param inputs: tower input names
+        :param outputs: tower output names
+        """
+        self._id = id_
+        self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
+        self._input_names = inputs
+        self._output_names = outputs
+        self._inputs = {}
+        self._outputs = {}
+        self._loss = None
+
+    def _get_full_name(self, tensor_name: str) -> str:
+        """
+        Translates a simple tensor name to the actual tensor name in the sub-graph.
+
+        E.g.:
+        variable named `loss` in the 0th tower will be named `loss:0`
+        variable name `predictions` in the 1st tower will be name `predictions_1:0`
+        """
+        return tensor_name + ('' if self._id < 1 else '_{}'.format(self._id)) + ':0'
+
+    def _find_or_raise(self, tensor_name: str) -> tf.Tensor:
+        """
+        Find the tensor with the given name in the default graph or raise an exception.
+        :param tensor_name: tensor name to be find
+        :return: tf.Tensor
+        """
+        full_name = self._get_full_name(tensor_name)
+        try:
+            return tf.get_default_graph().get_tensor_by_name(full_name)
+        except (KeyError, ValueError, TypeError) as ex:
+            raise ValueError('Tensor `{}` with full name `{}` was not found.'.format(tensor_name, full_name)) from ex
+
+    def find_io_tensors(self) -> None:
+        """Find the tower's input and output tensors in the default graph."""
+        for input_name in self._input_names:
+            self._inputs[input_name] = self._find_or_raise(input_name)
+        for output_name in self._output_names:
+            self._outputs[output_name] = self._find_or_raise(output_name)
+
+    @property
+    def loss(self) -> tf.Tensor:
+        """Return the loss tensor."""
+        return self[BaseModel.LOSS_NAME]
+
+    @property
+    def inputs(self) -> Iterable[tf.Tensor]:
+        """Return an iterable collection of input tensors."""
+        return self._inputs.values()
+
+    @property
+    def outputs(self) -> Iterable[tf.Tensor]:
+        """Return an iterable collection of output tensors."""
+        return self._outputs.values()
+
+    @property
+    def input_names(self) -> List[str]:
+        """Return list of the input names."""
+        return self._input_names
+
+    @property
+    def output_names(self) -> List[str]:
+        """Return list of the output names."""
+        return self._output_names
+
+    @property
+    def batch_size(self) -> tf.Tensor:
+        """Return the current batch size."""
+        return tf.shape(self[self._input_names[0]])[0]
+
+    def __getitem__(self, item) -> tf.Tensor:
+        """Return input/output tensor with the given name."""
+        if item in self._outputs:
+            return self._outputs[item]
+        elif item in self._inputs:
+            return self._inputs[item]
+        else:
+            raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
+
+    def __enter__(self) -> None:
+        """Enter with tf.device(...): env."""
+        self._device = tf.device(self._device_name)
+        self._device.__enter__()
+
+    def __exit__(self, *args) -> None:
+        """Exit with tf.device(...): env."""
+        self._device.__exit__(*args)
 
 
 class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
@@ -26,10 +148,13 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     Optionally, `_restore_model` might be overriden.
     """
 
+    TRAIN_OP_NAME = 'train_op'
+    LOSS_NAME = 'train_op'
+
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
-                 device: str='/cpu:0', threads: int=4, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, **kwargs):
+                 n_gpus: int=0, restore_from: Optional[str]=None, restore_model_name: Optional[str]=None,
+                 optimizer=None, freeze=False, **kwargs):
         """
         Create a cxflow trainable TensorFlow model.
 
@@ -40,125 +165,110 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
         :param outputs: model output names
-        :param device: tf device to be trained on
+        :param n_gpus: number of GPUs to use
         :param threads: number of threads to be used by tf
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
+        :param optimizer: optimizer configuration dict
         :param kwargs: additional kwargs which are passed to the _create_model method
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
-        assert outputs
-        assert threads > 0
-
         self._dataset = dataset
         self._log_dir = log_dir
+        self._freeze_graph = freeze
         self._train_op = None
         self._graph = self._saver = None
-        self._input_names = inputs
-        self._output_names = outputs
-        self._tensors = {}
+        self._towers = [GraphTower(i, inputs, outputs) for i in range(n_gpus)]
+        if n_gpus == 0:
+            self._towers.append(GraphTower(-1, inputs, outputs))
 
-        with tf.device(device):
-            logging.debug('Creating session')
-            self._graph = tf.Graph()
-            self._session = tf.Session(config=tf.ConfigProto(inter_op_parallelism_threads=threads,
-                                                             intra_op_parallelism_threads=threads,
-                                                             allow_soft_placement=True),
-                                       graph=self._graph)
+        logging.info('\tCreating TF model on %s devices', n_gpus)
+        self._graph = tf.Graph()
+        self._session = tf.Session(graph=self._graph)
+        with self._graph.as_default():
+            if restore_from is None:
+                with tf.variable_scope(tf.get_variable_scope()) as scope:
+                    for tower in self._towers:
+                        with tower:
+                            self._create_model(**kwargs)
+                        scope.reuse_variables()
+            else:
+                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
 
-            with self._graph.as_default():
-                logging.debug('Creating model')
-                if restore_from is not None:
-                    self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-                else:
-                    self._create_model(**kwargs)
+            for tower in self._towers:
+                tower.find_io_tensors()
 
-                logging.debug('Finding train_op in the created graph')
-                try:
-                    self._train_op = self._graph.get_operation_by_name('train_op')
-                except (KeyError, ValueError, TypeError) as ex:
-                    raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
+            if restore_from is None:
+                logging.debug('\tCreating train op')
+                self._create_train_op(optimizer)
 
-                logging.debug('Finding io tensors in the created graph')
-                for tensor_name in set(self._input_names + self._output_names):
-                    full_name = tensor_name + ':0'
-                    try:
-                        tensor = self._graph.get_tensor_by_name(full_name)
-                    except (KeyError, ValueError, TypeError) as ex:
-                        raise ValueError('Tensor `{}` defined as input/output was not found. It has to be named `{}`.'
-                                         .format(tensor_name, full_name)) from ex
+                logging.debug('\tInitializing the variables')
+                self._session.run(tf.global_variables_initializer())
+                self._session.run(tf.local_variables_initializer())
 
-                    if tensor_name not in self._tensors:
-                        self._tensors[tensor_name] = tensor
+            logging.debug('\tFinding train_op in the created graph')
+            try:
+                self._train_op = self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME)
+            except (KeyError, ValueError, TypeError) as ex:
+                raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
 
-                if not self._saver:
-                    logging.debug('Creating Saver')
-                    self._saver = tf.train.Saver(max_to_keep=100000000)
+            logging.debug('\tCreating Saver')
+            self._saver = tf.train.Saver(max_to_keep=100000000)
 
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as model inputs."""
-        return self._input_names
+        """List of TF tensor names listed as model inputs."""
+        return self._towers[0].input_names
 
     @property
     def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as model outputs."""
-        return self._output_names
+        """List of TF tensor names listed as model outputs."""
+        return self._towers[0].output_names
 
     @property
     def graph(self) -> tf.Graph:
-        """Tf graph object."""
+        """TF graph object."""
         return self._graph
 
     @property
     def session(self) -> tf.Session:
-        """Tf session object."""
+        """TF session object."""
         return self._session
-
-    @property
-    def train_op(self) -> tf.Operation:
-        """Model train op."""
-        return self._train_op
-
-    def get_tensor_by_name(self, name) -> tf.Tensor:
-        """
-        Get the tf tensor with the given name.
-
-        Only tensor previously defined as model inputs/outputs in model.io can be accessed.
-        :param name: tensor name
-        :return: tf tensor
-        """
-        if name in self._tensors:
-            return self._tensors[name]
-        else:
-            raise KeyError('Tensor named `{}` is not within accessible tensors.'.format(name))
 
     def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
         """
-        Feed-forward the model with the given batch as feed_dict.
+        Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.
         Fetch and return all the model outputs as a dict.
         :param batch: batch dict source_name->values
         :param train: flag whether parameters update (train_op) should be included in fetches
         :return: outputs dict
         """
         # setup the feed dict
-        feed_dict = {}
-        for placeholder_name in self._input_names:
-            feed_dict[self.get_tensor_by_name(placeholder_name)] = batch[placeholder_name]
+        batch_size = len(batch[next(iter(batch))])
+        tower_batch_size = math.ceil(batch_size / len(self._towers))
 
-        # setup fetches
+        feed_dict = {}
         fetches = [self._train_op] if train else []
-        for output_name in self._output_names:
-            fetches.append(self.get_tensor_by_name(output_name))
+
+        for i, tower in enumerate(self._towers):
+            for placeholder_name in self.input_names:
+                tower_batch = batch[placeholder_name][i*tower_batch_size:(i+1)*tower_batch_size]
+                feed_dict[tower[placeholder_name]] = tower_batch
+            for output_name in self.output_names:
+                fetches.append(tower[output_name])
 
         # run the computational graph for one batch
-        batch_res = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
 
         if train:
-            batch_res = batch_res[1:]
+            outputs = outputs[1:]
 
-        return dict(zip(self._output_names, batch_res))
+        # stack partial tower outputs
+        num_outputs = len(self.output_names)
+        stacked_outputs = [np.concatenate(outputs[i::num_outputs]) for i in range(num_outputs)]
+
+        return dict(zip(self.output_names, stacked_outputs))
 
     def save(self, name_suffix: str) -> str:
         """
@@ -176,11 +286,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
         self._saver.save(self._session, checkpoint_path)
 
-        with tf.Graph().as_default():
-            freeze_graph(input_graph=graph_path,
-                         input_checkpoint=checkpoint_path,
-                         output_node_names=self._output_names,
-                         output_graph=frozen_graph_path)
+        if self._freeze_graph:
+            with tf.Graph().as_default():
+                freeze_graph(input_graph=graph_path,
+                             input_checkpoint=checkpoint_path,
+                             output_node_names=self.output_names,
+                             output_graph=frozen_graph_path)
 
         return checkpoint_path
 
@@ -230,18 +341,40 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     def restore_fallback_class(self) -> str:
         return 'BaseModel'
 
+    def _create_train_op(self, optimizer_config: Optional[dict]) -> None:
+        """
+        Create the train op used for training.
+
+        By default the train op is constructed in the following way:
+            - optimizer is created from the `model.optimizer` configuration dict
+            - gradients are computed in the respective towers
+            - gradients are averaged and applied
+
+        This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.
+        :param optimizer_config: optimizer configuration dict
+        """
+        if optimizer_config is None:
+            raise ValueError('Optimizer config was not specified although it is required for creating the train op. '
+                             'Please specify the configuration in `model.optimizer`.')
+        grads_and_vars = []
+        optimizer = create_optimizer(optimizer_config)
+        for tower in self._towers:
+            with tower:
+                grads_and_vars.append(optimizer.compute_gradients(tower.loss))
+
+        optimizer.apply_gradients(average_gradients(grads_and_vars), name=BaseModel.TRAIN_OP_NAME)
+
     def _create_model(self, **kwargs) -> None:
         """
-        Create model according to the given config.
+        Create the model.
 
-        -------------------------------------------------------
-        cxflow framework requires the following
-        -------------------------------------------------------
-        1. define training op named as 'train_op'
-        2. input/output tensors have to be named according to model.io config
-        3. initialize variables through self._session
-        -------------------------------------------------------
+        Every model has to define:
+            - loss as a tensor named BaseMode.LOSS_NAME
+            - input placeholders and output tensors named according to the specified input and output names
 
-        :param kwargs: model configuration
+        To support multi-GPU training, all the variables must be created
+        through tf.get_variable and appropriate variable scopes.
+        
+        :param kwargs: model configuration as specified in `model` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
