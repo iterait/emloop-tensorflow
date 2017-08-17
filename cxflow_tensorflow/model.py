@@ -1,9 +1,7 @@
 """
-Module with cxflow trainable models defined in tensorflow.
+Module with cxflow trainable models defined in TensorFlow, which are restorable from their corresponding checkpoints.
 
-Provides BaseModel which manages model config, api and unifies tf graph <=> cxflow touch points.
-
-which is able to restore arbitrary cxflow models from tf checkpoint.
+Provides `BaseModel` which manages model config, API and unifies the TF graph <=> cxflow touch points.
 """
 import math
 import logging

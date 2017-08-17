@@ -1,2 +1,3 @@
 tensorflow>=1.2.0
 cxflow>=0.6
+numpy>=1.13.1
