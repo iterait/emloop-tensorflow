@@ -5,6 +5,7 @@ Provides BaseModel which manages model config, api and unifies tf graph <=> cxfl
 
 which is able to restore arbitrary cxflow models from tf checkpoint.
 """
+import math
 import logging
 from os import path
 from abc import ABCMeta
@@ -12,12 +13,93 @@ from typing import List, Mapping, Optional
 from glob import glob
 
 import tensorflow as tf
+import numpy as np
 
 from cxflow import AbstractModel, AbstractDataset
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
+
+
+class BaseTower:
+
+    def __init__(self, id_: int, inputs: List[str], outputs: List[str]):
+        self._id = id_
+        self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
+        self._input_names = inputs
+        self._output_names = outputs
+        self._inputs = {}
+        self._outputs = {}
+        self._loss = None
+
+    def _get_full_name(self, tensor_name: str) -> str:
+        """
+        Translates a simple tensor name to the actual tensor name in the graph.
+
+        E.g.:
+        variable named `loss` in the 0th tower will be named `loss:0`
+        variable name `predictions` in the 1st tower will be name `predictions_1:0`
+        """
+        return tensor_name + ('' if self._id < 1 else '_{}'.format(self._id)) + ':0'
+
+    def _find_or_raise(self, tensor_name: str) -> tf.Tensor:
+        """
+        Find the tensor with the given name in the default graph or raise an exception.
+        :param tensor_name: tensor name to be find
+        :return: tf.Tensor
+        """
+        full_name = self._get_full_name(tensor_name)
+        try:
+            return tf.get_default_graph().get_tensor_by_name(full_name)
+        except (KeyError, ValueError, TypeError) as ex:
+            raise ValueError('Tensor `{}` with full name `{}` was not found.'.format(tensor_name, full_name)) from ex
+
+    def find_io_tensors(self) -> None:
+        """Find the tower's input and output tensors in the default graph."""
+        for input_name in self._input_names:
+            self._inputs[input_name] = self._find_or_raise(input_name)
+        for output_name in self._output_names:
+            self._outputs[output_name] = self._find_or_raise(output_name)
+
+    @property
+    def loss(self):
+        return self['loss']
+
+    @property
+    def inputs(self):
+        return self._inputs.values()
+
+    @property
+    def outputs(self):
+        return self._outputs.values()
+
+    @property
+    def input_names(self):
+        return self._input_names
+
+    @property
+    def output_names(self):
+        return self._output_names
+
+    @property
+    def batch_size(self):
+        return tf.shape(self[self._input_names[0]])[0]
+
+    def __getitem__(self, item):
+        if item in self._outputs:
+            return self._outputs[item]
+        elif item in self._inputs:
+            return self._inputs[item]
+        else:
+            raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
+
+    def __enter__(self):
+        self._device = tf.device(self._device_name)
+        self._device.__enter__()
+
+    def __exit__(self, *args):
+        self._device.__exit__(*args)
 
 
 class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
@@ -30,8 +112,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
-                 n_gpus: int=1, threads: int=4, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, optimizer=None, **kwargs):
+                 n_gpus: int=0, restore_from: Optional[str]=None, restore_model_name: Optional[str]=None,
+                 optimizer=None, freeze=False, **kwargs):
         """
         Create a cxflow trainable TensorFlow model.
 
@@ -50,96 +132,67 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
-        assert outputs
-        assert threads > 0
-
         self._dataset = dataset
         self._log_dir = log_dir
+        self._freeze_graph = freeze
         self._train_op = None
         self._graph = self._saver = None
-        self._input_names = inputs
-        self._output_names = outputs
-        self._io_tensors = {}
-        self._optimizer_config = optimizer
+        self._towers = [BaseTower(i, inputs, outputs) for i in range(n_gpus)]
+        if n_gpus == 0:
+            self._towers.append(BaseTower(-1, inputs, outputs))
 
-        logging.debug('Creating session')
+        logging.info('\tCreating TF model on %s devices', n_gpus)
         self._graph = tf.Graph()
-        config_proto = tf.ConfigProto(inter_op_parallelism_threads=threads, intra_op_parallelism_threads=threads,
-                                      allow_soft_placement=True)
-        self._session = tf.Session(config=config_proto, graph=self._graph)
-
-        devices = ['/gpu:{}'.format(i) for i in range(n_gpus)] + (['/cpu:0'] if n_gpus == 0 else [])
-
-        # if restore_from is not None:
-        #     self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-
-        losses = []
-
+        self._session = tf.Session(graph=self._graph)
         with self._graph.as_default():
-            with tf.variable_scope(tf.get_variable_scope()):
-                for i, device in enumerate(devices):
-                    with tf.device(device):
-                        logging.debug('Creating model on `{}`'.format(device))
-                        self._create_model(**kwargs)
+            if restore_from is not None:
+                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
+            else:
+                with tf.variable_scope(tf.get_variable_scope()):
+                    for tower in self._towers:
+                        with tower:
+                            self._create_model(**kwargs)
+                        tf.get_variable_scope().reuse_variables()
 
-                        logging.debug('Finding io tensors')
-                        for tensor_name in set(self._input_names + self._output_names):
-                            full_name = tensor_name + ('' if i == 0 else '_{}'.format(i)) + ':0'
-                            try:
-                                tensor = self._graph.get_tensor_by_name(full_name)
-                            except (KeyError, ValueError, TypeError) as ex:
-                                raise ValueError('Tensor `{}` defined as input/output was not found. '
-                                                 'It has to be named `{}`.'.format(tensor_name, full_name)) from ex
-                            assert tensor_name not in self._io_tensors
-                            self._io_tensors[tensor_name] = tensor
+            for tower in self._towers:
+                tower.find_io_tensors()
 
-                            if tensor_name == 'loss':
-                                losses.append(tensor)
-                        assert losses, 'Model has to define loss tensor.'
-                    tf.get_variable_scope().reuse_variables()
+            if restore_from is None:
+                logging.debug('\tCreating train op')
+                self._create_train_op(optimizer)
 
-        self._train_op = self._create_train_op(losses)
-        if not self._saver:
-            logging.debug('Creating Saver')
+                logging.debug('\tInitializing the variables')
+                self._session.run(tf.global_variables_initializer())
+                self._session.run(tf.local_variables_initializer())
+
+            logging.debug('\tFinding train_op in the created graph')
+            try:
+                self._train_op = self._graph.get_operation_by_name('train_op')
+            except (KeyError, ValueError, TypeError) as ex:
+                raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
+
+            logging.debug('\tCreating Saver')
             self._saver = tf.train.Saver(max_to_keep=100000000)
 
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as model inputs."""
-        return self._input_names
+        """List of TF tensor names listed as model inputs."""
+        return self._towers[0].input_names
 
     @property
     def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of tf tensor names listed as model outputs."""
-        return self._output_names
+        """List of TF tensor names listed as model outputs."""
+        return self._towers[0].output_names
 
     @property
     def graph(self) -> tf.Graph:
-        """Tf graph object."""
+        """TF graph object."""
         return self._graph
 
     @property
     def session(self) -> tf.Session:
-        """Tf session object."""
+        """TF session object."""
         return self._session
-
-    @property
-    def train_op(self) -> tf.Operation:
-        """Model train op."""
-        return self._train_op
-
-    def get_tensor_by_name(self, name) -> tf.Tensor:
-        """
-        Get the tf tensor with the given name.
-
-        Only tensor previously defined as model inputs/outputs in model.io can be accessed.
-        :param name: tensor name
-        :return: tf tensor
-        """
-        if name in self._io_tensors:
-            return self._io_tensors[name]
-        else:
-            raise KeyError('Tensor named `{}` is not within accessible tensors.'.format(name))
 
     def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
         """
@@ -150,22 +203,30 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         :return: outputs dict
         """
         # setup the feed dict
-        feed_dict = {}
-        for placeholder_name in self._input_names:
-            feed_dict[self.get_tensor_by_name(placeholder_name)] = batch[placeholder_name]
+        batch_size = len(batch[next(iter(batch))])
+        tower_batch_size = math.ceil(batch_size / len(self._towers))
 
-        # setup fetches
+        feed_dict = {}
         fetches = [self._train_op] if train else []
-        for output_name in self._output_names:
-            fetches.append(self.get_tensor_by_name(output_name))
+
+        for i, tower in enumerate(self._towers):
+            for placeholder_name in self.input_names:
+                tower_batch = batch[placeholder_name][i*tower_batch_size:(i+1)*tower_batch_size]
+                feed_dict[tower[placeholder_name]] = tower_batch
+            for output_name in self.output_names:
+                fetches.append(tower[output_name])
 
         # run the computational graph for one batch
-        batch_res = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
 
         if train:
-            batch_res = batch_res[1:]
+            outputs = outputs[1:]
 
-        return dict(zip(self._output_names, batch_res))
+        # stack partial tower outputs
+        num_outputs = len(self.output_names)
+        stacked_outputs = [np.concatenate(outputs[i::num_outputs]) for i in range(num_outputs)]
+
+        return dict(zip(self.output_names, stacked_outputs))
 
     def save(self, name_suffix: str) -> str:
         """
@@ -183,11 +244,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
         self._saver.save(self._session, checkpoint_path)
 
-        with tf.Graph().as_default():
-            freeze_graph(input_graph=graph_path,
-                         input_checkpoint=checkpoint_path,
-                         output_node_names=self._output_names,
-                         output_graph=frozen_graph_path)
+        if self._freeze_graph:
+            with tf.Graph().as_default():
+                freeze_graph(input_graph=graph_path,
+                             input_checkpoint=checkpoint_path,
+                             output_node_names=self.output_names,
+                             output_graph=frozen_graph_path)
 
         return checkpoint_path
 
@@ -237,15 +299,18 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     def restore_fallback_class(self) -> str:
         return 'BaseModel'
 
-    def _create_train_op(self, losses: List[tf.Tensor]) -> tf.Operation:
+    def _create_train_op(self, optimizer_config: Optional[dict]) -> None:
         """
         TODO: docstring
         :param kwargs: model configuration
         """
-        optimizer = create_optimizer(self._optimizer_config)
-        grads_and_vars = average_gradients([optimizer.compute_gradients(loss) for loss in losses])
-        return optimizer.apply_gradients(grads_and_vars)
+        grads_and_vars = []
+        optimizer = create_optimizer(optimizer_config)
+        for tower in self._towers:
+            with tower:
+                grads_and_vars.append(optimizer.compute_gradients(tower.loss))
 
+        optimizer.apply_gradients(average_gradients(grads_and_vars), name='train_op')
 
     def _create_model(self, **kwargs) -> None:
         """
