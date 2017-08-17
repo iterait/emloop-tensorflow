@@ -22,7 +22,32 @@ from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
 
 
-class BaseTower:
+class GraphTower:
+    """
+    GraphTower is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
+    It allows to work with multiple copies of the same sub-graph distributed on multiple devices
+    with only one set of input and output names.
+
+    ---------------------------------------------
+    USAGE
+    ---------------------------------------------
+    1. create the desired number of GraphTowers:
+        towers = [GraphTower(i, inputs, outputs) for i in range(4)]
+    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):
+        for tower in towers:
+            with tower:
+                # define the TF graph with the respective inputs and outputs
+    3. find the input placeholders and output variables:
+        for tower in towers:
+            tower.find_io_tensors()
+    4. access the io tensors, loss etc.
+        towers[3]['my_input']  # my_input placeholder which is actually named 'my_input_3:0'
+
+    ---------------------------------------------
+    WARNING
+    ---------------------------------------------
+    The sub-graphs must be defined in the order corresponding to the tower ids!
+    """
 
     def __init__(self, id_: int, inputs: List[str], outputs: List[str]):
         self._id = id_
@@ -35,7 +60,7 @@ class BaseTower:
 
     def _get_full_name(self, tensor_name: str) -> str:
         """
-        Translates a simple tensor name to the actual tensor name in the graph.
+        Translates a simple tensor name to the actual tensor name in the sub-graph.
 
         E.g.:
         variable named `loss` in the 0th tower will be named `loss:0`
@@ -137,9 +162,9 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         self._freeze_graph = freeze
         self._train_op = None
         self._graph = self._saver = None
-        self._towers = [BaseTower(i, inputs, outputs) for i in range(n_gpus)]
+        self._towers = [GraphTower(i, inputs, outputs) for i in range(n_gpus)]
         if n_gpus == 0:
-            self._towers.append(BaseTower(-1, inputs, outputs))
+            self._towers.append(GraphTower(-1, inputs, outputs))
 
         logging.info('\tCreating TF model on %s devices', n_gpus)
         self._graph = tf.Graph()
@@ -148,11 +173,11 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             if restore_from is not None:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
             else:
-                with tf.variable_scope(tf.get_variable_scope()):
+                with tf.variable_scope(tf.get_variable_scope()) as scope:
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
-                        tf.get_variable_scope().reuse_variables()
+                        scope.reuse_variables()
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -196,7 +221,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
         """
-        Feed-forward the model with the given batch as feed_dict.
+        Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.
         Fetch and return all the model outputs as a dict.
         :param batch: batch dict source_name->values
         :param train: flag whether parameters update (train_op) should be included in fetches
