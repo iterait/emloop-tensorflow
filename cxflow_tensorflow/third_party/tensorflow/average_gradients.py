@@ -32,6 +32,9 @@ def average_gradients(tower_grads):
      List of pairs of (gradient, variable) where the gradient has been averaged
      across all towers.
     """
+    if len(tower_grads) == 1:
+        return tower_grads[0]
+
     average_grads = []
     for grad_and_vars in zip(*tower_grads):
         # Note that each grad_and_vars looks like the following:
