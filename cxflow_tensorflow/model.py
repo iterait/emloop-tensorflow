@@ -149,7 +149,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     """
 
     TRAIN_OP_NAME = 'train_op'
-    LOSS_NAME = 'train_op'
+    LOSS_NAME = 'loss'
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
@@ -369,7 +369,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         Create the model.
 
         Every model has to define:
-            - loss as a tensor named BaseMode.LOSS_NAME
+            - loss as a tensor named BaseModel.LOSS_NAME
             - input placeholders and output tensors named according to the specified input and output names
 
         To support multi-GPU training, all the variables must be created
