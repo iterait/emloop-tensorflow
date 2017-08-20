@@ -10,7 +10,7 @@ from cxflow.hooks import AbstractHook
 from cxflow_tensorflow.model import BaseModel
 
 
-class TensorBoardHook(AbstractHook):
+class WriteTensorboard(AbstractHook):
     """
     Log epoch summaries to TensorBoard.
 
@@ -18,12 +18,12 @@ class TensorBoardHook(AbstractHook):
     Example usage in config
     -------------------------------------------------------
     hooks:
-      - class: TensorBoardHook
+      - cxflow_tensorflow.WriteTensorboard
     -------------------------------------------------------
     # unknown variable types are casted to strings
     hooks:
-      - class: TensorBoardHook
-        on_unknown_type: str
+      - cxflow_tensorflow.WriteTensorboard:
+          on_unknown_type: str
     -------------------------------------------------------
     """
 
@@ -74,7 +74,7 @@ class TensorBoardHook(AbstractHook):
                     else:
                         continue
 
-                measures.append(tf.Summary.Value(tag='{}_{}'.format(stream_name, variable), simple_value=result))
+                measures.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
 
         self._summary_writer.add_summary(tf.Summary(value=measures), epoch_id)
 

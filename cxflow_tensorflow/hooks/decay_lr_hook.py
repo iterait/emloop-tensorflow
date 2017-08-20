@@ -8,7 +8,7 @@ from cxflow.hooks.abstract_hook import AbstractHook
 from cxflow_tensorflow import BaseModel
 
 
-class LRDecayHook(AbstractHook):
+class DecayLR(AbstractHook):
     """
     Hook for modifying (decaying) the learning rate (or any other variable) during the training.
 
@@ -21,21 +21,21 @@ class LRDecayHook(AbstractHook):
     -------------------------------------------------------
     # for multiplying learning_rate variable by 0.98 after every epoch
     hooks:
-      - class: LRDecayHook
+      - cxflow_tensorflow.DecayLR
     -------------------------------------------------------
     # for linear decay of my_learning_rate variable
     hooks:
-      - class: LRDecayHook
-        decay_value=-0.00001
-        variable_name='my_learning_rate'
-        decay_type='multiply'
+      - cxflow_tensorflow.DecayLR:
+          decay_value=-0.00001
+          variable_name='my_learning_rate'
+          decay_type='multiply'
     -------------------------------------------------------
     """
 
     LR_DECAY_TYPES = {'multiply', 'add'}
 
-    def __init__(self, model: BaseModel,
-                 decay_value=0.98, variable_name='learning_rate', decay_type='multiply', **kwargs):
+    def __init__(self, model: BaseModel, decay_value=0.98, variable_name='learning_rate', decay_type='multiply',
+                 **kwargs):
         """
         Create new LRDecayHook.
         :param model: tf model being trained
@@ -48,9 +48,9 @@ class LRDecayHook(AbstractHook):
                             'Only to models derived from '
                             '`cxflow_tensorflow.BaseModel` are allowed. '.format(type(model)))
 
-        if decay_type not in LRDecayHook.LR_DECAY_TYPES:
+        if decay_type not in DecayLR.LR_DECAY_TYPES:
             raise ValueError('Unrecognized LR decay type `{}`. '
-                             'Allowed values are `{}`'.format(decay_type, LRDecayHook.LR_DECAY_TYPES))
+                             'Allowed values are `{}`'.format(decay_type, DecayLR.LR_DECAY_TYPES))
 
         if decay_type == 'multiply' and decay_value <= 0:
             raise ValueError('Invalid lr decay value `{}` for multiply lr decay.'
@@ -65,7 +65,7 @@ class LRDecayHook(AbstractHook):
 
     def after_epoch(self, **_) -> None:
         """
-        Modify the specified tf variable (now saved in self._lr) with self._decay_value.
+        Modify the specified TF variable (now saved in self._lr) with self._decay_value.
         """
         old_value = self._lr.eval(session=self._model.session)
         new_value = old_value * self._decay_value if self._decay_type == 'multiply' else old_value + self._decay_value

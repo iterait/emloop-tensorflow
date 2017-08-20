@@ -5,7 +5,7 @@ Test module for cxflow_tensorflow.hooks.LRDecayHook.
 import tensorflow as tf
 from unittest import TestCase
 
-from cxflow_tensorflow import LRDecayHook
+from cxflow_tensorflow import DecayLR
 
 from ..model_test import TrainableModel
 
@@ -29,10 +29,10 @@ class LRDecayHookTest(TestCase):
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
-        self.assertRaises(TypeError, LRDecayHook, model=42)
-        self.assertRaises(ValueError, LRDecayHook, model, decay_value=-1)
-        self.assertRaises(ValueError, LRDecayHook, model, decay_type='unrecognized')
-        self.assertRaises(KeyError, LRDecayHook, model, variable_name='missing_variable')
+        self.assertRaises(TypeError, DecayLR, model=42)
+        self.assertRaises(ValueError, DecayLR, model, decay_value=-1)
+        self.assertRaises(ValueError, DecayLR, model, decay_type='unrecognized')
+        self.assertRaises(KeyError, DecayLR, model, variable_name='missing_variable')
 
     def test_multiply(self):
         """ Test if LRDecayHook works properly in multiply mode."""
@@ -41,7 +41,7 @@ class LRDecayHookTest(TestCase):
         repeats = 13
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
-        hook = LRDecayHook(model, decay_value=decay_value)
+        hook = DecayLR(model, decay_value=decay_value)
 
         hook.after_epoch()
         self.assertAlmostEqual(
@@ -58,7 +58,7 @@ class LRDecayHookTest(TestCase):
         repeats = 17
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
-        hook = LRDecayHook(model, decay_value=decay_value, decay_type='add')
+        hook = DecayLR(model, decay_value=decay_value, decay_type='add')
 
         hook.after_epoch()
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),

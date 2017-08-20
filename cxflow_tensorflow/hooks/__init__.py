@@ -1,2 +1,2 @@
-from .lr_decay_hook import LRDecayHook
-from .tensorboard_hook import TensorBoardHook
+from .decay_lr_hook import DecayLR
+from .write_tensorboard_hook import WriteTensorboard
