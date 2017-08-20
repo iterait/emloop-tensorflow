@@ -153,8 +153,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
-                 n_gpus: int=0, restore_from: Optional[str]=None, restore_model_name: Optional[str]=None,
-                 optimizer=None, freeze=False, **kwargs):
+                 session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
+                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, **kwargs):
         """
         Create a cxflow trainable TensorFlow model.
 
@@ -165,11 +165,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
         :param outputs: model output names
+        :param session: TF session configuration dict
         :param n_gpus: number of GPUs to use
-        :param threads: number of threads to be used by tf
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
         :param optimizer: optimizer configuration dict
+        :param freeze: freeze the graph after each save
         :param kwargs: additional kwargs which are passed to the _create_model method
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
@@ -185,7 +186,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
         logging.info('\tCreating TF model on %s devices', n_gpus)
         self._graph = tf.Graph()
-        self._session = tf.Session(graph=self._graph)
+        self._session = self._create_session(session_config)
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope()) as scope:
@@ -340,6 +341,21 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     @property
     def restore_fallback_class(self) -> str:
         return 'BaseModel'
+
+    def _create_session(self, session_config: Optional[dict]) -> tf.Session:
+        """
+        Create and return TF Session for this model.
+
+        By default the session is configured with ConfigProto created with the given session_config as **kwargs.
+        Override this method in order to configure additional nested options (e.g. GraphOptions).
+
+        The Session should use self._graph as the default graph.
+        :param session_config: session configuration dict as specified in the config yaml
+        :return: TF Session
+        """
+        if session_config:
+            session_config = tf.ConfigProto(**session_config)
+        return tf.Session(graph=self._graph, config=session_config)
 
     def _create_train_op(self, optimizer_config: Optional[dict]) -> None:
         """
