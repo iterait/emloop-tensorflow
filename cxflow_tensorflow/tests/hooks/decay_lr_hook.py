@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from cxflow_tensorflow import DecayLR
 
-from ..model_test import TrainableModel
+from ..model_test import TrainableModel, _OPTIMIZER
 
 
 class LRModel(TrainableModel):
@@ -17,6 +17,9 @@ class LRModel(TrainableModel):
         tf.Variable(2, name='learning_rate', dtype=tf.float32)
 
         super()._create_model(**kwargs)
+
+    def _create_train_ops(self, _):
+        tf.no_op(name='train_op_1')
 
 
 class LRDecayHookTest(TestCase):

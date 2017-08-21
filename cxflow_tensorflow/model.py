@@ -178,7 +178,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
-        self._train_op = None
+        self._train_ops = []
         self._graph = self._saver = None
         self._towers = [GraphTower(i, inputs, outputs) for i in range(n_gpus)]
         if n_gpus == 0:
@@ -201,18 +201,20 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                 tower.find_io_tensors()
 
             if restore_from is None:
-                logging.debug('\tCreating train op')
-                self._create_train_op(optimizer)
+                logging.debug('\tCreating train ops')
+                self._create_train_ops(optimizer)
 
                 logging.debug('\tInitializing the variables')
                 self._session.run(tf.global_variables_initializer())
                 self._session.run(tf.local_variables_initializer())
 
-            logging.debug('\tFinding train_op in the created graph')
+            logging.debug('\tSearching for the train ops in the created graph')
             try:
-                self._train_op = self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME)
+                for i in range(len(self._towers)):
+                    self._train_ops.append(self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1)))
             except (KeyError, ValueError, TypeError) as ex:
-                raise ValueError('Cannot find train op in graph. Train op must be named `train_op`.') from ex
+                raise ValueError('Cannot find train op {} in graph. '
+                                 'The op must be named `train_op_{}`.'.format(i+1, i+1)) from ex
 
             logging.debug('\tCreating Saver')
             self._saver = tf.train.Saver(max_to_keep=100000000)
@@ -248,16 +250,18 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         # setup the feed dict
         batch_size = len(batch[next(iter(batch))])
         tower_batch_size = math.ceil(batch_size / len(self._towers))
+        nonempty_towers = batch_size // tower_batch_size + (0 if batch_size % tower_batch_size == 0 else 1)
 
         feed_dict = {}
-        fetches = [self._train_op] if train else []
+        fetches = [self._train_ops[nonempty_towers-1]] if train else []
 
         for i, tower in enumerate(self._towers):
-            for placeholder_name in self.input_names:
-                tower_batch = batch[placeholder_name][i*tower_batch_size:(i+1)*tower_batch_size]
-                feed_dict[tower[placeholder_name]] = tower_batch
-            for output_name in self.output_names:
-                fetches.append(tower[output_name])
+            if i*tower_batch_size < batch_size:
+                for placeholder_name in self.input_names:
+                    tower_batch = batch[placeholder_name][i*tower_batch_size:(i+1)*tower_batch_size]
+                    feed_dict[tower[placeholder_name]] = tower_batch
+                for output_name in self.output_names:
+                    fetches.append(tower[output_name])
 
         # run the computational graph for one batch
         outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
@@ -357,14 +361,18 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             session_config = tf.ConfigProto(**session_config)
         return tf.Session(graph=self._graph, config=session_config)
 
-    def _create_train_op(self, optimizer_config: Optional[dict]) -> None:
+    def _create_train_ops(self, optimizer_config: Optional[dict]) -> None:
         """
-        Create the train op used for training.
+        Create the train ops used for training. In order to handle incomplete batches, there must be one train op for
+        each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
+        respectively. The train ops must be named train_op_1, train_op_2 etc. wherein the suffixed number stands for the
+        number of towers.
 
-        By default the train op is constructed in the following way:
+        By default the train ops are constructed in the following way:
             - optimizer is created from the `model.optimizer` configuration dict
-            - gradients are computed in the respective towers
-            - gradients are averaged and applied
+            - gradients minimizing the respective tower losses are computed
+            - for each number of towers
+                - gradients of the respective number of towers are averaged and applied
 
         This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.
         :param optimizer_config: optimizer configuration dict
@@ -377,8 +385,9 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         for tower in self._towers:
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tower.loss))
-
-        optimizer.apply_gradients(average_gradients(grads_and_vars), name=BaseModel.TRAIN_OP_NAME)
+        for i in range(len(self._towers)):
+            optimizer.apply_gradients(average_gradients(grads_and_vars[:(i+1)]),
+                                      name=BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1))
 
     def _create_model(self, **kwargs) -> None:
         """
@@ -388,8 +397,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             - loss as a tensor named BaseModel.LOSS_NAME
             - input placeholders and output tensors named according to the specified input and output names
 
-        To support multi-GPU training, all the variables must be created
-        through tf.get_variable and appropriate variable scopes.
+        To support multi-GPU training, all the variables must be created with tf.get_variable and appropriate
+        variable scopes.
         
         :param kwargs: model configuration as specified in `model` section of the configuration file
         """

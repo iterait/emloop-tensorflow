@@ -11,18 +11,19 @@ import tensorflow as tf
 
 from cxflow import MainLoop
 from cxflow.tests.main_loop_test import SimpleDataset
+from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow.hooks import StopAfter
 
-from cxflow_tensorflow import BaseModel, create_optimizer
-from cxflow_tensorflow.tests.test_core import CXTestCaseWithDirAndModel
+from cxflow_tensorflow import BaseModel
+
+_OPTIMIZER = {'module': 'tensorflow.python.training.adam', 'class': 'AdamOptimizer', 'learning_rate': 0.1}
+_IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
 
 def create_simple_main_loop(epochs: int, tmpdir: str):
     dataset = SimpleDataset()
-    model = TrainableModel(dataset=dataset, log_dir=tmpdir,  # pylint: disable=redefined-variable-type
-                           inputs=['input', 'target'], outputs=['output'])
-    mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=epochs)],
-                        skip_zeroth_epoch=False)
+    model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER)
+    mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=epochs)], skip_zeroth_epoch=False)
     return dataset, model, mainloop
 
 
@@ -35,8 +36,8 @@ class DummyModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_op(self, _):
-        tf.no_op(name='train_op')
+    def _create_train_ops(self, _):
+        tf.no_op(name='train_op_1')
 
 
 class TrainOpModel(BaseModel):
@@ -48,8 +49,8 @@ class TrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_op(self, _):
-        tf.no_op(name='train_op')
+    def _create_train_ops(self, _):
+        tf.no_op(name='train_op_1')
 
 
 class NoTrainOpModel(BaseModel):
@@ -61,7 +62,7 @@ class NoTrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_op(self, _):
+    def _create_train_ops(self, _):
         pass
 
 
@@ -80,10 +81,8 @@ class SimpleModel(BaseModel):
 
         self.sum = tf.add(self.input1, self.input2, name='sum')
 
-        self.session.run(tf.global_variables_initializer())
-
-    def _create_train_op(self, _):
-        tf.no_op(name='train_op')
+    def _create_train_ops(self, _):
+        tf.no_op(name='train_op_1')
 
 
 class TrainableModel(BaseModel):
@@ -95,23 +94,16 @@ class TrainableModel(BaseModel):
         self.input = tf.placeholder(tf.float32, shape=[None, 10], name='input')
         self.target = tf.placeholder(tf.float32, shape=[None, 10], name='target')
 
-        self.var = tf.Variable([2] * 10, name='var', dtype=tf.float32)
+        self.var = tf.get_variable(name='var', shape=[10], dtype=tf.float32,
+                                   initializer=tf.constant_initializer([2] * 10))
 
         self.output = tf.multiply(self.input, self.var, name='output')
 
-        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output))
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1)
+        tf.identity(self.loss, name='loss')
 
 
-
-        self.session.run(tf.global_variables_initializer())
-
-    def _create_train_op(self, _):
-        # defining a dummy train_op as otherwise we would not be able to create the model
-        create_optimizer({'module': 'tensorflow.python.training.adam',
-                          'class': 'AdamOptimizer', 'learning_rate': 0.1}).minimize(self.loss, name='train_op')
-
-
-class BaseModelTest(CXTestCaseWithDirAndModel):
+class BaseModelTest(CXTestCaseWithDir):
     """
     Test case for BaseModel.
 
@@ -124,12 +116,10 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         good_io = {'inputs': [], 'outputs': ['dummy']}
 
         # test whether train_op is found correctly
-        trainop_model = TrainOpModel(dataset=None, log_dir='', **good_io)
-        tf.reset_default_graph()
+        TrainOpModel(dataset=None, log_dir='', **good_io)
 
         # test whether an error is raised when no train_op is defined
         self.assertRaises(ValueError, NoTrainOpModel, dataset=None, log_dir='', **good_io)
-        tf.reset_default_graph()
 
     def test_io_mapping(self):
         """Test if model.io is translated to output/input names."""
@@ -138,19 +128,16 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         model = SimpleModel(dataset=None, log_dir='', **good_io)
         self.assertListEqual(model.input_names, good_io['inputs'])
         self.assertListEqual(model.output_names, good_io['outputs'])
-        tf.reset_default_graph()
 
         # test if an error is raised when certain input/output tensor is not found
         self.assertRaises(ValueError, SimpleModel, dataset=None, log_dir='',
                           inputs=['input', 'second_input', 'third_input'], outputs=['output', 'sum'])
-        tf.reset_default_graph()
+
         self.assertRaises(ValueError, SimpleModel, dataset=None, log_dir='', inputs=['input', 'second_input'],
                           outputs=['output', 'sum', 'sub'])
-        tf.reset_default_graph()
 
     def test_run(self):
         """Test tf model run."""
-
         good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
         model = SimpleModel(dataset=None, log_dir='', **good_io)
         valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
@@ -161,10 +148,9 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
             self.assertTrue(output_name in results)
         self.assertTrue(np.allclose(results['output'], [2]*10))
         self.assertTrue(np.allclose(results['sum'], [3]*10))
-        tf.reset_default_graph()
 
         # test variables update if and only if train=True
-        trainable_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+        trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # single run with train=False
@@ -209,18 +195,15 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         """Test restore from directory with one valid checkpoint."""
 
         # test model saving
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
         saved_var_value = trainable_model.var.eval(session=trainable_model.session)
         trainable_model.save('1')
 
-        tf.reset_default_graph()
-
         # test restoring
-        restored_model = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_model = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
 
         var = restored_model.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_model.session)
@@ -230,8 +213,7 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         """Test restore from directory with two checkpoints and a specification of which one to restore from."""
 
         # test model saving
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -239,11 +221,9 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         trainable_model.save('1')
         checkpoint_path = trainable_model.save('2')
 
-        tf.reset_default_graph()
-
         # test restoring
         restored_model = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir,
-                                   restore_model_name=checkpoint_path, **trainable_io)
+                                   restore_model_name=checkpoint_path, **_IO, optimizer=_OPTIMIZER)
 
         var = restored_model.graph.get_tensor_by_name('var:0')
         var_value = var.eval(session=restored_model.session)
@@ -253,47 +233,39 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         """Test restore from directory with two checkpoints and no specification of which one to restore from."""
 
         # test model saving
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
         trainable_model.save('1')
         trainable_model.save('2')
 
-        tf.reset_default_graph()
-
         # test restoring
         with self.assertRaises(ValueError):
-            BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+            BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO)
 
     def test_restore_0(self):
         """Test restore from directory with no checkpoints."""
 
         # test model saving
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
 
-        tf.reset_default_graph()
-
         # test restoring
         with self.assertRaises(ValueError):
-            BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+            BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO)
 
     def test_restore_and_train(self):
         """Test model training after restoring."""
 
         # save a model that is not trained
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         trainable_model.save('')
-        tf.reset_default_graph()
 
         # restored the model
-        restored_model = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
+        restored_model = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO)
 
         # test whether it can be trained
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
@@ -304,7 +276,7 @@ class BaseModelTest(CXTestCaseWithDirAndModel):
         self.assertTrue(np.allclose([0]*10, after_value))
 
 
-class TFBaseModelSaverTest(CXTestCaseWithDirAndModel):
+class TFBaseModelSaverTest(CXTestCaseWithDir):
     """
     Test case for correct usage of tensorflow saver in BaseModel.
     """
@@ -329,7 +301,7 @@ class TFBaseModelSaverTest(CXTestCaseWithDirAndModel):
             self.assertGreater(len(data_files), 0)
 
 
-class TFBaseModelManagementTest(CXTestCaseWithDirAndModel):
+class TFBaseModelManagementTest(CXTestCaseWithDir):
     """
     Test case for correct management of tf graphs and sessions.
     """
@@ -340,10 +312,8 @@ class TFBaseModelManagementTest(CXTestCaseWithDirAndModel):
 
         This is regression test for issue #83 (One can not create and use more than one instance of BaseModel).
         """
-
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        model1 = TrainableModel(dataset=None, log_dir='', **trainable_io)
-        model2 = TrainableModel(dataset=None, log_dir='', **trainable_io)
+        model1 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
+        model2 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # test if one can train one model while the other remains intact
@@ -368,9 +338,8 @@ class TFBaseModelManagementTest(CXTestCaseWithDirAndModel):
         """
         tmpdir2 = tempfile.mkdtemp()
 
-        trainable_io = {'inputs': ['input', 'target'], 'outputs': ['output']}
-        model1 = TrainableModel(dataset=None, log_dir=self.tmpdir, **trainable_io)
-        model2 = TrainableModel(dataset=None, log_dir=tmpdir2, **trainable_io)
+        model1 = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        model2 = TrainableModel(dataset=None, log_dir=tmpdir2, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             model1.run(batch, train=True)
@@ -379,8 +348,8 @@ class TFBaseModelManagementTest(CXTestCaseWithDirAndModel):
         model2.save('')
 
         # test if one can `_restore_model` two models and use them at the same time
-        restored_model1 = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **trainable_io)
-        restored_model2 = BaseModel(dataset=None, log_dir='', restore_from=tmpdir2, **trainable_io)
+        restored_model1 = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO)
+        restored_model2 = BaseModel(dataset=None, log_dir='', restore_from=tmpdir2, **_IO)
 
         trained_value = restored_model1.graph.get_tensor_by_name('var:0').eval(session=restored_model1.session)
         self.assertTrue(np.allclose([0]*10, trained_value))
@@ -388,3 +357,38 @@ class TFBaseModelManagementTest(CXTestCaseWithDirAndModel):
         self.assertTrue(np.allclose([2]*10, default_value))
 
         shutil.rmtree(tmpdir2)
+
+
+class TFBaseModelMultiGPUTest(CXTestCaseWithDir):
+    """
+    Test case for correct handling of multi-gpu trainings.
+    """
+
+    def test_incomplete_batches(self):
+        """Test if incomplete batches are handled properly in multi-tower env."""
+        multi_gpu_model = TrainableModel(dataset=None, log_dir='', **_IO, n_gpus=4,
+                                         session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER)
+        batch = {'input': [[1]*10]*8, 'target': [[0]*10]*8}
+        small_batch = {'input': [[1]*10]*3, 'target': [[0]*10]*3}
+
+        # single run with full batch
+        outputs = multi_gpu_model.run(batch, train=False)
+        self.assertTrue(np.allclose(outputs['output'], [[2]*10]*8))
+
+        # single run with small batch
+        outputs2 = multi_gpu_model.run(small_batch, train=False)
+        self.assertTrue(np.allclose(outputs2['output'], [[2]*10]*3))
+
+        # multiple train runs with full batch
+        for _ in range(1000):
+            multi_gpu_model.run(batch, train=True)
+        after_value = multi_gpu_model.var.eval(session=multi_gpu_model.session)
+        self.assertTrue(np.allclose(after_value, [0]*10))
+
+        multi_gpu_model2 = TrainableModel(dataset=None, log_dir='', **_IO, n_gpus=4,
+                                          session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER)
+        # multiple train runs with small batch
+        for _ in range(1000):
+            multi_gpu_model2.run(small_batch, train=True)
+        after_value = multi_gpu_model2.var.eval(session=multi_gpu_model2.session)
+        self.assertTrue(np.allclose(after_value, [0]*10))

@@ -5,7 +5,7 @@ Test module for metrics util functions.
 import numpy as np
 import tensorflow as tf
 
-from cxflow_tensorflow.tests.test_core import CXTestCaseWithDir
+from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow_tensorflow import bin_dice, bin_stats
 
 _LABELS = [[1, 0, 0, 0, 1, 1], [1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0]]
