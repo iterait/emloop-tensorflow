@@ -339,12 +339,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             self._restore_checkpoint(path.join(restore_from, restore_model_name))
 
     @property
-    def restore_fallback_module(self) -> str:
-        return 'cxflow_tensorflow'
-
-    @property
-    def restore_fallback_class(self) -> str:
-        return 'BaseModel'
+    def restore_fallback(self) -> str:
+        return 'cxflow_tensorflow.BaseModel'
 
     def _create_session(self, session_config: Optional[dict]) -> tf.Session:
         """
