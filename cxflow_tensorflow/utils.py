@@ -7,9 +7,7 @@ from typing import Dict, Callable, Any
 import numpy as np
 import tensorflow as tf
 
-from cxflow.utils.reflection import create_object_from_config, get_class_module
-
-TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
+from cxflow.utils.reflection import parse_fully_qualified_name, create_object
 
 
 def create_optimizer(optimizer_config: Dict[str, Any]):
@@ -25,22 +23,18 @@ def create_optimizer(optimizer_config: Dict[str, Any]):
     :param optimizer_config: dict with at least `class` and `learning_rate` entries
     :return: optimizer
     """
-    assert 'learning_rate' in optimizer_config
-    assert 'class' in optimizer_config
+    assert 'learning_rate' in optimizer_config, 'Optimizer learning rate not specified'
+    assert 'class' in optimizer_config, 'Optimizer class not specified'
+
+    optimizer_module, optimizer_class = parse_fully_qualified_name(optimizer_config['class'])
+
     kwargs = optimizer_config.copy()
+    kwargs.pop('class')
+
     learning_rate = kwargs.pop('learning_rate')
     learning_rate = tf.Variable(learning_rate, name='learning_rate', trainable=False)
-    if 'module' not in kwargs:
-        optimizer_module = get_class_module(TF_OPTIMIZERS_MODULE, optimizer_config['class'])
-        if optimizer_module is not None:
-            optimizer_config['module'] = optimizer_module
-        else:
-            raise ValueError('Can\'t find the optimizer module for class `{}` under `{}`. Please specify it explicitly.'
-                             .format(optimizer_config['class'], TF_OPTIMIZERS_MODULE))
-    else:
-        kwargs.pop('module')
-    kwargs.pop('class')
-    return create_object_from_config(optimizer_config, args=(learning_rate,), kwargs=kwargs)
+
+    return create_object(optimizer_module, optimizer_class, args=(learning_rate,), kwargs=kwargs)
 
 
 def create_activation(activation_name: str) -> Callable[[tf.Tensor], tf.Tensor]:

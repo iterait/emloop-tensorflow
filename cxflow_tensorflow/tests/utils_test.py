@@ -40,7 +40,7 @@ class UtilsTest(CXTestCaseWithDir):
         # test missing required entry `class`
         self.assertRaises(AssertionError, create_optimizer, optimizer_config)
 
-        optimizer_config['class'] = 'GradientDescentOptimizer'
+        optimizer_config['class'] = 'tensorflow.python.training.gradient_descent.GradientDescentOptimizer'
 
         with tf.Session().as_default():
             # test if the optimizer is created correctlyW
@@ -52,7 +52,7 @@ class UtilsTest(CXTestCaseWithDir):
             tf.get_default_session().run(tf.global_variables_initializer())
             self.assertAlmostEqual(lr_tensor.eval(), 0.1)
 
-        optimizer_config2 = {'learning_rate': 0.1, 'class': 'MomentumOptimizer'}
+        optimizer_config2 = {'learning_rate': 0.1, 'class': 'tensorflow.python.training.momentum.MomentumOptimizer'}
 
         # test missing required argument (momentum in this case)
         with tf.Graph().as_default():

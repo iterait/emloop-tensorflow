@@ -16,7 +16,7 @@ from cxflow.hooks import StopAfter
 
 from cxflow_tensorflow import BaseModel
 
-_OPTIMIZER = {'module': 'tensorflow.python.training.adam', 'class': 'AdamOptimizer', 'learning_rate': 0.1}
+_OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
 _IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
 
