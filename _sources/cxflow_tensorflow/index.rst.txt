@@ -1,0 +1,11 @@
+API Reference
+=============
+
+All the
+
+.. toctree::
+   :maxdepth: 1
+   :includehidden:
+   :glob:
+
+   *

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Welcome to cxflow-tensorflow docs &#8212; cxflow-tensorflow 0.1 documentation</title>
+    <title>Getting Started &#8212; cxflow-tensorflow 0.1 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
@@ -27,7 +27,8 @@
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Welcome to cxflow-tensorflow docs" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -45,7 +46,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="index.html">
           cxflow-tensorflow</a>
         <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
       </div>
@@ -53,7 +54,7 @@
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="getting_started.html">Getting Started</a></li>
+                <li><a href="#">Getting Started</a></li>
                 <li><a href="tutorial.html">Tutorial</a></li>
                 <li><a href="multi_gpu.html">Multi GPU models</a></li>
                 <li><a href="cxflow_tensorflow/index.html">API Reference</a></li>
@@ -64,7 +65,7 @@
      id="dLabelGlobalToc"
      data-toggle="dropdown"
      data-target="#"
-     href="#">Pages <b class="caret"></b></a>
+     href="index.html">Pages <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"></ul>
@@ -85,13 +86,16 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary">
 <div class="side_nav">
-    <a href="getting_started.html" title="Next Chapter: Getting Started"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Getting Started &raquo;</span>
+    <a href="index.html" title="Previous Chapter: Welcome to cxflow-tensorflow docs"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Welcome to cxflow-tensorflow docs</span>
+    </a>
+    </div>
+<div class="side_nav">
+    <a href="tutorial.html" title="Next Chapter: Tutorial"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Tutorial &raquo;</span>
     </a>
     </div><ul>
-<li><a class="reference internal" href="#">Welcome to cxflow-tensorflow docs</a><ul>
-<li><a class="reference internal" href="#contribute">Contribute</a></li>
-<li><a class="reference internal" href="#support">Support</a></li>
-<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#developer-installation">Developer Installation</a></li>
 </ul>
 </li>
 </ul>
@@ -107,37 +111,31 @@
       </div>
     <div class="col-md-9 content">
       
-  <div class="toctree-wrapper compound">
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
 </div>
-<div class="section" id="welcome-to-cxflow-tensorflow-docs">
-<h1>Welcome to cxflow-tensorflow docs<a class="headerlink" href="#welcome-to-cxflow-tensorflow-docs" title="Permalink to this headline">¶</a></h1>
-<p>Cxflow-tensorflow is <strong>cxflow</strong> plugin for training TensorFlow models with ease.
-It allows you to focus on the model architecture instead of writing the burdensome code around it.</p>
-<p>Before you start working with cxflow-tensorflow, make sure you are well aware of</p>
-<ul class="simple">
-<li><a class="reference external" href="https://www.tensorflow.org/get_started/">TensorFlow essentials</a></li>
-<li><a class="reference external" href="http://cxflow.readthedocs.io/en/doc/index.html" title="(in cxflow v0.7)"><span class="xref std std-doc">cxflow basics</span></a></li>
-</ul>
-<p>After that, <a class="reference internal" href="getting_started.html"><span class="doc">proceed with installation</span></a> and go
-through our 5-minutes and <a class="reference internal" href="tutorial.html"><span class="doc">tutorial</span></a>.</p>
-<p>Leveraging the speed and potential of multi-GPU models was never easier with our
-<a class="reference internal" href="multi_gpu.html"><span class="doc">multi-GPU base model</span></a>.</p>
-<div class="section" id="contribute">
-<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li>Issue Tracker: <a class="reference external" href="https://github.com/Cognexa/cxflow-tensorflow/issues">https://github.com/Cognexa/cxflow-tensorflow/issues</a></li>
-<li>Source Code: <a class="reference external" href="https://github.com/Cognexa/cxflow-tensorflow">https://github.com/Cognexa/cxflow-tensorflow</a></li>
-</ul>
+<p>Before we dive in, cxflow-tensorflow must be properly installed.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>The most simple installation of cxflow-tensorflow is via pip.
+This is the recommended option for majority of users.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install cxflow-tensorflow
+</pre></div>
 </div>
-<div class="section" id="support">
-<h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
-<p>If you are having issues, please let us know either via the official
-<a class="reference external" href="https://github.com/Cognexa/cxflow-tensorflow/issues">issue tracker</a> or via e-mail.
-We have a mailing list located at: <a class="reference external" href="mailto:cxflow&#37;&#52;&#48;cognexa&#46;com">cxflow<span>&#64;</span>cognexa<span>&#46;</span>com</a></p>
+<p>Alternatively, cxflow might be installed directly from the sources.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install git+https://github.com/Cognexa/cxflow-tensorflow.git
+</pre></div>
 </div>
-<div class="section" id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
-<p>The project is licensed under the MIT license.</p>
+</div>
+<div class="section" id="developer-installation">
+<h2>Developer Installation<a class="headerlink" href="#developer-installation" title="Permalink to this headline">¶</a></h2>
+<p>Finally, cxflow might be installed directly for developer purposes.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone git@github.com:Cognexa/cxflow-tensorflow.git
+<span class="nb">cd</span> cxflow-tensorflow
+pip install -e .
+</pre></div>
+</div>
 </div>
 </div>
 

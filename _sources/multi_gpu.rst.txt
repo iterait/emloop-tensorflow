@@ -1,0 +1,10 @@
+Multi-GPU models
+################
+
+.. toctree::
+   :hidden:
+   :glob:
+
+   multi_gpu
+
+TODO
