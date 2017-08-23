@@ -1,0 +1,23 @@
+=============================
+``cxflow_tensorflow.metrics``
+=============================
+
+.. automodule:: cxflow_tensorflow.metrics
+
+
+.. currentmodule:: cxflow_tensorflow.metrics
+
+
+Functions
+=========
+
+- :py:func:`bin_stats`:
+  Calculate f1, precision and recall from binary classification expected and predicted values.
+
+- :py:func:`bin_dice`:
+  Calculate Sørensen–Dice coefficient from the given binary classification expected and predicted values.
+
+
+.. autofunction:: bin_stats
+
+.. autofunction:: bin_dice
