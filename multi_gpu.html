@@ -88,7 +88,12 @@
     <a href="tutorial.html" title="Previous Chapter: Tutorial"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Tutorial</span>
     </a>
     </div><ul>
-<li><a class="reference internal" href="#">Multi-GPU models</a></li>
+<li><a class="reference internal" href="#">Multi-GPU models</a><ul>
+<li><a class="reference internal" href="#compatible-models">Compatible models</a></li>
+<li><a class="reference internal" href="#multi-gpu-training">Multi-GPU training</a></li>
+<li><a class="reference internal" href="#implementation-details">Implementation details</a></li>
+</ul>
+</li>
 </ul>
 
 <form action="search.html" method="get" class="searchbox">
@@ -106,7 +111,59 @@
 <h1>Multi-GPU models<a class="headerlink" href="#multi-gpu-models" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>TODO</p>
+<p>Training deep learning models often require large amounts of data and computation resources rendering the process
+quite time expensive.
+Models are trained for hours or days which makes experimenting with different configurations cumbersome and slow.</p>
+<div class="figure align-right" id="id1">
+<a class="reference internal image-reference" href="_images/multi-gpu-speed.png"><img alt="_images/multi-gpu-speed.png" src="_images/multi-gpu-speed.png" style="width: 491.20000000000005px; height: 222.4px;" /></a>
+<p class="caption"><span class="caption-text">Performance gain with multiple GPUs in <strong>cxflow-tensorflow</strong> framework.</span></p>
+</div>
+<p>One way to speed up the process is utilizing multiple GPUs for model training. This may significantly lower the
+wall clock time, yet, the implementation is not always straightforward. Lucky enough, we implemented the necessary
+routines to make arbitrary TensorFlow model eligible for multi GPU training.</p>
+<div class="section" id="compatible-models">
+<h2>Compatible models<a class="headerlink" href="#compatible-models" title="Permalink to this headline">¶</a></h2>
+<p>The chances are, your TensorFlow model is already ready for multi GPU training in <strong>cxflow-tensorflow</strong>.
+In fact, the only requirement is to use <code class="docutils literal"><span class="pre">tf.get_variable</span></code> instead of <code class="docutils literal"><span class="pre">tf.Variable</span></code> so that the variables may be
+reused and shared over multiple GPUs.</p>
+</div>
+<div class="section" id="multi-gpu-training">
+<h2>Multi-GPU training<a class="headerlink" href="#multi-gpu-training" title="Permalink to this headline">¶</a></h2>
+<p>To train on (multiple) GPUs, define the <code class="docutils literal"><span class="pre">n_gpus</span></code> parameter in the configuration file. E.g.:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
+   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">nets.MyMultiGPUNet</span>
+<span class="hll">   <span class="l l-Scalar l-Scalar-Plain">n_gpus</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">4</span>
+</span>   <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+</div>
+<p>That’s it! Now better check your server temperatures…</p>
+<p>Fully working example may be found HERE.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Increase your dataset <strong>batch size</strong> together with the <code class="docutils literal"><span class="pre">n_gpus</span></code> parameter.
+Each batch is distributed evenly between the GPUs alowing for much greater batch sizes!</p>
+</div>
+</div>
+<div class="section" id="implementation-details">
+<h2>Implementation details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h2>
+<div class="figure align-right" id="id3">
+<img alt="_images/multi-gpu-graph.png" src="_images/multi-gpu-graph.png" />
+<p class="caption"><span class="caption-text">Tower architecture for multi GPU training.</span></p>
+</div>
+<p>In order to leverage the computation resources of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
+computational graph than usual. In fact, the whole model is multiplicated so that each GPU has its own <em>tower</em>. The
+variables to be trained are, naturally, shared between the towers. Each GPU computes its own feed-forward pass and the
+respective variable gradients. Consequently, the gradients are averaged and used for update.</p>
+<p>During the training <strong>cxflow-tensorflow</strong> distributes each batch equally among the towers. The fetched outputs are
+concatenated preserving its orders which ensures perfect abstraction for the remaining <strong>cxflow</strong> components. From the
+perspective of hooks and datasets, nothing has changed. Additionally, <strong>cxflow-tensorflow</strong> handles
+incomplete batches with ease.</p>
+<p>A model trained on multiple GPUs may be restored and used for inference with equal or less amount of GPUs or even
+on CPU without any troubles.</p>
+</div>
 </div>
 
 
