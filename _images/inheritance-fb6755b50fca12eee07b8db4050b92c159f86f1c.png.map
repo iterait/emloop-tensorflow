@@ -1,0 +1,4 @@
+<map id="inheritance01dbad70af" name="inheritance01dbad70af">
+<area shape="rect" id="node1" title="Abstract machine learning model which exposes input and output names, run and save methods." alt="" coords="5,5,120,31"/>
+<area shape="rect" id="node2" title="Cxflow :py:class:`AbstractModel &lt;cxflow.models.AbstractModel&gt;` implementation for TensorFlow models." alt="" coords="168,5,260,31"/>
+</map>

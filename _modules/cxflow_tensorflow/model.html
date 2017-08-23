@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cxflow_tensorflow.model &#8212; cxflow-tensorflow 0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/highlight.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          cxflow-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../getting_started.html">Getting Started</a></li>
+                <li><a href="../../tutorial.html">Tutorial</a></li>
+                <li><a href="../../multi_gpu.html">Multi GPU models</a></li>
+                <li><a href="../../cxflow_tensorflow/index.html">API Reference</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Pages <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../search.html" method="get" class="searchbox">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for cxflow_tensorflow.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="k">import</span> <span class="n">glob</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">cxflow</span> <span class="k">import</span> <span class="n">AbstractModel</span><span class="p">,</span> <span class="n">AbstractDataset</span>
+
+<span class="kn">from</span> <span class="nn">.third_party.tensorflow.freeze_graph</span> <span class="k">import</span> <span class="n">freeze_graph</span>
+<span class="kn">from</span> <span class="nn">.third_party.tensorflow.average_gradients</span> <span class="k">import</span> <span class="n">average_gradients</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">create_optimizer</span>
+
+
+<span class="k">class</span> <span class="nc">GraphTower</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GraphTower is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.</span>
+<span class="sd">    It allows to work with multiple copies of the same sub-graph distributed on multiple devices</span>
+<span class="sd">    with only one set of input and output names.</span>
+
+<span class="sd">    ---------------------------------------------</span>
+<span class="sd">    USAGE</span>
+<span class="sd">    ---------------------------------------------</span>
+<span class="sd">    1. create the desired number of GraphTowers:</span>
+<span class="sd">        towers = [GraphTower(i, inputs, outputs) for i in range(4)]</span>
+<span class="sd">    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):</span>
+<span class="sd">        for tower in towers:</span>
+<span class="sd">            with tower:</span>
+<span class="sd">                # define the TF graph with the respective inputs and outputs</span>
+<span class="sd">    3. find the input placeholders and output variables:</span>
+<span class="sd">        for tower in towers:</span>
+<span class="sd">            tower.find_io_tensors()</span>
+<span class="sd">    4. access the io tensors, loss etc.</span>
+<span class="sd">        towers[3][&#39;my_input&#39;]  # my_input placeholder which is actually named &#39;my_input_3:0&#39;</span>
+
+<span class="sd">    ---------------------------------------------</span>
+<span class="sd">    WARNING</span>
+<span class="sd">    ---------------------------------------------</span>
+<span class="sd">    The sub-graphs must be defined in the order corresponding to the tower ids!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create new GraphTower.</span>
+<span class="sd">        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0</span>
+<span class="sd">        :param inputs: tower input names</span>
+<span class="sd">        :param outputs: tower output names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">id_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device_name</span> <span class="o">=</span> <span class="s1">&#39;/cpu:0&#39;</span> <span class="k">if</span> <span class="n">id_</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;/gpu:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">id_</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span> <span class="o">=</span> <span class="n">outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loss</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Translates a simple tensor name to the actual tensor name in the sub-graph.</span>
+
+<span class="sd">        E.g.:</span>
+<span class="sd">        variable named `loss` in the 0th tower will be named `loss:0`</span>
+<span class="sd">        variable name `predictions` in the 1st tower will be name `predictions_1:0`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tensor_name</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;:0&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_find_or_raise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the tensor with the given name in the default graph or raise an exception.</span>
+<span class="sd">        :param tensor_name: tensor name to be find</span>
+<span class="sd">        :return: tf.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">full_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_full_name</span><span class="p">(</span><span class="n">tensor_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_default_graph</span><span class="p">()</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">full_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Tensor `</span><span class="si">{}</span><span class="s1">` with full name `</span><span class="si">{}</span><span class="s1">` was not found.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tensor_name</span><span class="p">,</span> <span class="n">full_name</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+    <span class="k">def</span> <span class="nf">find_io_tensors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find the tower&#39;s input and output tensors in the default graph.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">input_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">[</span><span class="n">input_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_or_raise</span><span class="p">(</span><span class="n">input_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">output_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">[</span><span class="n">output_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_or_raise</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the loss tensor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">LOSS_NAME</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return an iterable collection of input tensors.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return an iterable collection of output tensors.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">input_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return list of the input names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return list of the output names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_output_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">batch_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the current batch size.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_input_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return input/output tensor with the given name.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputs</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputs</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Tensor `</span><span class="si">{}</span><span class="s1">` is not within the input/output tensors&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Enter with tf.device(...): env.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_device_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Exit with tf.device(...): env.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="n">AbstractModel</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>   <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cxflow :py:class:`AbstractModel &lt;cxflow.models.AbstractModel&gt;` implementation for TensorFlow models.</span>
+
+<span class="sd">    To define a **cxflow** trainable model in Tensorflow, derive your class from :py:class:`BaseModel` and override</span>
+<span class="sd">    :py:meth:`_create_model` method.</span>
+
+<span class="sd">    See the method references for additional customization options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">TRAIN_OP_NAME</span> <span class="o">=</span> <span class="s1">&#39;train_op&#39;</span>
+    <span class="sd">&quot;&quot;&quot;Expected train op tensor name prefix.&quot;&quot;&quot;</span>
+
+    <span class="n">LOSS_NAME</span> <span class="o">=</span> <span class="s1">&#39;loss&#39;</span>
+    <span class="sd">&quot;&quot;&quot;Expected loss tensor name.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseModel.__init__"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># pylint: disable=too-many-arguments</span>
+                 <span class="n">dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AbstractDataset</span><span class="p">],</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">session_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_gpus</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">restore_from</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">restore_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create new cxflow trainable TensorFlow model.</span>
+
+<span class="sd">        TF Graph, train ops etc. are constructed with the following procedure:</span>
+
+<span class="sd">        #. Create ``tf.Graph`` and ``tf.Session`` with :py:meth:`_create_session`</span>
+<span class="sd">        #. Either create or restore the model with  :py:meth:`_create_model` or :py:meth:`_restore_model` respectively</span>
+<span class="sd">        #. Find input/output tensors</span>
+<span class="sd">        #. Create train ops with :py:meth:`_create_train_ops` unless they are already restored</span>
+<span class="sd">        #. Find the train ops</span>
+<span class="sd">        #. Create ``tf.Saver``</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            In most cases, it is not required to re-define the ``__init__`` method for your models.</span>
+
+<span class="sd">        :param dataset: dataset to be trained with</span>
+<span class="sd">        :param log_dir: path to the logging directory (wherein models should be saved)</span>
+<span class="sd">        :param inputs: model input names</span>
+<span class="sd">        :param outputs: model output names</span>
+<span class="sd">        :param session: TF session configuration dict, see :py:meth:`_create_session`</span>
+<span class="sd">        :param n_gpus: number of GPUs to use</span>
+<span class="sd">        :param restore_from: path to directory from which the model is restored</span>
+<span class="sd">        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)</span>
+<span class="sd">        :param optimizer: TF optimizer configuration dict</span>
+<span class="sd">        :param freeze: freeze the graph after each save</span>
+<span class="sd">        :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">restore_from</span><span class="o">=</span><span class="n">restore_from</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span> <span class="o">=</span> <span class="n">log_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_freeze_graph</span> <span class="o">=</span> <span class="n">freeze</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_train_ops</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span> <span class="o">=</span> <span class="p">[</span><span class="n">GraphTower</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_gpus</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">n_gpus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GraphTower</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="p">))</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating TF model on </span><span class="si">%s</span><span class="s1"> devices&#39;</span><span class="p">,</span> <span class="n">n_gpus</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_session</span><span class="p">(</span><span class="n">session_config</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">restore_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_variable_scope</span><span class="p">())</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">tower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="n">tower</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="n">scope</span><span class="o">.</span><span class="n">reuse_variables</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_restore_model</span><span class="p">(</span><span class="n">restore_from</span><span class="o">=</span><span class="n">restore_from</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="o">=</span><span class="n">restore_model_name</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">tower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">:</span>
+                <span class="n">tower</span><span class="o">.</span><span class="n">find_io_tensors</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">restore_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating train ops&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_train_ops</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Initializing the variables&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">local_variables_initializer</span><span class="p">())</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Searching for the train ops in the created graph&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_train_ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_operation_by_name</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span><span class="o">+</span><span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot find train op </span><span class="si">{}</span><span class="s1"> in graph. &#39;</span>
+                                 <span class="s1">&#39;The op must be named `train_op_</span><span class="si">{}</span><span class="s1">`.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating Saver&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">max_to_keep</span><span class="o">=</span><span class="mi">100000000</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">input_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>   <span class="c1"># pylint: disable=invalid-sequence-index</span>
+        <span class="sd">&quot;&quot;&quot;List of TF input tensor (placeholder) names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>   <span class="c1"># pylint: disable=invalid-sequence-index</span>
+        <span class="sd">&quot;&quot;&quot;List of TF output tensor names.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">graph</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;TF graph object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;TF session object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
+
+<div class="viewcode-block" id="BaseModel.run"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.</span>
+<span class="sd">        Fetch and return all the model outputs as a dict.</span>
+<span class="sd">        :param batch: batch dict source_name-&gt;values</span>
+<span class="sd">        :param train: flag whether parameters update (train_op) should be included in fetches</span>
+<span class="sd">        :return: outputs dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># setup the feed dict</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">batch</span><span class="p">))])</span>
+        <span class="n">tower_batch_size</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">batch_size</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">))</span>
+        <span class="n">nonempty_towers</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="o">//</span> <span class="n">tower_batch_size</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">batch_size</span> <span class="o">%</span> <span class="n">tower_batch_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">feed_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">fetches</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_ops</span><span class="p">[</span><span class="n">nonempty_towers</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="k">if</span> <span class="n">train</span> <span class="k">else</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tower</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">*</span><span class="n">tower_batch_size</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">placeholder_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_names</span><span class="p">:</span>
+                    <span class="n">tower_batch</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">placeholder_name</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="n">tower_batch_size</span><span class="p">:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">tower_batch_size</span><span class="p">]</span>
+                    <span class="n">feed_dict</span><span class="p">[</span><span class="n">tower</span><span class="p">[</span><span class="n">placeholder_name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">tower_batch</span>
+                <span class="k">for</span> <span class="n">output_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_names</span><span class="p">:</span>
+                    <span class="n">fetches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tower</span><span class="p">[</span><span class="n">output_name</span><span class="p">])</span>
+
+        <span class="c1"># run the computational graph for one batch</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fetches</span><span class="o">=</span><span class="n">fetches</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">feed_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">train</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1"># stack partial tower outputs</span>
+        <span class="n">num_outputs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_names</span><span class="p">)</span>
+        <span class="n">stacked_outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="n">i</span><span class="p">::</span><span class="n">num_outputs</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_outputs</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_names</span><span class="p">,</span> <span class="n">stacked_outputs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BaseModel.save"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save current tensorflow graph to a checkpoint named with the given name suffix.</span>
+
+<span class="sd">        The checkpoint will be locaced in self.log_dir directory.</span>
+<span class="sd">        :param name_suffix: saved checkpoint name suffix</span>
+<span class="sd">        :return: path to the saved checkpoint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">graph_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span><span class="p">,</span> <span class="s1">&#39;model_</span><span class="si">{}</span><span class="s1">.graph&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name_suffix</span><span class="p">))</span>
+        <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span><span class="p">,</span> <span class="s1">&#39;model_</span><span class="si">{}</span><span class="s1">.ckpt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name_suffix</span><span class="p">))</span>
+        <span class="n">frozen_graph_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_dir</span><span class="p">,</span> <span class="s1">&#39;model_</span><span class="si">{}</span><span class="s1">.pb&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name_suffix</span><span class="p">))</span>
+
+        <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">graph_def</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">graph_path</span><span class="p">,</span> <span class="n">as_text</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_freeze_graph</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                <span class="n">freeze_graph</span><span class="p">(</span><span class="n">input_graph</span><span class="o">=</span><span class="n">graph_path</span><span class="p">,</span>
+                             <span class="n">input_checkpoint</span><span class="o">=</span><span class="n">checkpoint_path</span><span class="p">,</span>
+                             <span class="n">output_node_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">output_names</span><span class="p">,</span>
+                             <span class="n">output_graph</span><span class="o">=</span><span class="n">frozen_graph_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">checkpoint_path</span></div>
+
+<div class="viewcode-block" id="BaseModel._restore_checkpoint"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">_restore_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given the checkpoint name (including the path to it), restore the model.</span>
+
+<span class="sd">        :param checkpoint_name: name in form of `*.ckpt`, e.g. `model_3.ckpt`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading meta graph&#39;</span><span class="p">)</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">import_meta_graph</span><span class="p">(</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s1">&#39;.meta&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Restoring model&#39;</span><span class="p">)</span>
+        <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel._restore_model"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_model">[docs]</a>    <span class="k">def</span> <span class="nf">_restore_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restore_from</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Restore TF model from the given checkpoint.</span>
+<span class="sd">        :param restore_from: path to directory from which the model is restored</span>
+<span class="sd">        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Restoring model from `</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_from</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">restore_from</span><span class="p">),</span> <span class="s1">&#39;`BaseModel` expect `restore_from` to be an existing directory.&#39;</span>
+        <span class="n">meta_files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/*.ckpt.meta&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_from</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No `</span><span class="si">{}</span><span class="s1">/*.ckpt.meta` files found.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_from</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Restoring model from checkpoint metafile`</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meta_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restore_checkpoint</span><span class="p">(</span><span class="n">meta_files</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">5</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Multiple checkpoint metafiles found.&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">restore_model_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;There are multiple checkpoint metafiles found in the directory </span><span class="si">{}</span><span class="s1">. However, config &#39;</span>
+                                 <span class="s1">&#39;lacks `model.restore_model_name`. Please, specify it.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_from</span><span class="p">))</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Restoring model from checkpoint `</span><span class="si">{}</span><span class="s1">` located in directory `</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_model_name</span><span class="p">,</span>
+                                                                                                 <span class="n">restore_from</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restore_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">restore_from</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="p">))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">restore_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;cxflow_tensorflow.BaseModel&#39;</span>
+
+<div class="viewcode-block" id="BaseModel._create_session"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_session">[docs]</a>    <span class="k">def</span> <span class="nf">_create_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return TF Session for this model.</span>
+
+<span class="sd">        By default the session is configured with ``tf.ConfigProto`` created with</span>
+<span class="sd">        the given ``session_config`` as ``**kwargs``.</span>
+
+<span class="sd">        .. tip::</span>
+<span class="sd">            Override this method in order to configure additional nested options (e.g. ``tf.GraphOptions``).</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            The session should use ``self._graph`` as the default graph.</span>
+
+<span class="sd">        :param session_config: session configuration dict as specified in the config yaml</span>
+<span class="sd">        :return: TensorFlow session</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">session_config</span><span class="p">:</span>
+            <span class="n">session_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ConfigProto</span><span class="p">(</span><span class="o">**</span><span class="n">session_config</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">session_config</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel._create_train_ops"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">[docs]</a>    <span class="k">def</span> <span class="nf">_create_train_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the train ops used for training. In order to handle incomplete batches, there must be one train op for</span>
+<span class="sd">        each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers</span>
+<span class="sd">        respectively. The train ops must be named train_op_1, train_op_2 etc. wherein the suffixed number stands for the</span>
+<span class="sd">        number of towers.</span>
+
+<span class="sd">        By default the train ops are constructed in the following way:</span>
+<span class="sd">            - optimizer is created from the `model.optimizer` configuration dict</span>
+<span class="sd">            - gradients minimizing the respective tower losses are computed</span>
+<span class="sd">            - for each number of towers</span>
+<span class="sd">                - gradients of the respective number of towers are averaged and applied</span>
+
+<span class="sd">        This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.</span>
+
+<span class="sd">        :param optimizer_config: optimizer configuration dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">optimizer_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Optimizer config was not specified although it is required for creating the train op. &#39;</span>
+                             <span class="s1">&#39;Please specify the configuration in `model.optimizer`.&#39;</span><span class="p">)</span>
+        <span class="n">grads_and_vars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">optimizer_config</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">tower</span><span class="p">:</span>
+                <span class="n">grads_and_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">optimizer</span><span class="o">.</span><span class="n">compute_gradients</span><span class="p">(</span><span class="n">tower</span><span class="o">.</span><span class="n">loss</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">)):</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">average_gradients</span><span class="p">(</span><span class="n">grads_and_vars</span><span class="p">[:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]),</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span><span class="o">+</span><span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BaseModel._create_model"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_model">[docs]</a>    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create your TensorFlow model.</span>
+
+<span class="sd">        Every model has to define:</span>
+
+<span class="sd">        - loss tensor named according to :py:attr:`LOSS_NAME`</span>
+<span class="sd">        - input placeholders and output tensors named according to the specified input and output names</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            To support multi-GPU training, all the variables must be created with ``tf.get_variable``</span>
+<span class="sd">            and appropriate variable scopes.</span>
+<span class="sd">        </span>
+<span class="sd">        :param kwargs: model configuration as specified in `model` section of the configuration file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;`_create_model` method must be implemented in order to construct a new model.&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2017, Blazek Adam, Belohlavek Petr, Matzner Filip.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
