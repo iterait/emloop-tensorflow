@@ -123,21 +123,9 @@
       
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-.. toctree:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">:</span><span class="n">hidden</span><span class="p">:</span>
-<span class="p">:</span><span class="n">glob</span><span class="p">:</span>
-
-<span class="n">tutorial</span>
-</pre></div>
-</div>
 <p>Imagine you colleague prepared a <strong>cxflow</strong> compatible dataset for the well
 known task of recognizing images of hand-written letters. Now, your task is to
 implement a baseline neural network for that. It can not be done easier than
-=======
-Imagine you colleague prepared a <strong>cxflow</strong> compatible dataset for the well known task of recognizing
-hand-written images. Now, your task is to implement a baseline neural network for that. It can not be done easier than
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 with cxflow-tensorflow.</p>
 <div class="section" id="first-cxflow-tensorflow-model">
 <h2>First cxflow-tensorflow model<a class="headerlink" href="#first-cxflow-tensorflow-model" title="Permalink to this headline">¶</a></h2>
@@ -274,15 +262,10 @@ one would update the code as follows:</p>
 </pre></div>
 </div>
 </div>
-<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-In fact, <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code>
+<p>In fact, <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code>
 section is directly forwarded
 to the <code class="docutils literal"><span class="pre">_create_model</span></code> function. This way, the whole model can be easily
-parametrized.
-=======
-In fact <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code> section is directly forwarded
-to the <code class="docutils literal"><span class="pre">_create_model</span></code> function. In this way, the whole model may be easily parametrized.
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87</p>
+parametrized.</p>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">Try to experiment with the <code class="docutils literal"><span class="pre">fc_size</span></code> parameter. How small the fully connected layer can be before the performance

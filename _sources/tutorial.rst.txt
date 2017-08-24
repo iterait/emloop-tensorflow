@@ -1,20 +1,9 @@
 Tutorial
 ########
 
-<<<<<<< HEAD
-.. toctree::
-   :hidden:
-   :glob:
-
-   tutorial
-
 Imagine you colleague prepared a **cxflow** compatible dataset for the well 
 known task of recognizing images of hand-written letters. Now, your task is to 
 implement a baseline neural network for that. It can not be done easier than
-=======
-Imagine you colleague prepared a **cxflow** compatible dataset for the well known task of recognizing
-hand-written images. Now, your task is to implement a baseline neural network for that. It can not be done easier than
->>>>>>> b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 with cxflow-tensorflow.
 
 First cxflow-tensorflow model
@@ -156,15 +145,10 @@ one would update the code as follows:
       inputs: [images, labels]
       outputs: [loss, probs]
 
-<<<<<<< HEAD
 In fact, **any** parameter found in the configuration under the ``model`` 
 section is directly forwarded
 to the ``_create_model`` function. This way, the whole model can be easily 
 parametrized.
-=======
-In fact **any** parameter found in the configuration under the ``model`` section is directly forwarded
-to the ``_create_model`` function. In this way, the whole model may be easily parametrized.
->>>>>>> b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 
 .. tip::
    Try to experiment with the ``fc_size`` parameter. How small the fully connected layer can be before the performance
