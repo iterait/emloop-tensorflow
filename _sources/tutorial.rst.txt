@@ -1,14 +1,20 @@
 Tutorial
 ########
 
+<<<<<<< HEAD
 .. toctree::
    :hidden:
    :glob:
 
    tutorial
 
+Imagine you colleague prepared a **cxflow** compatible dataset for the well 
+known task of recognizing images of hand-written letters. Now, your task is to 
+implement a baseline neural network for that. It can not be done easier than
+=======
 Imagine you colleague prepared a **cxflow** compatible dataset for the well known task of recognizing
 hand-written images. Now, your task is to implement a baseline neural network for that. It can not be done easier than
+>>>>>>> b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 with cxflow-tensorflow.
 
 First cxflow-tensorflow model
@@ -45,7 +51,8 @@ A simple convolution network takes only a couple of lines.
            tf.nn.softmax(logits, name='probs')
 
 .. tip::
-   It does not matter how the graph is created as long the input/output tensors are named properly. Feel free use your
+   It does not matter how the graph is created as long the input/output tensors 
+   are named properly. Feel free to use your
    favorite framework such as `Keras <https://keras.io/>`_,
    `Slim <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim>`_ or vanilla TensorFlow.
 
@@ -76,12 +83,12 @@ Finally run the training with:
 
    cxflow train config.yaml
 
-Fully working example may be found at TODO link.
+A fully functional example may be found at TODO link.
 
 Basic configuration
 -------------------
 As intended, most of the heavy lifting was done by the **cxflow** and **cxflow-tensorflow**.
-Only the model itself and a few unavoidable configurations had to be specified.
+Only the model itself and a few unavoidable configuration options had to be specified.
 In this section, we go through the basic configuration options in greater detail.
 
 Inputs & Outputs
@@ -149,8 +156,15 @@ one would update the code as follows:
       inputs: [images, labels]
       outputs: [loss, probs]
 
-In fact **any* parameter found in the configuration under the ``model`` section is directly forwarded
+<<<<<<< HEAD
+In fact, **any** parameter found in the configuration under the ``model`` 
+section is directly forwarded
+to the ``_create_model`` function. This way, the whole model can be easily 
+parametrized.
+=======
+In fact **any** parameter found in the configuration under the ``model`` section is directly forwarded
 to the ``_create_model`` function. In this way, the whole model may be easily parametrized.
+>>>>>>> b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 
 .. tip::
    Try to experiment with the ``fc_size`` parameter. How small the fully connected layer can be before the performance

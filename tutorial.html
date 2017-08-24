@@ -123,16 +123,27 @@
       
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+.. toctree:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">:</span><span class="n">hidden</span><span class="p">:</span>
+<span class="p">:</span><span class="n">glob</span><span class="p">:</span>
+
+<span class="n">tutorial</span>
+</pre></div>
 </div>
-<p>Imagine you colleague prepared a <strong>cxflow</strong> compatible dataset for the well known task of recognizing
+<p>Imagine you colleague prepared a <strong>cxflow</strong> compatible dataset for the well
+known task of recognizing images of hand-written letters. Now, your task is to
+implement a baseline neural network for that. It can not be done easier than
+=======
+Imagine you colleague prepared a <strong>cxflow</strong> compatible dataset for the well known task of recognizing
 hand-written images. Now, your task is to implement a baseline neural network for that. It can not be done easier than
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87
 with cxflow-tensorflow.</p>
 <div class="section" id="first-cxflow-tensorflow-model">
 <h2>First cxflow-tensorflow model<a class="headerlink" href="#first-cxflow-tensorflow-model" title="Permalink to this headline">¶</a></h2>
 <p>A simple convolution network takes only a couple of lines.</p>
-<div class="literal-block-wrapper docutils container" id="id3">
-<div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
  <span class="kn">import</span> <span class="nn">tensorflow.contrib.slim</span> <span class="kn">as</span> <span class="nn">slim</span>
 
@@ -163,13 +174,14 @@ with cxflow-tensorflow.</p>
 </div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
-<p class="last">It does not matter how the graph is created as long the input/output tensors are named properly. Feel free use your
+<p class="last">It does not matter how the graph is created as long the input/output tensors
+are named properly. Feel free to use your
 favorite framework such as <a class="reference external" href="https://keras.io/">Keras</a>,
 <a class="reference external" href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">Slim</a> or vanilla TensorFlow.</p>
 </div>
 <p>The next step is to write a simple configuration file putting everything together:</p>
-<div class="literal-block-wrapper docutils container" id="id4">
-<div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span>
    <span class="l l-Scalar l-Scalar-Plain">class datasets.MNISTDataset</span>
 <span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
@@ -192,12 +204,12 @@ favorite framework such as <a class="reference external" href="https://keras.io/
 <div class="highlight-bash"><div class="highlight"><pre><span></span>cxflow train config.yaml
 </pre></div>
 </div>
-<p>Fully working example may be found at TODO link.</p>
+<p>A fully functional example may be found at TODO link.</p>
 </div>
 <div class="section" id="basic-configuration">
 <h2>Basic configuration<a class="headerlink" href="#basic-configuration" title="Permalink to this headline">¶</a></h2>
 <p>As intended, most of the heavy lifting was done by the <strong>cxflow</strong> and <strong>cxflow-tensorflow</strong>.
-Only the model itself and a few unavoidable configurations had to be specified.
+Only the model itself and a few unavoidable configuration options had to be specified.
 In this section, we go through the basic configuration options in greater detail.</p>
 <div class="section" id="inputs-outputs">
 <h3>Inputs &amp; Outputs<a class="headerlink" href="#inputs-outputs" title="Permalink to this headline">¶</a></h3>
@@ -205,8 +217,8 @@ In this section, we go through the basic configuration options in greater detail
 Similarly, the variables to be fetched are configured by the <em>outputs</em>.
 Both <em>inputs</em> and <em>outputs</em> are nothing more than lists of variable names.
 The respective tensors are expected to be found in the created TF graph.</p>
-<div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">configuring inputs and outputs</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">configuring inputs and outputs</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span>   <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
       <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
@@ -223,8 +235,8 @@ The respective tensors are expected to be found in the created TF graph.</p>
 minimize the model <code class="docutils literal"><span class="pre">loss</span></code>.
 Hence, we need to both specify the optimizer and include a tensor named <code class="docutils literal"><span class="pre">loss</span></code> in the graph.
 Arbitrary <a class="reference external" href="https://www.tensorflow.org/api_guides/python/train">TF Optimizer</a> may be referenced by its name.</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span>   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">nets.SimpleConvNet</span>
 <span class="hll">   <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
 </span><span class="hll">      <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
@@ -241,16 +253,16 @@ Contrary to that, those parameters happen to frequently change as we search for 
 <p>In <strong>cxflow</strong>, model parameters may be defined and configured quite easily.
 For example, to introduce new <code class="docutils literal"><span class="pre">fc_size</span></code> parameter controlling the number of neurons in the fully connected,
 one would update the code as follows:</p>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll">    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc_size</span><span class="p">):</span>
 </span>        <span class="o">...</span>
 <span class="hll">        <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">fc_size</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;fc4&#39;</span><span class="p">)</span>
 </span></pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id8">
-<div class="code-block-caption"><span class="caption-text">configuring inputs and outputs</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">configuring inputs and outputs</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
    <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">nets.SimpleConvNet</span>
    <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
@@ -262,8 +274,15 @@ one would update the code as follows:</p>
 </pre></div>
 </div>
 </div>
-<p>In fact <a href="#id1"><span class="problematic" id="id2">**</span></a>any* parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code> section is directly forwarded
-to the <code class="docutils literal"><span class="pre">_create_model</span></code> function. In this way, the whole model may be easily parametrized.</p>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+In fact, <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code>
+section is directly forwarded
+to the <code class="docutils literal"><span class="pre">_create_model</span></code> function. This way, the whole model can be easily
+parametrized.
+=======
+In fact <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code> section is directly forwarded
+to the <code class="docutils literal"><span class="pre">_create_model</span></code> function. In this way, the whole model may be easily parametrized.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; b0bfef2edf73f208b1f9e06bc8894ab2ad8d1a87</p>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">Try to experiment with the <code class="docutils literal"><span class="pre">fc_size</span></code> parameter. How small the fully connected layer can be before the performance
