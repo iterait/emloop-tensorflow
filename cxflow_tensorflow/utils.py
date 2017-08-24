@@ -7,7 +7,10 @@ from typing import Dict, Callable, Any
 import numpy as np
 import tensorflow as tf
 
-from cxflow.utils.reflection import parse_fully_qualified_name, create_object
+from cxflow.utils.reflection import parse_fully_qualified_name, create_object, get_class_module
+
+
+TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
 
 
 def create_optimizer(optimizer_config: Dict[str, Any]):
@@ -27,6 +30,8 @@ def create_optimizer(optimizer_config: Dict[str, Any]):
     assert 'class' in optimizer_config, 'Optimizer class not specified'
 
     optimizer_module, optimizer_class = parse_fully_qualified_name(optimizer_config['class'])
+    if optimizer_module is None:
+        optimizer_module = get_class_module(TF_OPTIMIZERS_MODULE, optimizer_class)
 
     kwargs = optimizer_config.copy()
     kwargs.pop('class')
