@@ -3,9 +3,9 @@ version: 2
 references:
   doc: &doc
     run:
-      name: Test index.html
+      name: index.html-exists
       command: |
-        test -e filename
+        test -e index.html
 
 jobs:
 
