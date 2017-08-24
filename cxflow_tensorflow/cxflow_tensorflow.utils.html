@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.metrics &#8212; cxflow-tensorflow 0.1 documentation</title>
+    <title>cxflow_tensorflow.utils &#8212; cxflow-tensorflow 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -87,7 +87,7 @@
   <div class="row">
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">cxflow_tensorflow.metrics</span></code></a><ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">cxflow_tensorflow.utils</span></code></a><ul>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
 </li>
@@ -104,61 +104,49 @@
       </div>
     <div class="col-md-9 content">
       
-  <div class="section" id="module-cxflow_tensorflow.metrics">
-<span id="cxflow-tensorflow-metrics"></span><h1><code class="docutils literal"><span class="pre">cxflow_tensorflow.metrics</span></code><a class="headerlink" href="#module-cxflow_tensorflow.metrics" title="Permalink to this headline">¶</a></h1>
-<p>Module with TF util functions computing various ml metrics.</p>
+  <div class="section" id="module-cxflow_tensorflow.utils">
+<span id="cxflow-tensorflow-utils"></span><h1><code class="docutils literal"><span class="pre">cxflow_tensorflow.utils</span></code><a class="headerlink" href="#module-cxflow_tensorflow.utils" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="#cxflow_tensorflow.metrics.bin_stats" title="cxflow_tensorflow.metrics.bin_stats"><code class="xref py py-func docutils literal"><span class="pre">bin_stats()</span></code></a>:
-Calculate f1, precision and recall from binary classification expected and predicted values.</li>
-<li><a class="reference internal" href="#cxflow_tensorflow.metrics.bin_dice" title="cxflow_tensorflow.metrics.bin_dice"><code class="xref py py-func docutils literal"><span class="pre">bin_dice()</span></code></a>:
-Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.utils.create_activation" title="cxflow_tensorflow.utils.create_activation"><code class="xref py py-func docutils literal"><span class="pre">create_activation()</span></code></a>:
+Create tf activation with the given name.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.utils.create_optimizer" title="cxflow_tensorflow.utils.create_optimizer"><code class="xref py py-func docutils literal"><span class="pre">create_optimizer()</span></code></a>:
+Create tf optimizer according to the given config.</li>
 </ul>
 <dl class="function">
-<dt id="cxflow_tensorflow.metrics.bin_stats">
-<code class="descclassname">cxflow_tensorflow.metrics.</code><code class="descname">bin_stats</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/metrics/bin.html#bin_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.metrics.bin_stats" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate f1, precision and recall from binary classification expected and predicted values.</p>
+<dt id="cxflow_tensorflow.utils.create_activation">
+<code class="descclassname">cxflow_tensorflow.utils.</code><code class="descname">create_activation</code><span class="sig-paren">(</span><em>activation_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/utils/reflection.html#create_activation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.utils.create_activation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create tf activation with the given name.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
-<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, labels) of expected 0/1 classes</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>activation_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; one of {Relu, Identity, Softmax}</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]</p>
-</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple of batched (f1, precision and recall) values</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">activation</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="cxflow_tensorflow.metrics.bin_dice">
-<code class="descclassname">cxflow_tensorflow.metrics.</code><code class="descname">bin_dice</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/metrics/bin.html#bin_dice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.metrics.bin_dice" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</p>
-<p>The coefficient is defined as <span class="math">\(2*|X \cup Y| / (|X| + |Y|)\)</span>.</p>
+<dt id="cxflow_tensorflow.utils.create_optimizer">
+<code class="descclassname">cxflow_tensorflow.utils.</code><code class="descname">create_optimizer</code><span class="sig-paren">(</span><em>optimizer_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/utils/reflection.html#create_optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.utils.create_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create tf optimizer according to the given config.</p>
+<p>When <cite>module</cite> entry is not present in the optimizer_config,
+the function attempts to find it under the TF_OPTIMIZER_MODULE.</p>
+<p>A tf variable named &#8216;learning_rate&#8217; is created during the process.
+One must handle Graphs and Sessions carefully when using this function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
-<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, labels) of expected 0/1 classes</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>optimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]) &#8211; dict with at least <cite>class</cite> and <cite>learning_rate</cite> entries</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">batched Sørensen–Dice coefficients</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">optimizer</td>
 </tr>
 </tbody>
 </table>

@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview: module code &#8212; cxflow-tensorflow 0.1 documentation</title>
+    <title>cxflow_tensorflow.ops &#8212; cxflow-tensorflow 0.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -59,7 +59,7 @@
                 <li><a href="../getting_started.html">Getting Started</a></li>
                 <li><a href="../tutorial.html">Tutorial</a></li>
                 <li><a href="../multi_gpu.html">Multi GPU models</a></li>
-                <li><a href="../cxflow_tensorflow/index.html">API Reference</a></li>
+                <li><a href="index.html">API Reference</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -86,7 +86,13 @@
 <div class="container">
   <div class="row">
       <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">cxflow_tensorflow.ops</span></code></a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
 <form action="../search.html" method="get" class="searchbox">
  <div class="form-group">
   <input type="text" name="q" class="form-control" placeholder="Search" />
@@ -98,14 +104,47 @@
       </div>
     <div class="col-md-9 content">
       
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="cxflow_tensorflow/hooks/decay_lr_hook.html">cxflow_tensorflow.hooks.decay_lr_hook</a></li>
-<li><a href="cxflow_tensorflow/hooks/write_tensorboard_hook.html">cxflow_tensorflow.hooks.write_tensorboard_hook</a></li>
-<li><a href="cxflow_tensorflow/metrics/bin.html">cxflow_tensorflow.metrics.bin</a></li>
-<li><a href="cxflow_tensorflow/model.html">cxflow_tensorflow.model</a></li>
-<li><a href="cxflow_tensorflow/ops/repeat.html">cxflow_tensorflow.ops.repeat</a></li>
-<li><a href="cxflow_tensorflow/utils/reflection.html">cxflow_tensorflow.utils.reflection</a></li>
+  <div class="section" id="module-cxflow_tensorflow.ops">
+<span id="cxflow-tensorflow-ops"></span><h1><code class="docutils literal"><span class="pre">cxflow_tensorflow.ops</span></code><a class="headerlink" href="#module-cxflow_tensorflow.ops" title="Permalink to this headline">¶</a></h1>
+<p>Module with custom TF ops.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#cxflow_tensorflow.ops.repeat" title="cxflow_tensorflow.ops.repeat"><code class="xref py py-func docutils literal"><span class="pre">repeat()</span></code></a>:
+Repeat elements of the input tensor in the specified axis repeat-times.</li>
 </ul>
+<dl class="function">
+<dt id="cxflow_tensorflow.ops.repeat">
+<code class="descclassname">cxflow_tensorflow.ops.</code><code class="descname">repeat</code><span class="sig-paren">(</span><em>tensor</em>, <em>repeats</em>, <em>axis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/ops/repeat.html#repeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.ops.repeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repeat elements of the input tensor in the specified axis repeat-times.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Chaining of this op may produce TF warnings although the performance seems to be unaffected.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tensor</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; TF tensor to be repeated</li>
+<li><strong>repeats</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; number of repeats</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; axis to repeat</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tensor with repeated elements</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
 
     </div>
       
