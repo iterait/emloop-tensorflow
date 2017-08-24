@@ -126,13 +126,13 @@ In fact, in most cases one will override only a single method <a class="referenc
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
-Cxflow <code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code> implementation for TensorFlow models.</li>
+Cxflow <a class="reference external" href="https://cognexa.github.io/cxflow/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.models.abstract_model.AbstractModel</span></code></p>
-<p>Cxflow <code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code> implementation for TensorFlow models.</p>
+<p>Cxflow <a class="reference external" href="https://cognexa.github.io/cxflow/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in Tensorflow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
 <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a> method.</p>
 <p>See the method references for additional customization options.</p>
@@ -178,7 +178,7 @@ Cxflow <code class="xref py py-class docutils literal"><span class="pre">Abstrac
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dataset</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="http://cxflow.readthedocs.io/en/doc/api/cxflow.datasets.html#cxflow.datasets.abstract_dataset.AbstractDataset" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">AbstractDataset</span></code></a>]) &#8211; dataset to be trained with</li>
+<li><strong>dataset</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">AbstractDataset</span></code>]) &#8211; dataset to be trained with</li>
 <li><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to the logging directory (wherein models should be saved)</li>
 <li><strong>inputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model input names</li>
 <li><strong>outputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model output names</li>
@@ -253,19 +253,19 @@ the given <code class="docutils literal"><span class="pre">session_config</span>
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel._create_train_ops">
 <code class="descname">_create_train_ops</code><span class="sig-paren">(</span><em>optimizer_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._create_train_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._create_train_ops" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create the train ops used for training. In order to handle incomplete batches, there must be one train op for
+<dd><p>Create the train ops for training. In order to handle incomplete batches, there must be one train op for
 each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
-respectively. The train ops must be named train_op_1, train_op_2 etc. wherein the suffixed number stands for the
-number of towers.</p>
+respectively. The train ops must be named <code class="docutils literal"><span class="pre">train_op_1</span></code>, <code class="docutils literal"><span class="pre">train_op_2</span></code> etc.
+wherein the suffixed number stands for the number of towers.</p>
 <dl class="docutils">
 <dt>By default the train ops are constructed in the following way:</dt>
 <dd><ul class="first last simple">
-<li>optimizer is created from the <cite>model.optimizer</cite> configuration dict</li>
+<li>optimizer is created from the <code class="docutils literal"><span class="pre">model.optimizer</span></code> configuration dict</li>
 <li>gradients minimizing the respective tower losses are computed</li>
 <li><dl class="first docutils">
-<dt>for each number of towers</dt>
+<dt>for each number of non-empty towers</dt>
 <dd><ul class="first last">
-<li>gradients of the respective number of towers are averaged and applied</li>
+<li>gradients of the respective towers are averaged and applied</li>
 </ul>
 </dd>
 </dl>
@@ -273,7 +273,17 @@ number of towers.</p>
 </ul>
 </dd>
 </dl>
-<p>This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.</p>
+<p>This implement a custom behavior, override this method and create your own op named as
+<a class="reference internal" href="#cxflow_tensorflow.BaseModel.TRAIN_OP_NAME" title="cxflow_tensorflow.BaseModel.TRAIN_OP_NAME"><code class="xref py py-attr docutils literal"><span class="pre">TRAIN_OP_NAME</span></code></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">example optimizer config</span><a class="headerlink" href="#id1" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">RMSPropOptimizer</span>
+        <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
+</pre></div>
+</div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -288,13 +298,13 @@ number of towers.</p>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel._restore_checkpoint">
-<code class="descname">_restore_checkpoint</code><span class="sig-paren">(</span><em>checkpoint_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._restore_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._restore_checkpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given the checkpoint name (including the path to it), restore the model.</p>
+<code class="descname">_restore_checkpoint</code><span class="sig-paren">(</span><em>checkpoint_path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._restore_checkpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._restore_checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore model from the given <code class="docutils literal"><span class="pre">checkpoint_path</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>checkpoint_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; name in form of <cite>*.ckpt</cite>, e.g. <cite>model_3.ckpt</cite>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>checkpoint_path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; full path to the checkpoint, e.g. <cite>my_dir/model_3.ckpt</cite>.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
@@ -305,16 +315,20 @@ number of towers.</p>
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel._restore_model">
 <code class="descname">_restore_model</code><span class="sig-paren">(</span><em>restore_from</em>, <em>restore_model_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._restore_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._restore_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Restore TF model from the given checkpoint.
-:type restore_from: <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>
-:param restore_from: path to directory from which the model is restored
-:type restore_model_name: <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]
-:param restore_model_name: model name to be restored (e.g. <cite>model.ckpt</cite>)</p>
+<dd><p>Restore TF model from the given <code class="docutils literal"><span class="pre">restore_from</span></code> path and <code class="docutils literal"><span class="pre">restore_model_name</span></code>.</p>
+<p>The model name can be derived if the <code class="docutils literal"><span class="pre">restore_from</span></code> directory contains exactly one checkpoint.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to directory from which the model is restored</li>
+<li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <cite>model.ckpt</cite>)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">None</span></code></p>
+</td>
 </tr>
 </tbody>
 </table>

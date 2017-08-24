@@ -410,20 +410,23 @@
 
         <span class="k">return</span> <span class="n">checkpoint_path</span></div>
 
-<div class="viewcode-block" id="BaseModel._restore_checkpoint"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">_restore_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseModel._restore_checkpoint"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_checkpoint">[docs]</a>    <span class="k">def</span> <span class="nf">_restore_checkpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Given the checkpoint name (including the path to it), restore the model.</span>
+<span class="sd">        Restore model from the given ``checkpoint_path``.</span>
 
-<span class="sd">        :param checkpoint_name: name in form of `*.ckpt`, e.g. `model_3.ckpt`.</span>
+<span class="sd">        :param checkpoint_path: full path to the checkpoint, e.g. `my_dir/model_3.ckpt`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading meta graph&#39;</span><span class="p">)</span>
-        <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">import_meta_graph</span><span class="p">(</span><span class="n">checkpoint_name</span> <span class="o">+</span> <span class="s1">&#39;.meta&#39;</span><span class="p">)</span>
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">import_meta_graph</span><span class="p">(</span><span class="n">checkpoint_path</span> <span class="o">+</span> <span class="s1">&#39;.meta&#39;</span><span class="p">)</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Restoring model&#39;</span><span class="p">)</span>
-        <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">,</span> <span class="n">checkpoint_name</span><span class="p">)</span></div>
+        <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseModel._restore_model"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_model">[docs]</a>    <span class="k">def</span> <span class="nf">_restore_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restore_from</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Restore TF model from the given checkpoint.</span>
+<span class="sd">        Restore TF model from the given ``restore_from`` path and ``restore_model_name``.</span>
+
+<span class="sd">        The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.</span>
+
 <span class="sd">        :param restore_from: path to directory from which the model is restored</span>
 <span class="sd">        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -474,18 +477,27 @@
 
 <div class="viewcode-block" id="BaseModel._create_train_ops"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">[docs]</a>    <span class="k">def</span> <span class="nf">_create_train_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create the train ops used for training. In order to handle incomplete batches, there must be one train op for</span>
+<span class="sd">        Create the train ops for training. In order to handle incomplete batches, there must be one train op for</span>
 <span class="sd">        each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers</span>
-<span class="sd">        respectively. The train ops must be named train_op_1, train_op_2 etc. wherein the suffixed number stands for the</span>
-<span class="sd">        number of towers.</span>
+<span class="sd">        respectively. The train ops must be named ``train_op_1``, ``train_op_2`` etc.</span>
+<span class="sd">        wherein the suffixed number stands for the number of towers.</span>
 
 <span class="sd">        By default the train ops are constructed in the following way:</span>
-<span class="sd">            - optimizer is created from the `model.optimizer` configuration dict</span>
+<span class="sd">            - optimizer is created from the ``model.optimizer`` configuration dict</span>
 <span class="sd">            - gradients minimizing the respective tower losses are computed</span>
-<span class="sd">            - for each number of towers</span>
-<span class="sd">                - gradients of the respective number of towers are averaged and applied</span>
+<span class="sd">            - for each number of non-empty towers</span>
+<span class="sd">                - gradients of the respective towers are averaged and applied</span>
 
-<span class="sd">        This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.</span>
+<span class="sd">        This implement a custom behavior, override this method and create your own op named as</span>
+<span class="sd">        :py:attr:`TRAIN_OP_NAME`.</span>
+
+<span class="sd">        .. code-block:: yaml</span>
+<span class="sd">            :caption: example optimizer config</span>
+
+<span class="sd">            model:</span>
+<span class="sd">                optimizer:</span>
+<span class="sd">                    class: RMSPropOptimizer</span>
+<span class="sd">                    learning_rate: 0.001</span>
 
 <span class="sd">        :param optimizer_config: optimizer configuration dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>

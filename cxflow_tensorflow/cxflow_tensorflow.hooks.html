@@ -120,7 +120,7 @@ Hook for modifying (decaying) the learning rate (or any other variable) during t
 <dl class="class">
 <dt id="cxflow_tensorflow.hooks.WriteTensorboard">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">WriteTensorboard</code><span class="sig-paren">(</span><em>model</em>, <em>output_dir</em>, <em>flush_secs=10</em>, <em>on_unknown_type='ignore'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/write_tensorboard_hook.html#WriteTensorboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://cxflow.readthedocs.io/en/doc/api/cxflow.hooks.html#cxflow.hooks.abstract_hook.AbstractHook" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></p>
 <p>Write scalar epoch variables to TensorBoard summaries.</p>
 <p>Refer to TensorBoard <a class="reference external" href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">introduction</a> for more
 info.</p>
@@ -150,7 +150,7 @@ info.</p>
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS">
-<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'warn', 'ignore', 'error'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'ignore', 'warn', 'error'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible actions to take on unknown variable type.</p>
 </dd></dl>
 
@@ -200,7 +200,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorb
 <dl class="class">
 <dt id="cxflow_tensorflow.hooks.DecayLR">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">DecayLR</code><span class="sig-paren">(</span><em>model</em>, <em>decay_value=0.98</em>, <em>variable_name='learning_rate'</em>, <em>decay_type='multiply'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr_hook.html#DecayLR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="http://cxflow.readthedocs.io/en/doc/api/cxflow.hooks.html#cxflow.hooks.abstract_hook.AbstractHook" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></p>
 <p>Hook for modifying (decaying) the learning rate (or any other variable) during the training.</p>
 <p>It expects an variable with the specified name to be present in the TF model being trained.</p>
 <p>After every epoch, the variable is either multiplied or summed with the specified decay_value.</p>
@@ -231,7 +231,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorb
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES">
-<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'multiply', 'add'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
+<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'add', 'multiply'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible LR decay types.</p>
 </dd></dl>
 

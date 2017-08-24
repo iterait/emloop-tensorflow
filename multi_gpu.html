@@ -157,7 +157,7 @@ Each batch is distributed evenly between the GPUs alowing for much greater batch
 <img alt="_images/multi-gpu-graph.png" src="_images/multi-gpu-graph.png" />
 <p class="caption"><span class="caption-text">Tower architecture for multi GPU training.</span></p>
 </div>
-<p>In order to leverage the computation resources of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
+<p>In order to leverage the true potential of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
 computational graph than usual. In fact, the whole model is multiplicated so that each GPU has its own <em>tower</em>. The
 variables to be trained are, naturally, shared between the towers. Each GPU computes its own feed-forward pass and the
 respective variable gradients. Consequently, the gradients are averaged and used for update.</p>
