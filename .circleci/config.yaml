@@ -1,4 +1,25 @@
-test:
-  override:
-    - echo "test"
+version: 2
 
+references:
+  doc: &doc
+    run:
+      name: Test index.html
+      command: |
+        test -e filename
+
+jobs:
+
+  test_ubuntu_latest:
+    docker:
+      - image: ubuntu:latest
+    working_directory: ~/cxflow-tensorflow
+    steps:
+      - checkout
+      - *doc
+
+workflows:
+
+  version: 2
+  test-doc-exists:
+    jobs:
+      - test_ubuntu_latest
