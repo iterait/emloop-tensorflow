@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
     <title>Multi-GPU models &#8212; cxflow-tensorflow 0.1 documentation</title>
+    
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
@@ -20,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -34,7 +38,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body>
+  <body role="document">
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -139,7 +143,7 @@ reused and shared over multiple GPUs.</p>
 </pre></div>
 </div>
 </div>
-<p>That’s it! Now better check your server temperatures…</p>
+<p>That&#8217;s it! Now better check your server temperatures...</p>
 <p>Fully working example may be found HERE.</p>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
@@ -153,7 +157,7 @@ Each batch is distributed evenly between the GPUs alowing for much greater batch
 <img alt="_images/multi-gpu-graph.png" src="_images/multi-gpu-graph.png" />
 <p class="caption"><span class="caption-text">Tower architecture for multi GPU training.</span></p>
 </div>
-<p>In order to leverage the computation resources of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
+<p>In order to leverage the true potential of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
 computational graph than usual. In fact, the whole model is multiplicated so that each GPU has its own <em>tower</em>. The
 variables to be trained are, naturally, shared between the towers. Each GPU computes its own feed-forward pass and the
 respective variable gradients. Consequently, the gradients are averaged and used for update.</p>
@@ -179,7 +183,7 @@ on CPU without any troubles.</p>
     </p>
     <p>
         &copy; Copyright 2017, Blazek Adam, Belohlavek Petr, Matzner Filip.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.<br/>
     </p>
   </div>
 </footer>
