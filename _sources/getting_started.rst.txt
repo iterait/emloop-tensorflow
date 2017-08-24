@@ -1,25 +1,20 @@
 Getting Started
 ###############
 
-.. toctree::
-   :hidden:
-   :glob:
-
-   getting_started
-
 Before we dive in, cxflow-tensorflow must be properly installed.
+
 
 Installation
 ************
 
-The most simple installation of cxflow-tensorflow is via pip.
-This is the recommended option for majority of users.
+The simplest way of installing cxflow-tensorflow is using pip.
+This is the recommended option for the majority of users.
 
 .. code-block:: bash
 
     pip install cxflow-tensorflow
 
-Alternatively, cxflow might be installed directly from the sources.
+Alternatively, cxflow can be installed directly from the sources.
 
 .. code-block:: bash
 
@@ -28,7 +23,7 @@ Alternatively, cxflow might be installed directly from the sources.
 Developer Installation
 **********************
 
-Finally, cxflow might be installed directly for developer purposes.
+Finally, cxflow might be installed directly for development purposes.
 
 .. code-block:: bash
 
