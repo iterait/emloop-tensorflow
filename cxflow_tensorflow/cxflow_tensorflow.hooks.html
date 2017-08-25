@@ -130,7 +130,7 @@ Hook for modifying (decaying) the learning rate (or any other variable) during t
 <dl class="class">
 <dt id="cxflow_tensorflow.hooks.WriteTensorboard">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">WriteTensorboard</code><span class="sig-paren">(</span><em>model</em>, <em>output_dir</em>, <em>flush_secs=10</em>, <em>on_unknown_type='ignore'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/write_tensorboard_hook.html#WriteTensorboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hooks.AbstractHook</span></code></p>
 <p>Write scalar epoch variables to TensorBoard summaries.</p>
 <p>Refer to TensorBoard <a class="reference external" href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">introduction</a> for more
 info.</p>
@@ -150,9 +150,8 @@ info.</p>
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-f3b18c87125cd67b9d873a0d2657d8b757144997.png" alt="Inheritance diagram of WriteTensorboard" usemap="#inheritance83ebe3d767" class="inheritance"/>
+<img src="../_images/inheritance-d9b8c3e7af7e14479e7b56290b08129e976f751d.png" alt="Inheritance diagram of WriteTensorboard" usemap="#inheritance83ebe3d767" class="inheritance"/>
 <map id="inheritance83ebe3d767" name="inheritance83ebe3d767">
-<area shape="rect" id="node1" title="cxflow hooks interface" alt="" coords="5,5,115,31"/>
 <area shape="rect" id="node2" title="Write scalar epoch variables to TensorBoard summaries." alt="" coords="163,5,293,31"/>
 </map>
 <div class="line-block">
@@ -160,7 +159,7 @@ info.</p>
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS">
-<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'warn', 'error', 'ignore'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'warn', 'ignore', 'error'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorboard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible actions to take on unknown variable type.</p>
 </dd></dl>
 
@@ -194,7 +193,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorb
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>epoch_id</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; epoch ID</li>
-<li><strong>epoch_data</strong> (<em>&lt;function NewType.&lt;locals&gt;.new_type at 0x7f7d6ad1aea0&gt;</em>) &#8211; epoch data as created by other hooks</li>
+<li><strong>epoch_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]]) &#8211; epoch data as created by other hooks</li>
 </ul>
 </td>
 </tr>
@@ -210,7 +209,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorb
 <dl class="class">
 <dt id="cxflow_tensorflow.hooks.DecayLR">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">DecayLR</code><span class="sig-paren">(</span><em>model</em>, <em>decay_value=0.98</em>, <em>variable_name='learning_rate'</em>, <em>decay_type='multiply'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr_hook.html#DecayLR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.abstract_hook.AbstractHook</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hooks.AbstractHook</span></code></p>
 <p>Hook for modifying (decaying) the learning rate (or any other variable) during the training.</p>
 <p>It expects an variable with the specified name to be present in the TF model being trained.</p>
 <p>After every epoch, the variable is either multiplied or summed with the specified decay_value.</p>
@@ -231,9 +230,8 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorb
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-7ba8af8a1f87935e9e1b451515ee983976d78d64.png" alt="Inheritance diagram of DecayLR" usemap="#inheritance4c00d285d1" class="inheritance"/>
+<img src="../_images/inheritance-6520996eb35ecf9c7fcefdc8510da0604d43b52c.png" alt="Inheritance diagram of DecayLR" usemap="#inheritance4c00d285d1" class="inheritance"/>
 <map id="inheritance4c00d285d1" name="inheritance4c00d285d1">
-<area shape="rect" id="node1" title="cxflow hooks interface" alt="" coords="5,5,115,31"/>
 <area shape="rect" id="node2" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="163,5,240,31"/>
 </map>
 <div class="line-block">
