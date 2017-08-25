@@ -184,7 +184,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         if n_gpus == 0:
             self._towers.append(GraphTower(-1, inputs, outputs))
 
-        logging.info('\tCreating TF model on %s devices', n_gpus)
+        logging.info('\tCreating TF model on %s GPU devices', n_gpus)
         self._graph = tf.Graph()
         self._session = self._create_session(session_config)
         with self._graph.as_default():
@@ -245,6 +245,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         Fetch and return all the model outputs as a dict.
         :param batch: batch dict source_name->values
         :param train: flag whether parameters update (train_op) should be included in fetches
+        :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
         :return: outputs dict
         """
         # setup the feed dict
@@ -269,9 +270,21 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         if train:
             outputs = outputs[1:]
 
+        for i, output in enumerate(outputs):
+            if not isinstance(output, (list, tuple, np.ndarray)):
+                output_name = self.output_names[i % len(self.output_names)]
+                raise ValueError('Model output `{}` is not one of list, tuple or numpy array. Found `{}` instead. '
+                                 'Model outputs should be batched, i.e. the first dimension should refer to '
+                                 'different examples.'.format(output_name, type(output)))
+
         # stack partial tower outputs
         num_outputs = len(self.output_names)
         stacked_outputs = [np.concatenate(outputs[i::num_outputs]) for i in range(num_outputs)]
+
+        for i, output in enumerate(stacked_outputs):
+            if len(output) != batch_size:
+                raise ValueError('Input-output batch size mismatch. Input: {} Output: {} for `{}`'
+                                 .format(batch_size, len(output), self.output_names[i]))
 
         return dict(zip(self.output_names, stacked_outputs))
 
