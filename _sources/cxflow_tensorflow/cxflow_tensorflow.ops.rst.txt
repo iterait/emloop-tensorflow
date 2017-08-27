@@ -12,7 +12,7 @@ Functions
 =========
 
 - :py:func:`repeat`:
-  Repeat elements of the input tensor in the specified axis repeat-times.
+  Repeat elements of the input tensor in the specified axis ``repeats``-times.
 
 
 .. autofunction:: repeat

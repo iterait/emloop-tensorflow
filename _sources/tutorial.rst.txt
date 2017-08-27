@@ -8,7 +8,7 @@ with cxflow-tensorflow.
 
 First cxflow-tensorflow model
 -----------------------------
-A simple convolution network takes only a couple of lines.
+A simple convolutional network takes only a couple of lines.
 
 .. code-block:: python
   :caption: convnet.py
@@ -53,7 +53,7 @@ The next step is to write a simple configuration file putting everything togethe
    dataset:
       class datasets.MNISTDataset
    model:
-      class: nets.SimpleConvNet
+      class: convnet.SimpleConvNet
       optimizer:
          class: AdamOptimizer
          learning_rate: 0.001
@@ -70,9 +70,11 @@ Finally run the training with:
 
 .. code-block:: bash
 
-   cxflow train config.yaml
+   cxflow train <path to config.yaml>
 
-A fully functional example may be found at TODO link.
+.. tip::
+   Full example may be found in our
+   `GitHub examples repository <https://github.com/Cognexa/cxflow-examples/tree/master/convnet>`_.
 
 Basic configuration
 -------------------
@@ -121,7 +123,7 @@ Note that the model (hyper-)parameters such as the number of layers were all har
 Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.
 
 In **cxflow**, model parameters may be defined and configured quite easily.
-For example, to introduce new ``fc_size`` parameter controlling the number of neurons in the fully connected,
+For example, to introduce new ``fc_size`` parameter controlling the number of neurons in the fully connected layer,
 one would update the code as follows:
 
 .. code-block:: python
@@ -133,7 +135,7 @@ one would update the code as follows:
            net = slim.fully_connected(net, fc_size, scope='fc4')
 
 .. code-block:: yaml
-   :caption: configuring inputs and outputs
+   :caption: passing the model parameters
    :emphasize-lines: 6
 
    model:
@@ -156,9 +158,10 @@ parametrized.
 
 Next steps
 ----------
-See TODO for additional examples or read the :py:class:`cxflow_tensorflow.BaseModel` reference
-for the full list of customization options.
+See our `GitHub examples repository <https://github.com/Cognexa/cxflow-examples>`_.
+for additional examples or read the :py:class:`cxflow_tensorflow.BaseModel` reference for the full list of
+customization options.
 
-Extensive :doc:`cxflow_tensorflow/index` documents additional TensorFlow util functions
-and couple of hooks that are available in **cxflow-tensorflow**.
-
+This project contains additional util functions and **cxflow** hooks documented in the :doc:`cxflow_tensorflow/index`.
+Be sure you do not miss the :py:class:`cxflow_tensorflow.hooks.WriteTensorboard` hook providing seamless integration with
+`TensorBoard <https://www.tensorflow.org/get_started/summaries_and_tensorboard>`_.

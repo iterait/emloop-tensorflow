@@ -12,7 +12,7 @@ Functions
 =========
 
 - :py:func:`create_activation`:
-  Create tf activation with the given name.
+  Create TensorFlow activation function with the given name.
 
 - :py:func:`create_optimizer`:
   Create tf optimizer according to the given config.

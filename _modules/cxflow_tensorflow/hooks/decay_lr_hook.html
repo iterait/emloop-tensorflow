@@ -113,7 +113,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hook for modifying (decaying) the learning rate (or any other variable) during the training.</span>
 
-<span class="sd">    It expects an variable with the specified name to be present in the TF model being trained.</span>
+<span class="sd">    It expects a variable with the specified name to be present in the TF model being trained.</span>
 
 <span class="sd">    After every epoch, the variable is either multiplied or summed with the specified decay_value.</span>
 
@@ -171,9 +171,9 @@
 
 <div class="viewcode-block" id="DecayLR.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Modify the specified TF variable (now saved in ``self._lr``) with ``self._decay_value``.</span>
+<span class="sd">        Modify the specified TF variable (now saved in ``self._lr``) using ``self._decay_value``.</span>
 
-<span class="sd">        :param _: Ignore all the parameters</span>
+<span class="sd">        :param _: ignore all the parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
         <span class="n">new_value</span> <span class="o">=</span> <span class="n">old_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_type</span> <span class="o">==</span> <span class="s1">&#39;multiply&#39;</span> <span class="k">else</span> <span class="n">old_value</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_value</span>
@@ -193,7 +193,7 @@
       
     </p>
     <p>
-        &copy; Copyright 2017, Blazek Adam, Belohlavek Petr, Matzner Filip.<br/>
+        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.<br/>
     </p>
   </div>

@@ -111,27 +111,30 @@
       
   <div class="section" id="module-cxflow_tensorflow.utils">
 <span id="cxflow-tensorflow-utils"></span><h1><code class="docutils literal"><span class="pre">cxflow_tensorflow.utils</span></code><a class="headerlink" href="#module-cxflow_tensorflow.utils" title="Permalink to this headline">¶</a></h1>
+<p>Module with TensorFlow util functions.</p>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.utils.create_activation" title="cxflow_tensorflow.utils.create_activation"><code class="xref py py-func docutils literal"><span class="pre">create_activation()</span></code></a>:
-Create tf activation with the given name.</li>
+Create TensorFlow activation function with the given name.</li>
 <li><a class="reference internal" href="#cxflow_tensorflow.utils.create_optimizer" title="cxflow_tensorflow.utils.create_optimizer"><code class="xref py py-func docutils literal"><span class="pre">create_optimizer()</span></code></a>:
 Create tf optimizer according to the given config.</li>
 </ul>
 <dl class="function">
 <dt id="cxflow_tensorflow.utils.create_activation">
 <code class="descclassname">cxflow_tensorflow.utils.</code><code class="descname">create_activation</code><span class="sig-paren">(</span><em>activation_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/utils/reflection.html#create_activation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.utils.create_activation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create tf activation with the given name.</p>
+<dd><p>Create TensorFlow activation function with the given name.</p>
+<p>List of available activation functions is available in
+<a class="reference external" href="https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/activation_functions_">TensorFlow docs</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>activation_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; one of {Relu, Identity, Softmax}</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>activation_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; activation function name</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">activation</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">callable activation function</td>
 </tr>
 </tbody>
 </table>
@@ -172,7 +175,7 @@ One must handle Graphs and Sessions carefully when using this function.</p>
       
     </p>
     <p>
-        &copy; Copyright 2017, Blazek Adam, Belohlavek Petr, Matzner Filip.<br/>
+        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.<br/>
     </p>
   </div>

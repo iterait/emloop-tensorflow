@@ -149,8 +149,12 @@ reused and shared over multiple GPUs.</p>
 </pre></div>
 </div>
 </div>
-<p>That&#8217;s it! Now better check your server temperatures...</p>
-<p>A fully working example may be found HERE.</p>
+<p>That&#8217;s it! Now run the <strong>cxflow</strong> training and check if all your GPUs are in fact utilized.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Full example may be found in our
+<a class="reference external" href="https://github.com/Cognexa/cxflow-examples/tree/master/convnet">GitHub examples repository</a>.</p>
+</div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">Increase your dataset <strong>batch size</strong> together with the <code class="docutils literal"><span class="pre">n_gpus</span></code> parameter.
@@ -168,9 +172,9 @@ computational graph than usual. In fact, the whole model is multiplicated so tha
 variables to be trained are, naturally, shared between the towers. Each GPU computes its own feed-forward pass and the
 respective variable gradients. Consequently, the gradients are averaged and used for update.</p>
 <p>During the training <strong>cxflow-tensorflow</strong> distributes each batch equally among the towers. The fetched outputs are
-concatenated preserving its orders which ensures perfect abstraction for the remaining <strong>cxflow</strong> components. From the
+concatenated preserving their orders which ensures perfect abstraction for the remaining <strong>cxflow</strong> components. From the
 perspective of hooks and datasets, nothing has changed. Additionally, <strong>cxflow-tensorflow</strong> handles
-incomplete batches with ease.</p>
+incomplete batches automatically.</p>
 <p>A model trained on multiple GPUs may be restored and used for inference with equal or less amount of GPUs or even
 on CPU without any trouble.</p>
 </div>
@@ -188,7 +192,7 @@ on CPU without any trouble.</p>
       
     </p>
     <p>
-        &copy; Copyright 2017, Blazek Adam, Belohlavek Petr, Matzner Filip.<br/>
+        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.<br/>
     </p>
   </div>

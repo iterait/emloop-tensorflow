@@ -37,9 +37,11 @@ To train on (multiple) GPUs, define the ``n_gpus`` parameter in the configuratio
       n_gpus: 4
       ...
 
-That's it! Now better check your server temperatures...
+That's it! Now run the **cxflow** training and check if all your GPUs are in fact utilized.
 
-A fully working example may be found HERE.
+.. tip::
+   Full example may be found in our
+   `GitHub examples repository <https://github.com/Cognexa/cxflow-examples/tree/master/convnet>`_.
 
 .. tip::
    Increase your dataset **batch size** together with the ``n_gpus`` parameter.
@@ -59,9 +61,9 @@ variables to be trained are, naturally, shared between the towers. Each GPU comp
 respective variable gradients. Consequently, the gradients are averaged and used for update.
 
 During the training **cxflow-tensorflow** distributes each batch equally among the towers. The fetched outputs are
-concatenated preserving its orders which ensures perfect abstraction for the remaining **cxflow** components. From the
+concatenated preserving their orders which ensures perfect abstraction for the remaining **cxflow** components. From the
 perspective of hooks and datasets, nothing has changed. Additionally, **cxflow-tensorflow** handles
-incomplete batches with ease.
+incomplete batches automatically.
 
 A model trained on multiple GPUs may be restored and used for inference with equal or less amount of GPUs or even
 on CPU without any trouble.

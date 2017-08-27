@@ -7,7 +7,7 @@ Before we dive in, cxflow-tensorflow must be properly installed.
 Installation
 ************
 
-The simplest way of installing cxflow-tensorflow is using pip.
+The simplest way of installing cxflow-tensorflow is using ``pip``.
 This is the recommended option for the majority of users.
 
 .. code-block:: bash
