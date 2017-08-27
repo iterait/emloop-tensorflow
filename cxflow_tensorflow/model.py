@@ -151,6 +151,9 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     TRAIN_OP_NAME = 'train_op'
     LOSS_NAME = 'loss'
 
+    TRAINING_FLAG_NAME = 'cxf_is_training'
+    """Training flag variable name."""
+
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
@@ -190,12 +193,18 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope()) as scope:
+                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
                         scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
+                try:
+                    self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
+                except (KeyError, ValueError, TypeError) as ex:
+                    logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
+                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -230,6 +239,15 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         return self._towers[0].output_names
 
     @property
+    def is_training(self) -> tf.Tensor:
+        """
+        Training flag tensor.
+
+        This is useful for determining whether to use certain ops such as dropout.
+        """
+        return self._is_training
+
+    @property
     def graph(self) -> tf.Graph:
         """TF graph object."""
         return self._graph
@@ -253,7 +271,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         tower_batch_size = math.ceil(batch_size / len(self._towers))
         nonempty_towers = batch_size // tower_batch_size + (0 if batch_size % tower_batch_size == 0 else 1)
 
-        feed_dict = {}
+        feed_dict = {self._is_training: train}
         fetches = [self._train_ops[nonempty_towers-1]] if train else []
 
         for i, tower in enumerate(self._towers):

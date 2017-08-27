@@ -103,6 +103,17 @@ class TrainableModel(BaseModel):
         tf.identity(self.loss, name='loss')
 
 
+class DetectTrainingModel(BaseModel):
+    """Model with output variable depending on the training flag."""
+
+    def _create_model(self, **kwargs):
+        self.input1 = tf.placeholder(tf.int32, shape=[None, 10], name='input')
+        self.const = tf.Variable([1]*10, name='const')
+        self.output = tf.identity((self.const + self.input1) * tf.cast(self.is_training, tf.int32), name='output')
+
+    def _create_train_ops(self, _):
+        tf.no_op(name='train_op_1')
+
 class BaseModelTest(CXTestCaseWithDir):
     """
     Test case for BaseModel.
@@ -176,6 +187,15 @@ class BaseModelTest(CXTestCaseWithDir):
             trainable_model.run(batch, train=True)
         after_value = trainable_model.var.eval(session=trainable_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
+
+        # test training flag being set properly
+        detect_training_io = {'inputs': ['input'], 'outputs': ['output']}
+        detect_training_model = DetectTrainingModel(dataset=None, log_dir='', **detect_training_io)
+        detect_training_batch = {'input': [[1]*10]}
+        outputs = detect_training_model.run(detect_training_batch, train=False)
+        self.assertTrue(np.allclose(outputs['output'], [[0]*10]))
+        outputs2 = detect_training_model.run(detect_training_batch, train=True)
+        self.assertTrue(np.allclose(outputs2['output'], [[2]*10]))
 
     def test_mainloop_model_training(self):
         """Test the model is being trained properly."""
