@@ -1,5 +1,6 @@
 # cxflow-tensorflow
 [![CircleCI](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master.svg?style=shield)](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master)
+[![PyPI version](https://badge.fury.io/py/cxflow-tensorflow.svg)](https://badge.fury.io/py/cxflow-tensorflow)
 [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)]()
 [![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
@@ -15,29 +16,20 @@ TensorFlow extension for [cxflow framework](https://github.com/cognexa/cxflow) a
 pip install cxflow-tensorflow
 ```
 
-## Usage
-After installation, the following classes are available:
+## Quick start
 
-### Models
+- [5 minutes tutorial](https://tensorflow.cxflow.org/tutorial) ([code](https://github.com/Cognexa/cxflow-examples/tree/dev/convnet))
 
-- `cxflow_tensorflow.BaseTFModel`
-- `cxflow_tensorflow.BaseTFModelRestore`
+- [Documentation & API Reference](https://tensorflow.cxflow.org/)
 
-### Hooks
+- [Additional examples](https://github.com/cognexa/cxflow-examples)
 
-- `cxflow_tensorflow.TensorBoardHook`
-- `cxflow_tensorflow.LRDecayHook`
 
-### Metric utils
-- `cxflow_tensorflow.bin_dice` computing Dice score for binary classification
-- `cxflow_tensorflow.bin_stats` computing f1, precision and recall scores for binary classification
+## Contributions
 
-### Additional utils
+All contributions are welcomed. Please read our [contributor's guide](CONTRIBUTING.md).
 
-Additional helper and util functions in `cxflow_tensorflow.utils` module.
-
-## Testing
-Unit tests might be run by `$ python setup.py test`.
 
 ## License
-MIT License
+
+[MIT](LICENSE)

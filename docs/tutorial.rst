@@ -1,0 +1,167 @@
+Tutorial
+########
+
+Imagine you colleague prepared a **cxflow** compatible dataset for the well 
+known task of recognizing images of hand-written letters. Now, your task is to 
+implement a baseline neural network for that. It can not be done easier than
+with cxflow-tensorflow.
+
+First cxflow-tensorflow model
+-----------------------------
+A simple convolutional network takes only a couple of lines.
+
+.. code-block:: python
+  :caption: convnet.py
+
+   import tensorflow as tf
+   import tensorflow.contrib.slim as slim
+
+   from cxflow_tensorflow import BaseModel
+
+
+   class SimpleConvNet(BaseModel):
+
+       def _create_model(self):
+           images = tf.placeholder(tf.float32, shape=[None, 28, 28], name='images')
+           labels = tf.placeholder(tf.int32, shape=[None], name='labels')
+
+           net = tf.expand_dims(images, -1)
+           net = slim.conv2d(net, 20, 5, scope='conv1')
+           net = slim.max_pool2d(net, 2, scope='pool1')
+           net = slim.conv2d(net, 50, 5, scope='conv2')
+           net = slim.max_pool2d(net, 2, scope='pool2')
+           net = slim.flatten(net, scope='flatten3')
+           net = slim.fully_connected(net, 500, scope='fc4')
+           logits = slim.fully_connected(net, 10, activation_fn=None, scope='fc5')
+
+           loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+
+           tf.identity(loss, name='loss')
+           tf.nn.softmax(logits, name='probs')
+
+.. tip::
+   It does not matter how the graph is created as long the input/output tensors 
+   are named properly. Feel free to use your
+   favorite framework such as `Keras <https://keras.io/>`_,
+   `Slim <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim>`_ or vanilla TensorFlow.
+
+The next step is to write a simple configuration file putting everything together:
+
+.. code-block:: yaml
+   :caption: config.yaml
+
+   dataset:
+      class datasets.MNISTDataset
+   model:
+      class: convnet.SimpleConvNet
+      optimizer:
+         class: AdamOptimizer
+         learning_rate: 0.001
+      inputs: [images, labels]
+      outputs: [loss, probs]
+   hooks:
+     - ComputeStats:
+         variables:
+           'loss':[mean]
+     - LogVariables
+     - SaveBest
+
+Finally run the training with:
+
+.. code-block:: bash
+
+   cxflow train <path to config.yaml>
+
+.. tip::
+   Full example may be found in our
+   `GitHub examples repository <https://github.com/Cognexa/cxflow-examples/tree/master/convnet>`_.
+
+Basic configuration
+-------------------
+As intended, most of the heavy lifting was done by the **cxflow** and **cxflow-tensorflow**.
+Only the model itself and a few unavoidable configuration options had to be specified.
+In this section, we go through the basic configuration options in greater detail.
+
+Inputs & Outputs
+~~~~~~~~~~~~~~~~
+To connect the model to the data stream, its *inputs* must be defined in the config.
+Similarly, the variables to be fetched are configured by the *outputs*.
+Both *inputs* and *outputs* are nothing more than lists of variable names.
+The respective tensors are expected to be found in the created TF graph.
+
+.. code-block:: yaml
+   :caption: configuring inputs and outputs
+   :emphasize-lines: 4, 5
+
+      optimizer:
+         class: AdamOptimizer
+         learning_rate: 0.001
+      inputs: [images, labels]
+      outputs: [loss, probs]
+   hooks:
+
+Optimizer
+~~~~~~~~~
+By default, **cxflow-tensorflow** creates a TF optimizer specified in the configuration and attempts to
+minimize the model ``loss``.
+Hence, we need to both specify the optimizer and include a tensor named ``loss`` in the graph.
+Arbitrary `TF Optimizer <https://www.tensorflow.org/api_guides/python/train>`_ may be referenced by its name.
+
+.. code-block:: yaml
+   :caption: config.yaml
+   :emphasize-lines: 2, 3, 4
+
+      class: nets.SimpleConvNet
+      optimizer:
+         class: AdamOptimizer
+         learning_rate: 0.001
+      inputs: [images, labels]
+
+Model parameters
+~~~~~~~~~~~~~~~~
+Note that the model (hyper-)parameters such as the number of layers were all hard-coded in our example.
+Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.
+
+In **cxflow**, model parameters may be defined and configured quite easily.
+For example, to introduce new ``fc_size`` parameter controlling the number of neurons in the fully connected layer,
+one would update the code as follows:
+
+.. code-block:: python
+   :caption: convnet.py
+   :emphasize-lines: 1, 3
+
+       def _create_model(self, fc_size):
+           ...
+           net = slim.fully_connected(net, fc_size, scope='fc4')
+
+.. code-block:: yaml
+   :caption: passing the model parameters
+   :emphasize-lines: 6
+
+   model:
+      class: nets.SimpleConvNet
+      optimizer:
+         class: AdamOptimizer
+         learning_rate: 0.001
+      fc_size: 250
+      inputs: [images, labels]
+      outputs: [loss, probs]
+
+In fact, **any** parameter found in the configuration under the ``model`` 
+section is directly forwarded
+to the ``_create_model`` function. This way, the whole model can be easily 
+parametrized.
+
+.. tip::
+   Try to experiment with the ``fc_size`` parameter. How small the fully connected layer can be before the performance
+   degrades?
+
+Next steps
+----------
+See our `GitHub examples repository <https://github.com/Cognexa/cxflow-examples>`_.
+for additional examples or read the :py:class:`cxflow_tensorflow.BaseModel` reference for the full list of
+customization options.
+
+This project contains additional util functions and **cxflow** hooks documented in the :doc:`cxflow_tensorflow/index`.
+Be sure you do not miss the :py:class:`cxflow_tensorflow.hooks.WriteTensorboard` hook providing seamless integration with
+`TensorBoard <https://www.tensorflow.org/get_started/summaries_and_tensorboard>`_.

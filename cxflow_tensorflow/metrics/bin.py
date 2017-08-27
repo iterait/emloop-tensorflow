@@ -1,10 +1,12 @@
 """
 Module with tf util functions computing various ml metrics.
 """
+from typing import Tuple
+
 import tensorflow as tf
 
 
-def bin_stats(predictions, labels):
+def bin_stats(predictions: tf.Tensor, labels: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
     """
     Calculate f1, precision and recall from binary classification expected and predicted values.
 
@@ -26,11 +28,11 @@ def bin_stats(predictions, labels):
     return f1_score, precision, recall
 
 
-def bin_dice(predictions, labels):
+def bin_dice(predictions: tf.Tensor, labels: tf.Tensor) -> tf.Tensor:
     """
-    Calculate Sørensen–Dice coefficient from the given binary classification expected and predicted values.
+    Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.
 
-    The coefficient is defined as 2*|X <intersection> Y| / (|X| + |Y|).
+    The coefficient is defined as :math:`2*|X \cup Y| / (|X| + |Y|)`.
 
     :param predictions: 2-d tensor (batch, predictions) of predicted 0/1 classes
     :param labels: 2-d tensor (batch, labels) of expected 0/1 classes

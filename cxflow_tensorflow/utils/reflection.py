@@ -4,13 +4,13 @@ Module with various TF related helper functions
 
 from typing import Dict, Callable, Any
 
-import numpy as np
 import tensorflow as tf
 
 from cxflow.utils.reflection import parse_fully_qualified_name, create_object, get_class_module, get_attribute
 
 
 TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
+"""Module with TensorFlow optimizers."""
 
 TF_ACTIVATIONS_MODULE = 'tensorflow.python.ops.nn'
 """Module with TensorFlow activation functions."""
@@ -59,19 +59,3 @@ def create_activation(activation_name: str) -> Callable[[tf.Tensor], tf.Tensor]:
         return tf.identity
     return get_attribute(TF_ACTIVATIONS_MODULE, activation_name)
 
-
-def repeat(tensor: tf.Tensor, repeats: int, axis: int) -> tf.Tensor:
-    """
-    Repeat elements of the input tensor in the specified axis repeat-times.
-    """
-    shape = tensor.get_shape().as_list()
-
-    dims = np.arange(len(tensor.shape))
-    prepare_perm = np.hstack(([axis], np.delete(dims, axis)))
-    restore_perm = np.hstack((dims[1:axis+1], [0], dims[axis+1:]))
-
-    indices = tf.cast(tf.floor(tf.range(0, shape[axis]*repeats)/tf.constant(repeats)), 'int32')
-
-    shuffled = tf.transpose(tensor, prepare_perm)
-    repeated = tf.gather(shuffled, indices)
-    return tf.transpose(repeated, restore_perm)

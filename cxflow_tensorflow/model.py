@@ -1,8 +1,3 @@
-"""
-Module with cxflow trainable models defined in TensorFlow, which are restorable from their corresponding checkpoints.
-
-Provides `BaseModel` which manages model config, API and unifies the TF graph <=> cxflow touch points.
-"""
 import math
 import logging
 from os import path
@@ -142,14 +137,19 @@ class GraphTower:
 
 class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
     """
-    Base TensorFlow model enforcing uniform model API which is trainable in cxflow main loop.
+    Cxflow :py:class:`AbstractModel <cxflow.models.AbstractModel>` implementation for TensorFlow models.
 
-    All tf models should be derived from this class and override `_create_model` method.
-    Optionally, `_restore_model` might be overriden.
+    To define a **cxflow** trainable model in TensorFlow, derive your class from :py:class:`BaseModel` and override
+    :py:meth:`_create_model` method.
+
+    See the method references for additional customization options.
     """
 
     TRAIN_OP_NAME = 'train_op'
+    """Expected train op tensor name prefix."""
+
     LOSS_NAME = 'loss'
+    """Expected loss tensor name."""
 
     TRAINING_FLAG_NAME = 'cxf_is_training'
     """Training flag variable name."""
@@ -159,22 +159,31 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, **kwargs):
         """
-        Create a cxflow trainable TensorFlow model.
+        Create new cxflow trainable TensorFlow model.
 
-        In case `restore_from` is not `None`, the model will be restored from a checkpoint. See `_restore_model`
-        for more information.
+        TF Graph, train ops etc. are constructed with the following procedure:
+
+        #. Create ``tf.Graph`` and ``tf.Session`` with :py:meth:`_create_session`
+        #. Either create or restore the model with :py:meth:`_create_model` or :py:meth:`_restore_model` respectively
+        #. Find input/output tensors
+        #. Create train ops with :py:meth:`_create_train_ops` unless they are already restored
+        #. Find the train ops
+        #. Create ``tf.Saver``
+
+        .. note::
+            In most cases, it is not required to re-define the ``__init__`` method for your models.
 
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
         :param outputs: model output names
-        :param session: TF session configuration dict
+        :param session: TF session configuration dict, see :py:meth:`_create_session`
         :param n_gpus: number of GPUs to use
         :param restore_from: path to directory from which the model is restored
-        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
-        :param optimizer: optimizer configuration dict
+        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
+        :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
-        :param kwargs: additional kwargs which are passed to the _create_model method
+        :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
@@ -230,12 +239,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of TF tensor names listed as model inputs."""
+        """List of TF input tensor (placeholder) names."""
         return self._towers[0].input_names
 
     @property
     def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
-        """List of TF tensor names listed as model outputs."""
+        """List of TF output tensor names."""
         return self._towers[0].output_names
 
     @property
@@ -331,20 +340,23 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
         return checkpoint_path
 
-    def _restore_checkpoint(self, checkpoint_name: str) -> None:
+    def _restore_checkpoint(self, checkpoint_path: str) -> None:
         """
-        Given the checkpoint name (including the path to it), restore the model.
+        Restore model from the given ``checkpoint_path``.
 
-        :param checkpoint_name: name in form of `*.ckpt`, e.g. `model_3.ckpt`.
+        :param checkpoint_path: full path to the checkpoint, e.g. `my_dir/model_3.ckpt`.
         """
         logging.debug('Loading meta graph')
-        saver = tf.train.import_meta_graph(checkpoint_name + '.meta')
+        saver = tf.train.import_meta_graph(checkpoint_path + '.meta')
         logging.debug('Restoring model')
-        saver.restore(self._session, checkpoint_name)
+        saver.restore(self._session, checkpoint_path)
 
     def _restore_model(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
         """
-        Restore TF model from the given checkpoint.
+        Restore TF model from the given ``restore_from`` path and ``restore_model_name``.
+
+        The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.
+
         :param restore_from: path to directory from which the model is restored
         :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
         """
@@ -377,12 +389,17 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """
         Create and return TF Session for this model.
 
-        By default the session is configured with ConfigProto created with the given session_config as **kwargs.
-        Override this method in order to configure additional nested options (e.g. GraphOptions).
+        By default the session is configured with ``tf.ConfigProto`` created with
+        the given ``session_config`` as ``**kwargs``.
 
-        The Session should use self._graph as the default graph.
+        .. tip::
+            Override this method in order to configure additional nested options (e.g. ``tf.GraphOptions``).
+
+        .. warning::
+            The session should use ``self._graph`` as the default graph.
+
         :param session_config: session configuration dict as specified in the config yaml
-        :return: TF Session
+        :return: TensorFlow session
         """
         if session_config:
             session_config = tf.ConfigProto(**session_config)
@@ -390,18 +407,27 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def _create_train_ops(self, optimizer_config: Optional[dict]) -> None:
         """
-        Create the train ops used for training. In order to handle incomplete batches, there must be one train op for
+        Create the train ops for training. In order to handle incomplete batches, there must be one train op for
         each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
-        respectively. The train ops must be named train_op_1, train_op_2 etc. wherein the suffixed number stands for the
-        number of towers.
+        respectively. The train ops must be named ``train_op_1``, ``train_op_2`` etc.
+        wherein the suffixed number stands for the number of towers.
 
         By default the train ops are constructed in the following way:
-            - optimizer is created from the `model.optimizer` configuration dict
+            - optimizer is created from the ``model.optimizer`` configuration dict
             - gradients minimizing the respective tower losses are computed
-            - for each number of towers
-                - gradients of the respective number of towers are averaged and applied
+            - for each number of non-empty towers
+                - gradients of the respective towers are averaged and applied
 
-        This implement a custom behavior, override this method and create your own op named as BaseMode.TRAIN_OP_NAME.
+        To implement a custom behavior, override this method and create your own op named as :py:attr:`TRAIN_OP_NAME`.
+
+        .. code-block:: yaml
+            :caption: example optimizer config
+
+            model:
+                optimizer:
+                    class: RMSPropOptimizer
+                    learning_rate: 0.001
+
         :param optimizer_config: optimizer configuration dict
         """
         if optimizer_config is None:
@@ -418,14 +444,16 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def _create_model(self, **kwargs) -> None:
         """
-        Create the model.
+        Create your TensorFlow model.
 
         Every model has to define:
-            - loss as a tensor named BaseModel.LOSS_NAME
-            - input placeholders and output tensors named according to the specified input and output names
 
-        To support multi-GPU training, all the variables must be created with tf.get_variable and appropriate
-        variable scopes.
+        - loss tensor named according to :py:attr:`LOSS_NAME`
+        - input placeholders and output tensors named according to the specified input and output names
+
+        .. warning::
+            To support multi-GPU training, all the variables must be created with ``tf.get_variable``
+            and appropriate variable scopes.
         
         :param kwargs: model configuration as specified in `model` section of the configuration file
         """

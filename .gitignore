@@ -94,3 +94,4 @@ ENV/
 
 # Rope project settings
 .ropeproject
+docs/cxflow_tensorflow/cxflow_tensorflow.*

@@ -12,30 +12,39 @@ from cxflow_tensorflow.model import BaseModel
 
 class WriteTensorboard(AbstractHook):
     """
-    Log epoch summaries to TensorBoard.
+    Write scalar epoch variables to TensorBoard summaries.
 
-    -------------------------------------------------------
-    Example usage in config
-    -------------------------------------------------------
-    hooks:
-      - cxflow_tensorflow.WriteTensorboard
-    -------------------------------------------------------
-    # unknown variable types are casted to strings
-    hooks:
-      - cxflow_tensorflow.WriteTensorboard:
-          on_unknown_type: str
-    -------------------------------------------------------
+    Refer to TensorBoard `introduction <https://www.tensorflow.org/get_started/summaries_and_tensorboard>`_ for more
+    info.
+
+    By default, non-scalar values are ignored.
+
+    .. code-block:: yaml
+        :caption: default usage
+
+        hooks:
+          - cxflow_tensorflow.WriteTensorboard
+
+    .. code-block:: yaml
+        :caption: cast variables with unknown types to strings
+
+        hooks:
+          - cxflow_tensorflow.WriteTensorboard:
+              on_unknown_type: str
+
     """
 
     UNKNOWN_TYPE_ACTIONS = {'error', 'warn', 'ignore'}
+    """Possible actions to take on unknown variable type."""
 
     def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore', **kwargs):
         """
-        Create new TensorBoard logging hook.
+        Create new WriteTensorboard hook.
 
         :param model: a BaseModel being trained
         :param output_dir: output dir to save the tensorboard logs
-        :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list)
+        :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list),
+            one of :py:attr:`UNKNOWN_TYPE_ACTIONS`
         """
         assert isinstance(model, BaseModel)
 
@@ -45,14 +54,14 @@ class WriteTensorboard(AbstractHook):
         logging.debug('Creating TensorBoard writer')
         self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=model.graph, flush_secs=flush_secs)
 
-    def _log_to_tensorboard(self, epoch_id: int, epoch_data: AbstractHook.EpochData):
+    def after_epoch(self, epoch_id: int, epoch_data: AbstractHook.EpochData) -> None:
         """
-        Log the metrics from the result given to the tensorboard.
+        Log the specified epoch data variables to the tensorboard.
 
-        :param epoch_id: epoch number
-        :param epoch_data: the epoch data to be logged
+        :param epoch_id: epoch ID
+        :param epoch_data: epoch data as created by other hooks
         """
-
+        logging.debug('TensorBoard logging after epoch %d', epoch_id)
         measures = []
 
         for stream_name in epoch_data.keys():
@@ -77,8 +86,3 @@ class WriteTensorboard(AbstractHook):
                 measures.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
 
         self._summary_writer.add_summary(tf.Summary(value=measures), epoch_id)
-
-    def after_epoch(self, epoch_id: int, epoch_data: AbstractHook.EpochData) -> None:
-        """Log the specified epoch data variables to the tensorboar."""
-        logging.debug('TensorBoard logging after epoch %d', epoch_id)
-        self._log_to_tensorboard(epoch_id=epoch_id, epoch_data=epoch_data)
