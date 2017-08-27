@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow.tests.test_core import CXTestCaseWithDir
-from cxflow_tensorflow import repeat, create_optimizer
+from cxflow_tensorflow import repeat, create_optimizer, create_activation
 
 
 class UtilsTest(CXTestCaseWithDir):
@@ -58,5 +58,8 @@ class UtilsTest(CXTestCaseWithDir):
         with tf.Graph().as_default():
             self.assertRaises(TypeError, create_optimizer, optimizer_config2)
 
-
-
+    def test_create_activation(self):
+        """Test if create activation works properly."""
+        self.assertIs(create_activation('relu'), tf.nn.relu)
+        self.assertIs(create_activation('identity'), tf.identity)
+        self.assertRaises(AttributeError, create_activation, 'i_do_not_exist')

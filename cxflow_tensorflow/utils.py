@@ -7,10 +7,13 @@ from typing import Dict, Callable, Any
 import numpy as np
 import tensorflow as tf
 
-from cxflow.utils.reflection import parse_fully_qualified_name, create_object, get_class_module
+from cxflow.utils.reflection import parse_fully_qualified_name, create_object, get_class_module, get_attribute
 
 
 TF_OPTIMIZERS_MODULE = 'tensorflow.python.training'
+
+TF_ACTIVATIONS_MODULE = 'tensorflow.python.ops.nn'
+"""Module with TensorFlow activation functions."""
 
 
 def create_optimizer(optimizer_config: Dict[str, Any]):
@@ -44,16 +47,17 @@ def create_optimizer(optimizer_config: Dict[str, Any]):
 
 def create_activation(activation_name: str) -> Callable[[tf.Tensor], tf.Tensor]:
     """
-    Create tf activation with the given name.
-    :param activation_name: one of {Relu, Identity, Softmax}
-    :return: activation
-    """
-    if activation_name == 'ReLU':
-        return tf.nn.relu
-    if activation_name == 'Identity':
-        return tf.identity
+    Create TensorFlow activation function with the given name.
 
-    raise NotImplementedError
+    List of available activation functions is available in
+    `TensorFlow docs <https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/activation_functions_>`_.
+
+    :param activation_name: activation function name
+    :return: callable activation function
+    """
+    if activation_name == 'identity':
+        return tf.identity
+    return get_attribute(TF_ACTIVATIONS_MODULE, activation_name)
 
 
 def repeat(tensor: tf.Tensor, repeats: int, axis: int) -> tf.Tensor:
