@@ -14,30 +14,33 @@ A simple convolutional network takes only a couple of lines.
   :caption: convnet.py
 
    import tensorflow as tf
-   import tensorflow.contrib.slim as slim
+   import tensorflow.contrib.keras as K
+   import cxflow_tensorflow as cxtf
 
-   from cxflow_tensorflow import BaseModel
 
-
-   class SimpleConvNet(BaseModel):
+   class SimpleConvNet(cxtf.BaseModel):
 
        def _create_model(self):
            images = tf.placeholder(tf.float32, shape=[None, 28, 28], name='images')
-           labels = tf.placeholder(tf.int32, shape=[None], name='labels')
+           labels = tf.placeholder(tf.int64, shape=[None], name='labels')
 
-           net = tf.expand_dims(images, -1)
-           net = slim.conv2d(net, 20, 5, scope='conv1')
-           net = slim.max_pool2d(net, 2, scope='pool1')
-           net = slim.conv2d(net, 50, 5, scope='conv2')
-           net = slim.max_pool2d(net, 2, scope='pool2')
-           net = slim.flatten(net, scope='flatten3')
-           net = slim.fully_connected(net, 500, scope='fc4')
-           logits = slim.fully_connected(net, 10, activation_fn=None, scope='fc5')
+           with tf.variable_scope('conv1'):
+               net = tf.expand_dims(images, -1)
+               net = K.layers.Conv2D(20, 5)(net)
+               net = K.layers.MaxPool2D()(net)
+           with tf.variable_scope('conv2'):
+               net = K.layers.Conv2D(50, 3)(net)
+               net = K.layers.MaxPool2D()(net)
+           with tf.variable_scope('dense3'):
+               net = K.layers.Flatten()(net)
+               net = K.layers.Dense(100)(net)
+           with tf.variable_scope('dense4'):
+               logits = K.layers.Dense(10, activation=None)(net)
 
-           loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
-
+           loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
            tf.identity(loss, name='loss')
-           tf.nn.softmax(logits, name='probs')
+           predictions = tf.argmax(logits, 1, name='predictions')
+           tf.reduce_mean(tf.cast(tf.equal(predictions, labels), tf.float32, name='accuracy'))
 
 .. tip::
    It does not matter how the graph is created as long the input/output tensors 
@@ -45,26 +48,37 @@ A simple convolutional network takes only a couple of lines.
    favorite framework such as `Keras <https://keras.io/>`_,
    `Slim <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim>`_ or vanilla TensorFlow.
 
-The next step is to write a simple configuration file putting everything together:
+The next step is to write a configuration file putting everything together:
 
 .. code-block:: yaml
    :caption: config.yaml
 
    dataset:
-      class datasets.MNISTDataset
+     class: datasets.MNISTDataset
+
    model:
-      class: convnet.SimpleConvNet
-      optimizer:
-         class: AdamOptimizer
-         learning_rate: 0.001
-      inputs: [images, labels]
-      outputs: [loss, probs]
+     name: ConvNetExample
+     class: convnet.SimpleConvNet
+
+     optimizer:
+       class: AdamOptimizer
+       learning_rate: 0.001
+
+     inputs: [images, labels]
+     outputs: [accuracy, predictions, loss]
+
+   main_loop:
+     extra_streams: [test]
+
    hooks:
-     - ComputeStats:
-         variables:
-           'loss':[mean]
-     - LogVariables
-     - SaveBest
+   - ComputeStats:
+       variables:
+         loss: [mean, std]
+         accuracy: [mean]
+   - LogVariables
+   - CatchSigint
+   - StopAfter:
+       minutes: 5
 
 Finally run the training with:
 
