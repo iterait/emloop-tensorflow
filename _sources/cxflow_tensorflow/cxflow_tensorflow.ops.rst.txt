@@ -1,0 +1,18 @@
+=========================
+``cxflow_tensorflow.ops``
+=========================
+
+.. automodule:: cxflow_tensorflow.ops
+
+
+.. currentmodule:: cxflow_tensorflow.ops
+
+
+Functions
+=========
+
+- :py:func:`repeat`:
+  Repeat elements of the input tensor in the specified axis ``repeats``-times.
+
+
+.. autofunction:: repeat

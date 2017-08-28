@@ -1,0 +1,45 @@
+===========================
+``cxflow_tensorflow.hooks``
+===========================
+
+.. automodule:: cxflow_tensorflow.hooks
+
+
+.. currentmodule:: cxflow_tensorflow.hooks
+
+
+Classes
+=======
+
+- :py:class:`WriteTensorboard`:
+  Write scalar epoch variables to TensorBoard summaries.
+
+- :py:class:`DecayLR`:
+  Hook for modifying (decaying) the learning rate (or any other variable) during the training.
+
+
+
+.. autoclass:: WriteTensorboard
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+
+   .. inheritance-diagram:: WriteTensorboard
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: DecayLR
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+
+   .. inheritance-diagram:: DecayLR
+      :parts: 1
+
+   |
+
