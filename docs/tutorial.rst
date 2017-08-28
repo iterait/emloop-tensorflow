@@ -59,11 +59,9 @@ The next step is to write a configuration file putting everything together:
    model:
      name: ConvNetExample
      class: convnet.SimpleConvNet
-
      optimizer:
        class: AdamOptimizer
        learning_rate: 0.001
-
      inputs: [images, labels]
      outputs: [accuracy, predictions, loss]
 
@@ -107,11 +105,11 @@ The respective tensors are expected to be found in the created TF graph.
    :caption: configuring inputs and outputs
    :emphasize-lines: 4, 5
 
-      optimizer:
-         class: AdamOptimizer
-         learning_rate: 0.001
-      inputs: [images, labels]
-      outputs: [loss, probs]
+     optimizer:
+       class: AdamOptimizer
+       learning_rate: 0.001
+     inputs: [images, labels]
+     outputs: [accuracy, predictions, loss]
    hooks:
 
 Optimizer
@@ -125,10 +123,10 @@ Arbitrary `TF Optimizer <https://www.tensorflow.org/api_guides/python/train>`_ m
    :caption: config.yaml
    :emphasize-lines: 2, 3, 4
 
-      class: nets.SimpleConvNet
+      class: convnet.SimpleConvNet
       optimizer:
-         class: AdamOptimizer
-         learning_rate: 0.001
+        class: AdamOptimizer
+        learning_rate: 0.001
       inputs: [images, labels]
 
 Model parameters
@@ -137,29 +135,28 @@ Note that the model (hyper-)parameters such as the number of layers were all har
 Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.
 
 In **cxflow**, model parameters may be defined and configured quite easily.
-For example, to introduce new ``fc_size`` parameter controlling the number of neurons in the fully connected layer,
+For example, to introduce new ``dense_size`` parameter controlling the number of neurons in the fully connected layer,
 one would update the code as follows:
 
 .. code-block:: python
    :caption: convnet.py
-   :emphasize-lines: 1, 3
+   :emphasize-lines: 1, 5
 
-       def _create_model(self, fc_size):
+       def _create_model(self, dense_size:int =100):
            ...
-           net = slim.fully_connected(net, fc_size, scope='fc4')
+           with tf.variable_scope('dense3'):
+               net = K.layers.Flatten()(net)
+               net = K.layers.Dense(dense_size)(net)
 
 .. code-block:: yaml
    :caption: passing the model parameters
-   :emphasize-lines: 6
+   :emphasize-lines: 4
 
    model:
-      class: nets.SimpleConvNet
-      optimizer:
-         class: AdamOptimizer
-         learning_rate: 0.001
-      fc_size: 250
-      inputs: [images, labels]
-      outputs: [loss, probs]
+     name: ConvNetExample
+     class: convnet.SimpleConvNet
+     dense_size: 50
+     optimizer:
 
 In fact, **any** parameter found in the configuration under the ``model`` 
 section is directly forwarded
@@ -167,7 +164,7 @@ to the ``_create_model`` function. This way, the whole model can be easily
 parametrized.
 
 .. tip::
-   Try to experiment with the ``fc_size`` parameter. How small the fully connected layer can be before the performance
+   Try to experiment with the ``dense_size`` parameter. How small the fully connected layer can be before the performance
    degrades?
 
 Next steps
