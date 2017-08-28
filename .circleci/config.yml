@@ -45,7 +45,7 @@ references:
     run:
       name: Generate documentation
       command: |
-        .circleci/doc_deploy.sh
+        bash <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/doc_deploy.sh)
 
 jobs:
 
