@@ -33,6 +33,7 @@ A simple convolutional network takes only a couple of lines.
                net = K.layers.MaxPool2D()(net)
            with tf.variable_scope('dense3'):
                net = K.layers.Flatten()(net)
+               net = K.layers.Dropout(0.4).apply(net, training=self.is_training)
                net = K.layers.Dense(100)(net)
            with tf.variable_scope('dense4'):
                logits = K.layers.Dense(10, activation=None)(net)
