@@ -133,30 +133,33 @@ with cxflow-tensorflow.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
- <span class="kn">import</span> <span class="nn">tensorflow.contrib.slim</span> <span class="kn">as</span> <span class="nn">slim</span>
+ <span class="kn">import</span> <span class="nn">tensorflow.contrib.keras</span> <span class="kn">as</span> <span class="nn">K</span>
+ <span class="kn">import</span> <span class="nn">cxflow_tensorflow</span> <span class="kn">as</span> <span class="nn">cxtf</span>
 
- <span class="kn">from</span> <span class="nn">cxflow_tensorflow</span> <span class="kn">import</span> <span class="n">BaseModel</span>
 
-
- <span class="k">class</span> <span class="nc">SimpleConvNet</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+ <span class="k">class</span> <span class="nc">SimpleConvNet</span><span class="p">(</span><span class="n">cxtf</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
 
      <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
          <span class="n">images</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;images&#39;</span><span class="p">)</span>
-         <span class="n">labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;labels&#39;</span><span class="p">)</span>
+         <span class="n">labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;labels&#39;</span><span class="p">)</span>
 
-         <span class="n">net</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;conv1&#39;</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;pool1&#39;</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">conv2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;conv2&#39;</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">max_pool2d</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;pool2&#39;</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;flatten3&#39;</span><span class="p">)</span>
-         <span class="n">net</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;fc4&#39;</span><span class="p">)</span>
-         <span class="n">logits</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">fully_connected</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;fc5&#39;</span><span class="p">)</span>
+         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;conv1&#39;</span><span class="p">):</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">)(</span><span class="n">net</span><span class="p">)</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MaxPool2D</span><span class="p">()(</span><span class="n">net</span><span class="p">)</span>
+         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;conv2&#39;</span><span class="p">):</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">3</span><span class="p">)(</span><span class="n">net</span><span class="p">)</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MaxPool2D</span><span class="p">()(</span><span class="n">net</span><span class="p">)</span>
+         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;dense3&#39;</span><span class="p">):</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()(</span><span class="n">net</span><span class="p">)</span>
+             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">)(</span><span class="n">net</span><span class="p">)</span>
+         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;dense4&#39;</span><span class="p">):</span>
+             <span class="n">logits</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="bp">None</span><span class="p">)(</span><span class="n">net</span><span class="p">)</span>
 
-         <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sparse_softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-
+         <span class="n">loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sparse_softmax_cross_entropy_with_logits</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">logits</span><span class="o">=</span><span class="n">logits</span><span class="p">)</span>
          <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
-         <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;probs&#39;</span><span class="p">)</span>
+         <span class="n">predictions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;predictions&#39;</span><span class="p">)</span>
+         <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -167,24 +170,35 @@ are named properly. Feel free to use your
 favorite framework such as <a class="reference external" href="https://keras.io/">Keras</a>,
 <a class="reference external" href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">Slim</a> or vanilla TensorFlow.</p>
 </div>
-<p>The next step is to write a simple configuration file putting everything together:</p>
+<p>The next step is to write a configuration file putting everything together:</p>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span>
-   <span class="l l-Scalar l-Scalar-Plain">class datasets.MNISTDataset</span>
+  <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets.MNISTDataset</span>
+
 <span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
-   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">convnet.SimpleConvNet</span>
-   <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
-      <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
-   <span class="l l-Scalar l-Scalar-Plain">inputs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">images</span><span class="p p-Indicator">,</span> <span class="nv">labels</span><span class="p p-Indicator">]</span>
-   <span class="l l-Scalar l-Scalar-Plain">outputs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">loss</span><span class="p p-Indicator">,</span> <span class="nv">probs</span><span class="p p-Indicator">]</span>
+  <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ConvNetExample</span>
+  <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">convnet.SimpleConvNet</span>
+
+  <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
+    <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
+
+  <span class="l l-Scalar l-Scalar-Plain">inputs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">images</span><span class="p p-Indicator">,</span> <span class="nv">labels</span><span class="p p-Indicator">]</span>
+  <span class="l l-Scalar l-Scalar-Plain">outputs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">accuracy</span><span class="p p-Indicator">,</span> <span class="nv">predictions</span><span class="p p-Indicator">,</span> <span class="nv">loss</span><span class="p p-Indicator">]</span>
+
+<span class="l l-Scalar l-Scalar-Plain">main_loop</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">extra_streams</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">test</span><span class="p p-Indicator">]</span>
+
 <span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ComputeStats</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">variables</span><span class="p p-Indicator">:</span>
-        <span class="s">&#39;loss&#39;</span><span class="l l-Scalar l-Scalar-Plain">:[mean]</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">LogVariables</span>
-  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">SaveBest</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ComputeStats</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">variables</span><span class="p p-Indicator">:</span>
+      <span class="l l-Scalar l-Scalar-Plain">loss</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">mean</span><span class="p p-Indicator">,</span> <span class="nv">std</span><span class="p p-Indicator">]</span>
+      <span class="l l-Scalar l-Scalar-Plain">accuracy</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">mean</span><span class="p p-Indicator">]</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">LogVariables</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">CatchSigint</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">StopAfter</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">minutes</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
 </pre></div>
 </div>
 </div>
