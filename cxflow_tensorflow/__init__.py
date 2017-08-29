@@ -13,3 +13,5 @@ from .metrics import bin_dice, bin_stats
 from .ops import repeat
 
 __all__ = ['BaseModel']
+
+__version__ = '0.2'
