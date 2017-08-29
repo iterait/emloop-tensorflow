@@ -16,16 +16,17 @@
 Welcome to cxflow-tensorflow docs
 =================================
 
-Cxflow-tensorflow is **cxflow** plugin for training TensorFlow models with ease.
-It allows you to focus on the model architecture instead of writing the burdensome code around it.
+**cxflow-tensorflow** is a **cxflow** plugin that allows you to train TensorFlow models effortlessly.
+Instead of having to write tens or hundreds of lines of code,
+**cxflow-tensorflow** lets you focus on the model architecture.
 
-Before you start working with cxflow-tensorflow, make sure you are well aware of
+However, before you start working with cxflow-tensorflow, make sure you have read
 
 - `TensorFlow essentials <https://www.tensorflow.org/get_started/>`_
 - :doc:`cxflow basics <cxflow:index>`
 
-After that, :doc:`proceed with installation <getting_started>` and go
-through our 5-minutes :doc:`tutorial <tutorial>`.
+Once you’ve gone through that, you can proceed :doc:`proceed with installation <getting_started>`
+and go through our 5-minutes :doc:`tutorial <tutorial>`.
 
 Leveraging the speed and potential of multi-GPU models was never easier with our
 :doc:`multi-GPU base model <multi_gpu>`.
@@ -33,14 +34,14 @@ Leveraging the speed and potential of multi-GPU models was never easier with our
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/Cognexa/cxflow-tensorflow/issues
-- Source Code: https://github.com/Cognexa/cxflow-tensorflow
+- `Source Code @GitHub <https://github.com/Cognexa/cxflow-tensorflow>`_
+- `Issue Tracker @GitHub <https://github.com/Cognexa/cxflow-tensorflow/issues>`_
 
 Support
 -------
 
 If you are having issues, please let us know either via the official
-`issue tracker <https://github.com/Cognexa/cxflow-tensorflow/issues>`_ or via e-mail cxflow@cognexa.com
+`issue tracker <https://github.com/Cognexa/cxflow-tensorflow/issues>`_ or via e-mail cxflow@cognexa.com.
 
 License
 -------
