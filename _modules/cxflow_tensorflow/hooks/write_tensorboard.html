@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks.write_tensorboard_hook &#8212; cxflow-tensorflow 0.2 documentation</title>
+    <title>cxflow_tensorflow.hooks.write_tensorboard &#8212; cxflow-tensorflow 0.2 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -104,7 +104,7 @@
       </div>
     <div class="col-md-9 content">
       
-  <h1>Source code for cxflow_tensorflow.hooks.write_tensorboard_hook</h1><div class="highlight"><pre>
+  <h1>Source code for cxflow_tensorflow.hooks.write_tensorboard</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module with a tensorboard logging hook.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -117,7 +117,7 @@
 <span class="kn">from</span> <span class="nn">cxflow_tensorflow.model</span> <span class="k">import</span> <span class="n">BaseModel</span>
 
 
-<div class="viewcode-block" id="WriteTensorboard"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorboard">[docs]</a><span class="k">class</span> <span class="nc">WriteTensorboard</span><span class="p">(</span><span class="n">AbstractHook</span><span class="p">):</span>
+<div class="viewcode-block" id="WriteTensorBoard"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard">[docs]</a><span class="k">class</span> <span class="nc">WriteTensorBoard</span><span class="p">(</span><span class="n">AbstractHook</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write scalar epoch variables to TensorBoard summaries.</span>
 
@@ -144,9 +144,9 @@
     <span class="n">UNKNOWN_TYPE_ACTIONS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Possible actions to take on unknown variable type.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="WriteTensorboard.__init__"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorboard.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flush_secs</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">on_unknown_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="WriteTensorBoard.__init__"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">flush_secs</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">on_unknown_type</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create new WriteTensorboard hook.</span>
+<span class="sd">        Create new WriteTensorBoard hook.</span>
 
 <span class="sd">        :param model: a BaseModel being trained</span>
 <span class="sd">        :param output_dir: output dir to save the tensorboard logs</span>
@@ -161,7 +161,7 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Creating TensorBoard writer&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_summary_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">FileWriter</span><span class="p">(</span><span class="n">logdir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">flush_secs</span><span class="o">=</span><span class="n">flush_secs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="WriteTensorboard.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorboard.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">:</span> <span class="n">AbstractHook</span><span class="o">.</span><span class="n">EpochData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="WriteTensorBoard.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epoch_data</span><span class="p">:</span> <span class="n">AbstractHook</span><span class="o">.</span><span class="n">EpochData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Log the specified epoch data variables to the tensorboard.</span>
 

@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks.decay_lr_hook &#8212; cxflow-tensorflow 0.2 documentation</title>
+    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.2 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -104,7 +104,7 @@
       </div>
     <div class="col-md-9 content">
       
-  <h1>Source code for cxflow_tensorflow.hooks.decay_lr_hook</h1><div class="highlight"><pre>
+  <h1>Source code for cxflow_tensorflow.hooks.decay_lr</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module with learning rate decaying hook.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -121,7 +121,7 @@
 
 <span class="sd">    It expects a variable with the specified name to be present in the TF model being trained.</span>
 
-<span class="sd">    After every epoch, the variable is either multiplied or summed with the specified decay_value.</span>
+<span class="sd">    After every epoch, the variable is either multiplied or summed with the specified ``decay_value``.</span>
 
 
 <span class="sd">    .. code-block:: yaml</span>
@@ -165,7 +165,7 @@
                              <span class="s1">&#39;Allowed values are `</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">decay_type</span><span class="p">,</span> <span class="n">DecayLR</span><span class="o">.</span><span class="n">LR_DECAY_TYPES</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">decay_type</span> <span class="o">==</span> <span class="s1">&#39;multiply&#39;</span> <span class="ow">and</span> <span class="n">decay_value</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid lr decay value `</span><span class="si">{}</span><span class="s1">` for multiply lr decay.&#39;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid lr decay value `</span><span class="si">{}</span><span class="s1">` for multiply lr decay. &#39;</span>
                              <span class="s1">&#39;Only positive values are allowed for multiply LR decay.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">decay_value</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_decay_value</span> <span class="o">=</span> <span class="n">decay_value</span>

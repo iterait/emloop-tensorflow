@@ -11,7 +11,7 @@
 Classes
 =======
 
-- :py:class:`WriteTensorboard`:
+- :py:class:`WriteTensorBoard`:
   Write scalar epoch variables to TensorBoard summaries.
 
 - :py:class:`DecayLR`:
@@ -19,13 +19,14 @@ Classes
 
 
 
-.. autoclass:: WriteTensorboard
+.. autoclass:: WriteTensorBoard
    :show-inheritance:
    :members:
    :private-members:
    :special-members:
+   :exclude-members: __weakref__
 
-   .. inheritance-diagram:: WriteTensorboard
+   .. inheritance-diagram:: WriteTensorBoard
       :parts: 1
 
    |
@@ -37,6 +38,7 @@ Classes
    :members:
    :private-members:
    :special-members:
+   :exclude-members: __weakref__
 
    .. inheritance-diagram:: DecayLR
       :parts: 1

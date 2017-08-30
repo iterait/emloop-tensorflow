@@ -124,7 +124,7 @@
 <li><a class="reference internal" href="#cxflow_tensorflow.utils.create_activation" title="cxflow_tensorflow.utils.create_activation"><code class="xref py py-func docutils literal"><span class="pre">create_activation()</span></code></a>:
 Create TensorFlow activation function with the given name.</li>
 <li><a class="reference internal" href="#cxflow_tensorflow.utils.create_optimizer" title="cxflow_tensorflow.utils.create_optimizer"><code class="xref py py-func docutils literal"><span class="pre">create_optimizer()</span></code></a>:
-Create tf optimizer according to the given config.</li>
+Create TF optimizer according to the given config.</li>
 </ul>
 <dl class="function">
 <dt id="cxflow_tensorflow.utils.create_activation">
@@ -149,16 +149,16 @@ Create tf optimizer according to the given config.</li>
 <dl class="function">
 <dt id="cxflow_tensorflow.utils.create_optimizer">
 <code class="descclassname">cxflow_tensorflow.utils.</code><code class="descname">create_optimizer</code><span class="sig-paren">(</span><em>optimizer_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/utils/reflection.html#create_optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.utils.create_optimizer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create tf optimizer according to the given config.</p>
-<p>When <cite>module</cite> entry is not present in the optimizer_config,
-the function attempts to find it under the TF_OPTIMIZER_MODULE.</p>
-<p>A tf variable named &#8216;learning_rate&#8217; is created during the process.
+<dd><p>Create TF optimizer according to the given config.</p>
+<p>When <code class="docutils literal"><span class="pre">module</span></code> entry is not present in the <code class="docutils literal"><span class="pre">optimizer_config</span></code>,
+the function attempts to find it under the <code class="xref py py-attr docutils literal"><span class="pre">TF_OPTIMIZER_MODULE</span></code>.</p>
+<p>A tf variable named <code class="docutils literal"><span class="pre">learning_rate</span></code> is created during the process.
 One must handle Graphs and Sessions carefully when using this function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>optimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]) &#8211; dict with at least <cite>class</cite> and <cite>learning_rate</cite> entries</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>optimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]) &#8211; dict with at least <code class="docutils literal"><span class="pre">class</span></code> and <code class="docutils literal"><span class="pre">learning_rate</span></code> entries.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">optimizer</td>
 </tr>

@@ -142,19 +142,18 @@ In fact, in most cases one will override only a single method <a class="referenc
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
-Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
+Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.8)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
-<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[cxflow.datasets.abstract_dataset.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.models.abstract_model.AbstractModel</span></code></p>
-<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.7)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
+<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[.datasets.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
+<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.8)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
 <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a> method.</p>
 <p>See the method references for additional customization options.</p>
-<img src="../_images/inheritance-fb6755b50fca12eee07b8db4050b92c159f86f1c.png" alt="Inheritance diagram of BaseModel" usemap="#inheritance01dbad70af" class="inheritance"/>
+<img src="../_images/inheritance-6d2f051716e955a67394d98ca5c84b8f2659bd53.png" alt="Inheritance diagram of BaseModel" usemap="#inheritance01dbad70af" class="inheritance"/>
 <map id="inheritance01dbad70af" name="inheritance01dbad70af">
-<area shape="rect" id="node1" title="Abstract machine learning model which exposes input and output names, run and save methods." alt="" coords="5,5,120,31"/>
 <area shape="rect" id="node2" title="Cxflow :py:class:`AbstractModel &lt;cxflow.models.AbstractModel&gt;` implementation for TensorFlow models." alt="" coords="168,5,260,31"/>
 </map>
 <div class="line-block">
@@ -236,7 +235,7 @@ and appropriate variable scopes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; model configuration as specified in <cite>model</cite> section of the configuration file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; model configuration as specified in <code class="docutils literal"><span class="pre">model</span></code> section of the configuration file</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
@@ -249,15 +248,8 @@ and appropriate variable scopes.</p>
 <code class="descname">_create_session</code><span class="sig-paren">(</span><em>session_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._create_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._create_session" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return TF Session for this model.</p>
 <p>By default the session is configured with <code class="docutils literal"><span class="pre">tf.ConfigProto</span></code> created with
-the given <code class="docutils literal"><span class="pre">session_config</span></code> as <code class="docutils literal"><span class="pre">**kwargs</span></code>.</p>
-<div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p class="last">Override this method in order to configure additional nested options (e.g. <code class="docutils literal"><span class="pre">tf.GraphOptions</span></code>).</p>
-</div>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">The session should use <code class="docutils literal"><span class="pre">self._graph</span></code> as the default graph.</p>
-</div>
+the given <code class="docutils literal"><span class="pre">session_config</span></code> as <code class="docutils literal"><span class="pre">**kwargs</span></code>. Nested dictionaries such as
+<code class="docutils literal"><span class="pre">gpu_options</span></code> or <code class="docutils literal"><span class="pre">graph_options</span></code> are handled automatically.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -325,7 +317,7 @@ wherein the suffixed number stands for the number of towers.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>checkpoint_path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; full path to the checkpoint, e.g. <cite>my_dir/model_3.ckpt</cite>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>checkpoint_path</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; full path to the checkpoint, e.g. <code class="docutils literal"><span class="pre">my_dir/model_3.ckpt</span></code>.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
@@ -344,7 +336,7 @@ wherein the suffixed number stands for the number of towers.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to directory from which the model is restored</li>
-<li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <cite>model.ckpt</cite>)</li>
+<li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <code class="docutils literal"><span class="pre">model.ckpt</span></code>)</li>
 </ul>
 </td>
 </tr>
@@ -415,15 +407,29 @@ wherein the suffixed number stands for the number of towers.</p>
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.run">
 <code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.
-Fetch and return all the model outputs as a dict.
-:type batch: <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]
-:param batch: batch dict source_name-&gt;values
-:type train: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>
-:param train: flag whether parameters update (train_op) should be included in fetches
-:raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
-:rtype: <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]
-:return: outputs dict</p>
+<dd><p>Run the model with the given <code class="docutils literal"><span class="pre">batch</span></code>. Update the trainable variables only if <code class="docutils literal"><span class="pre">train</span></code> is true.</p>
+<p>Fetch and return all the model outputs as a dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
+<li><strong>train</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; flag whether parameters update (<code class="docutils literal"><span class="pre">train_op</span></code>) should be included in fetches</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><strong>ValueError</strong></a> &#8211; if an output is wrongly typed or its batch size differs from the input batch size</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">outputs dict</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">

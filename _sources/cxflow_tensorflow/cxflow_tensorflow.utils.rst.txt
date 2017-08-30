@@ -15,7 +15,7 @@ Functions
   Create TensorFlow activation function with the given name.
 
 - :py:func:`create_optimizer`:
-  Create tf optimizer according to the given config.
+  Create TF optimizer according to the given config.
 
 
 .. autofunction:: create_activation

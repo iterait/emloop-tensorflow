@@ -124,7 +124,7 @@
 
 <span class="k">class</span> <span class="nc">GraphTower</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    GraphTower is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.</span>
+<span class="sd">    ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.</span>
 <span class="sd">    It allows to work with multiple copies of the same sub-graph distributed on multiple devices</span>
 <span class="sd">    with only one set of input and output names.</span>
 
@@ -375,10 +375,12 @@
 
 <div class="viewcode-block" id="BaseModel.run"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.</span>
+<span class="sd">        Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.</span>
+
 <span class="sd">        Fetch and return all the model outputs as a dict.</span>
-<span class="sd">        :param batch: batch dict source_name-&gt;values</span>
-<span class="sd">        :param train: flag whether parameters update (train_op) should be included in fetches</span>
+
+<span class="sd">        :param batch: batch dict ``{source_name: values}``</span>
+<span class="sd">        :param train: flag whether parameters update (``train_op``) should be included in fetches</span>
 <span class="sd">        :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size</span>
 <span class="sd">        :return: outputs dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -451,7 +453,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Restore model from the given ``checkpoint_path``.</span>
 
-<span class="sd">        :param checkpoint_path: full path to the checkpoint, e.g. `my_dir/model_3.ckpt`.</span>
+<span class="sd">        :param checkpoint_path: full path to the checkpoint, e.g. ``my_dir/model_3.ckpt``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading meta graph&#39;</span><span class="p">)</span>
         <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">import_meta_graph</span><span class="p">(</span><span class="n">checkpoint_path</span> <span class="o">+</span> <span class="s1">&#39;.meta&#39;</span><span class="p">)</span>
@@ -465,7 +467,7 @@
 <span class="sd">        The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.</span>
 
 <span class="sd">        :param restore_from: path to directory from which the model is restored</span>
-<span class="sd">        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)</span>
+<span class="sd">        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Restoring model from `</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_from</span><span class="p">))</span>
@@ -497,13 +499,8 @@
 <span class="sd">        Create and return TF Session for this model.</span>
 
 <span class="sd">        By default the session is configured with ``tf.ConfigProto`` created with</span>
-<span class="sd">        the given ``session_config`` as ``**kwargs``.</span>
-
-<span class="sd">        .. tip::</span>
-<span class="sd">            Override this method in order to configure additional nested options (e.g. ``tf.GraphOptions``).</span>
-
-<span class="sd">        .. warning::</span>
-<span class="sd">            The session should use ``self._graph`` as the default graph.</span>
+<span class="sd">        the given ``session_config`` as ``**kwargs``. Nested dictionaries such as</span>
+<span class="sd">        ``gpu_options`` or ``graph_options`` are handled automatically.</span>
 
 <span class="sd">        :param session_config: session configuration dict as specified in the config yaml</span>
 <span class="sd">        :return: TensorFlow session</span>
@@ -562,7 +559,7 @@
 <span class="sd">            To support multi-GPU training, all the variables must be created with ``tf.get_variable``</span>
 <span class="sd">            and appropriate variable scopes.</span>
 <span class="sd">        </span>
-<span class="sd">        :param kwargs: model configuration as specified in `model` section of the configuration file</span>
+<span class="sd">        :param kwargs: model configuration as specified in ``model`` section of the configuration file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;`_create_model` method must be implemented in order to construct a new model.&#39;</span><span class="p">)</span></div></div>
 </pre></div>
