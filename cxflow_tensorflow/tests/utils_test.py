@@ -5,8 +5,8 @@ Test module for utils module.
 import numpy as np
 import tensorflow as tf
 
-from cxflow_tf.tests.test_core import CXTestCaseWithDir
-from cxflow_tf import repeat, create_optimizer
+from cxflow.tests.test_core import CXTestCaseWithDir
+from cxflow_tensorflow import repeat, create_optimizer, create_activation
 
 
 class UtilsTest(CXTestCaseWithDir):
@@ -40,7 +40,7 @@ class UtilsTest(CXTestCaseWithDir):
         # test missing required entry `class`
         self.assertRaises(AssertionError, create_optimizer, optimizer_config)
 
-        optimizer_config['class'] = 'GradientDescentOptimizer'
+        optimizer_config['class'] = 'tensorflow.python.training.gradient_descent.GradientDescentOptimizer'
 
         with tf.Session().as_default():
             # test if the optimizer is created correctlyW
@@ -52,11 +52,14 @@ class UtilsTest(CXTestCaseWithDir):
             tf.get_default_session().run(tf.global_variables_initializer())
             self.assertAlmostEqual(lr_tensor.eval(), 0.1)
 
-        optimizer_config2 = {'learning_rate': 0.1, 'class': 'MomentumOptimizer'}
+        optimizer_config2 = {'learning_rate': 0.1, 'class': 'tensorflow.python.training.momentum.MomentumOptimizer'}
 
         # test missing required argument (momentum in this case)
         with tf.Graph().as_default():
             self.assertRaises(TypeError, create_optimizer, optimizer_config2)
 
-
-
+    def test_create_activation(self):
+        """Test if create activation works properly."""
+        self.assertIs(create_activation('relu'), tf.nn.relu)
+        self.assertIs(create_activation('identity'), tf.identity)
+        self.assertRaises(AttributeError, create_activation, 'i_do_not_exist')

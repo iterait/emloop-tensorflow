@@ -1,8 +1,8 @@
 from pip.req import parse_requirements
 from setuptools import setup
 
-setup(name='cxflow-tf',
-      version='0.1',
+setup(name='cxflow-tensorflow',
+      version='0.2',
       description='TensorFlow extension for cxflow.',
       long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
@@ -24,13 +24,16 @@ setup(name='cxflow-tf',
       author_email='info@cognexa.com',
       license='MIT',
       packages=[
-          'cxflow_tf',
-          'cxflow_tf.hooks',
-          'cxflow_tf.third_party',
-          'cxflow_tf.third_party.tensorflow'
+          'cxflow_tensorflow',
+          'cxflow_tensorflow.hooks',
+          'cxflow_tensorflow.ops',
+          'cxflow_tensorflow.utils',
+          'cxflow_tensorflow.metrics',
+          'cxflow_tensorflow.third_party',
+          'cxflow_tensorflow.third_party.tensorflow'
       ],
       include_package_data=True,
       zip_safe=False,
-      test_suite='cxflow_tf.tests',
+      test_suite='cxflow_tensorflow.tests',
       install_requires=[str(ir.req) for ir in parse_requirements('requirements.txt', session='hack')],
      )
