@@ -18,7 +18,7 @@ pip install cxflow-tensorflow
 
 ## Quick start
 
-- [5 minutes tutorial](https://tensorflow.cxflow.org/tutorial) ([code](https://github.com/Cognexa/cxflow-examples/tree/dev/convnet))
+- [5 minutes tutorial](https://tensorflow.cxflow.org/tutorial) ([code](https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet))
 
 - [Documentation & API Reference](https://tensorflow.cxflow.org/)
 

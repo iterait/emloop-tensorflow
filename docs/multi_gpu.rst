@@ -39,7 +39,7 @@ That's it! Now run the **cxflow** training and check if all your GPUs are in fac
 
 .. tip::
    Full example may be found in our
-   `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples/tree/master/convnet>`_.
+   `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet>`_.
 
 .. tip::
    Increase your dataset **batch size** together with the ``n_gpus`` parameter.
