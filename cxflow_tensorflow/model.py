@@ -390,13 +390,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         Create and return TF Session for this model.
 
         By default the session is configured with ``tf.ConfigProto`` created with
-        the given ``session_config`` as ``**kwargs``.
-
-        .. tip::
-            Override this method in order to configure additional nested options (e.g. ``tf.GraphOptions``).
-
-        .. warning::
-            The session should use ``self._graph`` as the default graph.
+        the given ``session_config`` as ``**kwargs``. Nested dictionaries such as
+        ``gpu_options`` or ``graph_options`` are handled automatically.
 
         :param session_config: session configuration dict as specified in the config yaml
         :return: TensorFlow session
