@@ -8,7 +8,7 @@ In fact, in most cases one will override only a single method :py:meth:`cxflow_t
 """
 from .model import BaseModel
 from .utils import create_activation, create_optimizer
-from .hooks import DecayLR, WriteTensorboard
+from .hooks import DecayLR, WriteTensorBoard
 from .metrics import bin_dice, bin_stats
 from .ops import repeat
 

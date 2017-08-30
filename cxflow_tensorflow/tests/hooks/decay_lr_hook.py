@@ -28,7 +28,7 @@ class LRDecayHookTest(TestCase):
     """
 
     def test_invalid_config(self):
-        """ Test LRDecayHook invalid configurations."""
+        """ Test ``LRDecayHook`` invalid configurations."""
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
@@ -38,7 +38,7 @@ class LRDecayHookTest(TestCase):
         self.assertRaises(KeyError, DecayLR, model, variable_name='missing_variable')
 
     def test_multiply(self):
-        """ Test if LRDecayHook works properly in multiply mode."""
+        """ Test if ``LRDecayHook`` works properly in multiply mode."""
 
         decay_value = 0.9
         repeats = 13
@@ -56,7 +56,7 @@ class LRDecayHookTest(TestCase):
                                2*(decay_value**(1+repeats)))
 
     def test_add(self):
-        """ Test if LRDecayHook works properly in addition mode."""
+        """ Test if ``LRDecayHook`` works properly in addition mode."""
         decay_value = 0.01
         repeats = 17
 

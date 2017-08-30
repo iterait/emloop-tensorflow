@@ -18,7 +18,7 @@ class MetricsTest(CXTestCaseWithDir):
     """
 
     def test_dice(self):
-        """ Test if `dice` score is computed as expected."""
+        """ Test if ``dice`` score is computed as expected."""
 
         with tf.Session().as_default():
             labels = tf.constant(_LABELS, dtype=tf.int32)
