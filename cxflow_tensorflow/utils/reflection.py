@@ -18,15 +18,15 @@ TF_ACTIVATIONS_MODULE = 'tensorflow.python.ops.nn'
 
 def create_optimizer(optimizer_config: Dict[str, Any]):
     """
-    Create tf optimizer according to the given config.
+    Create TF optimizer according to the given config.
 
-    When `module` entry is not present in the optimizer_config,
-    the function attempts to find it under the TF_OPTIMIZER_MODULE.
+    When ``module`` entry is not present in the ``optimizer_config``,
+    the function attempts to find it under the :py:attr:`TF_OPTIMIZER_MODULE`.
 
-    A tf variable named 'learning_rate' is created during the process.
+    A tf variable named ``learning_rate`` is created during the process.
     One must handle Graphs and Sessions carefully when using this function.
 
-    :param optimizer_config: dict with at least `class` and `learning_rate` entries
+    :param optimizer_config: dict with at least ``class`` and ``learning_rate`` entries.
     :return: optimizer
     """
     assert 'learning_rate' in optimizer_config, 'Optimizer learning rate not specified'

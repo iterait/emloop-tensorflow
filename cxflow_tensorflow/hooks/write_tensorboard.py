@@ -10,7 +10,7 @@ from cxflow.hooks import AbstractHook
 from cxflow_tensorflow.model import BaseModel
 
 
-class WriteTensorboard(AbstractHook):
+class WriteTensorBoard(AbstractHook):
     """
     Write scalar epoch variables to TensorBoard summaries.
 
@@ -39,7 +39,7 @@ class WriteTensorboard(AbstractHook):
 
     def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore', **kwargs):
         """
-        Create new WriteTensorboard hook.
+        Create new WriteTensorBoard hook.
 
         :param model: a BaseModel being trained
         :param output_dir: output dir to save the tensorboard logs

@@ -6,8 +6,6 @@ from conf import *
 
 autoapi_modules = {
     'cxflow_tensorflow': {
-        # 'override': True,
-        # 'output': 'auto',
         'prune': True
     }
 }

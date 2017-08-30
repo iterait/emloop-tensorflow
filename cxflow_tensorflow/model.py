@@ -17,7 +17,7 @@ from .utils import create_optimizer
 
 class GraphTower:
     """
-    GraphTower is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
+    ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
     It allows to work with multiple copies of the same sub-graph distributed on multiple devices
     with only one set of input and output names.
 
@@ -268,10 +268,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
     def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
         """
-        Run the model with the given batch as feed_dict. Update the trainable variables only if train is true.
+        Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
+
         Fetch and return all the model outputs as a dict.
-        :param batch: batch dict source_name->values
-        :param train: flag whether parameters update (train_op) should be included in fetches
+
+        :param batch: batch dict ``{source_name: values}``
+        :param train: flag whether parameters update (``train_op``) should be included in fetches
         :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
         :return: outputs dict
         """
@@ -344,7 +346,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """
         Restore model from the given ``checkpoint_path``.
 
-        :param checkpoint_path: full path to the checkpoint, e.g. `my_dir/model_3.ckpt`.
+        :param checkpoint_path: full path to the checkpoint, e.g. ``my_dir/model_3.ckpt``.
         """
         logging.debug('Loading meta graph')
         saver = tf.train.import_meta_graph(checkpoint_path + '.meta')
@@ -358,7 +360,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.
 
         :param restore_from: path to directory from which the model is restored
-        :param restore_model_name: model name to be restored (e.g. `model.ckpt`)
+        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
@@ -390,13 +392,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         Create and return TF Session for this model.
 
         By default the session is configured with ``tf.ConfigProto`` created with
-        the given ``session_config`` as ``**kwargs``.
-
-        .. tip::
-            Override this method in order to configure additional nested options (e.g. ``tf.GraphOptions``).
-
-        .. warning::
-            The session should use ``self._graph`` as the default graph.
+        the given ``session_config`` as ``**kwargs``. Nested dictionaries such as
+        ``gpu_options`` or ``graph_options`` are handled automatically.
 
         :param session_config: session configuration dict as specified in the config yaml
         :return: TensorFlow session
@@ -455,6 +452,6 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             To support multi-GPU training, all the variables must be created with ``tf.get_variable``
             and appropriate variable scopes.
         
-        :param kwargs: model configuration as specified in `model` section of the configuration file
+        :param kwargs: model configuration as specified in ``model`` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')

@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/cxflow-tensorflow.svg)](https://badge.fury.io/py/cxflow-tensorflow)
 [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)]()
-[![Master Developer](https://img.shields.io/badge/master-Petr%20Bělohlávek-lightgrey.svg?style=flat)]()
+[![Master Developer](https://img.shields.io/badge/master-Adam%20Blažek-lightgrey.svg?style=flat)]()
 
 TensorFlow extension for [cxflow framework](https://github.com/cognexa/cxflow) allowing to train models defined in TensorFlow.
 

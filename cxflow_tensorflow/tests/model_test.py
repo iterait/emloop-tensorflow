@@ -1,5 +1,5 @@
 """
-Test module for base tensorflow models (cxflow.models.model).
+Test module for base TensorFlow models (:py:class:`cxflow_tensorflow.BaseModel`).
 """
 import os
 from os import path
@@ -28,7 +28,7 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
 
 
 class DummyModel(BaseModel):
-    """Dummy tf model with empty graph."""
+    """Dummy TF model with empty graph."""
 
     def _create_model(self, **kwargs):
         """Create dummy tf model."""
@@ -41,7 +41,7 @@ class DummyModel(BaseModel):
 
 
 class TrainOpModel(BaseModel):
-    """Dummy tf model with train op saved in self."""
+    """Dummy TF model with train op saved in self."""
 
     def _create_model(self, **kwargs):
         """Create dummy tf model."""
@@ -54,7 +54,7 @@ class TrainOpModel(BaseModel):
 
 
 class NoTrainOpModel(BaseModel):
-    """Dummy tf model without train op."""
+    """Dummy TF model without train op."""
 
     def _create_model(self, **kwargs):
         """Create dummy tf model."""
@@ -70,7 +70,7 @@ class SimpleModel(BaseModel):
     """Simple model with input and output tensors."""
 
     def _create_model(self, **kwargs):
-        """Create simple tf model."""
+        """Create simple TF model."""
 
         self.input1 = tf.placeholder(tf.int32, shape=[None, 10], name='input')
         self.input2 = tf.placeholder(tf.int32, shape=[None, 10], name='second_input')
@@ -86,10 +86,10 @@ class SimpleModel(BaseModel):
 
 
 class TrainableModel(BaseModel):
-    """Trainable tf model."""
+    """Trainable TF model."""
 
     def _create_model(self, **kwargs):
-        """Create simple trainable tf model."""
+        """Create simple trainable TF model."""
 
         self.input = tf.placeholder(tf.float32, shape=[None, 10], name='input')
         self.target = tf.placeholder(tf.float32, shape=[None, 10], name='target')
@@ -114,9 +114,10 @@ class DetectTrainingModel(BaseModel):
     def _create_train_ops(self, _):
         tf.no_op(name='train_op_1')
 
+
 class BaseModelTest(CXTestCaseWithDir):
     """
-    Test case for BaseModel.
+    Test case for ``BaseModel``.
 
     Note: do not forget to reset the default graph after every model creation!
     """
@@ -126,14 +127,14 @@ class BaseModelTest(CXTestCaseWithDir):
 
         good_io = {'inputs': [], 'outputs': ['dummy']}
 
-        # test whether train_op is found correctly
+        # test whether ``train_op`` is found correctly
         TrainOpModel(dataset=None, log_dir='', **good_io)
 
-        # test whether an error is raised when no train_op is defined
+        # test whether an error is raised when no ``train_op`` is defined
         self.assertRaises(ValueError, NoTrainOpModel, dataset=None, log_dir='', **good_io)
 
     def test_io_mapping(self):
-        """Test if model.io is translated to output/input names."""
+        """Test if ``inputs`` and ``outputs`` are translated to output/input names."""
 
         good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
         model = SimpleModel(dataset=None, log_dir='', **good_io)
@@ -148,7 +149,7 @@ class BaseModelTest(CXTestCaseWithDir):
                           outputs=['output', 'sum', 'sub'])
 
     def test_run(self):
-        """Test tf model run."""
+        """Test TF model run."""
         good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
         model = SimpleModel(dataset=None, log_dir='', **good_io)
         valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
@@ -160,28 +161,28 @@ class BaseModelTest(CXTestCaseWithDir):
         self.assertTrue(np.allclose(results['output'], [2]*10))
         self.assertTrue(np.allclose(results['sum'], [3]*10))
 
-        # test variables update if and only if train=True
+        # test variables update if and only if ``train=True``
         trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
-        # single run with train=False
+        # single run with ``train=False``
         orig_value = trainable_model.var.eval(session=trainable_model.session)
         trainable_model.run(batch, train=False)
         after_value = trainable_model.var.eval(session=trainable_model.session)
         self.assertTrue(np.allclose(orig_value, after_value))
 
-        # multiple runs with train=False
+        # multiple runs with ``train=False``
         for _ in range(100):
             trainable_model.run(batch, train=False)
         after_value = trainable_model.var.eval(session=trainable_model.session)
         self.assertTrue(np.allclose(orig_value, after_value))
 
-        # single run with train=True
+        # single run with ``train=True``
         trainable_model.run(batch, train=True)
         after_value = trainable_model.var.eval(session=trainable_model.session)
         self.assertFalse(np.allclose(orig_value, after_value))
 
-        # multiple runs with train=True
+        # multiple runs with ``train=True``
         trainable_model.run(batch, train=True)
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -298,14 +299,14 @@ class BaseModelTest(CXTestCaseWithDir):
 
 class TFBaseModelSaverTest(CXTestCaseWithDir):
     """
-    Test case for correct usage of tensorflow saver in BaseModel.
+    Test case for correct usage of TF ``Saver`` in ``BaseModel``.
     """
 
     def test_keep_checkpoints(self):
         """
         Test if the checkpoints are kept.
 
-        This is regression test for issue #71 (tensorflow saver is keeping only the last 5 checkpoints).
+        This is regression test for issue #71 (TF ``Saver`` is keeping only the last 5 checkpoints).
         """
         dummy_model = SimpleModel(dataset=None, log_dir=self.tmpdir, inputs=[], outputs=['output'])
 
@@ -323,14 +324,14 @@ class TFBaseModelSaverTest(CXTestCaseWithDir):
 
 class TFBaseModelManagementTest(CXTestCaseWithDir):
     """
-    Test case for correct management of tf graphs and sessions.
+    Test case for correct management of TF graphs and sessions.
     """
 
     def test_two_models_created(self):
         """
-        Test if one can create and train two BaseModels.
+        Test if one can create and train two ``BaseModels``.
 
-        This is regression test for issue #83 (One can not create and use more than one instance of BaseModel).
+        This is regression test for issue #83 (One can not create and use more than one instance of ``BaseModel``).
         """
         model1 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         model2 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
@@ -352,9 +353,9 @@ class TFBaseModelManagementTest(CXTestCaseWithDir):
 
     def test_two_models_restored(self):
         """
-        Test if one can `_restore_model` and use two BaseModels.
+        Test if one can ``_restore_model`` and use two ``BaseModels``.
 
-        This is regression test for issue #83 (One can not create and use more than one instance of BaseModel).
+        This is regression test for issue #83 (One can not create and use more than one instance of ``BaseModel``).
         """
         tmpdir2 = tempfile.mkdtemp()
 
@@ -367,7 +368,7 @@ class TFBaseModelManagementTest(CXTestCaseWithDir):
         model1.save('')
         model2.save('')
 
-        # test if one can `_restore_model` two models and use them at the same time
+        # test if one can ``_restore_model`` two models and use them at the same time
         restored_model1 = BaseModel(dataset=None, log_dir='', restore_from=self.tmpdir, **_IO)
         restored_model2 = BaseModel(dataset=None, log_dir='', restore_from=tmpdir2, **_IO)
 

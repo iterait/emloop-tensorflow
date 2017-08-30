@@ -14,7 +14,7 @@ class DecayLR(AbstractHook):
 
     It expects a variable with the specified name to be present in the TF model being trained.
 
-    After every epoch, the variable is either multiplied or summed with the specified decay_value.
+    After every epoch, the variable is either multiplied or summed with the specified ``decay_value``.
 
 
     .. code-block:: yaml
@@ -58,7 +58,7 @@ class DecayLR(AbstractHook):
                              'Allowed values are `{}`'.format(decay_type, DecayLR.LR_DECAY_TYPES))
 
         if decay_type == 'multiply' and decay_value <= 0:
-            raise ValueError('Invalid lr decay value `{}` for multiply lr decay.'
+            raise ValueError('Invalid lr decay value `{}` for multiply lr decay. '
                              'Only positive values are allowed for multiply LR decay.'.format(decay_value))
 
         self._decay_value = decay_value
