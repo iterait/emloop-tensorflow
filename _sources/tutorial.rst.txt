@@ -87,7 +87,7 @@ Finally run the training with:
 
 .. tip::
    Full example may be found in our
-   `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples/tree/master/convnet>`_.
+   `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet>`_.
 
 Basic configuration
 -------------------
