@@ -5,6 +5,7 @@ The hooks are expected to be created and used by **cxflow**. For additional info
 please refer to the `cxflow tutorial <https://cxflow.org/tutorial.html#hooks>`_.
 """
 from .decay_lr import DecayLR
+from .init_lr import InitLR
 from .write_tensorboard import WriteTensorBoard
 
-__all__ = ['WriteTensorBoard', 'DecayLR']
+__all__ = ['WriteTensorBoard', 'DecayLR', 'InitLR']
