@@ -237,6 +237,10 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             logging.debug('\tCreating Saver')
             self._saver = tf.train.Saver(max_to_keep=100000000)
 
+            train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+            logging.debug('Trainable variables: %s', [var.name for var in train_vars])
+            logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+
     @property
     def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
         """List of TF input tensor (placeholder) names."""
