@@ -5,10 +5,9 @@ from abc import ABCMeta
 from typing import List, Mapping, Optional, Iterable
 from glob import glob
 
-import tensorflow as tf
 import numpy as np
-
-from cxflow import AbstractModel, AbstractDataset
+import cxflow as cx
+import tensorflow as tf
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
@@ -135,7 +134,7 @@ class GraphTower:
         self._device.__exit__(*args)
 
 
-class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
+class BaseModel(cx.AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
     """
     Cxflow :py:class:`AbstractModel <cxflow.models.AbstractModel>` implementation for TensorFlow models.
 
@@ -155,7 +154,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     """Training flag variable name."""
 
     def __init__(self,  # pylint: disable=too-many-arguments
-                 dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
+                 dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, **kwargs):
         """
@@ -270,7 +269,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """TF session object."""
         return self._session
 
-    def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -283,7 +282,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """
         # setup the feed dict
         batch_size = len(batch[next(iter(batch))])
-        tower_batch_size = math.ceil(batch_size / len(self._towers))
+        tower_batch_size = int(math.ceil(batch_size / len(self._towers)))
         nonempty_towers = batch_size // tower_batch_size + (0 if batch_size % tower_batch_size == 0 else 1)
 
         feed_dict = {self._is_training: train}
