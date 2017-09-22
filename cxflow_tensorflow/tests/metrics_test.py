@@ -8,8 +8,8 @@ import tensorflow as tf
 from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow_tensorflow import bin_dice, bin_stats
 
-_LABELS = [[1, 0, 0, 0, 1, 1], [1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0]]
-_PREDICTIONS = [[0, 1, 0, 0, 0, 1], [0, 1, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0]]
+_LABELS = [[1, 0, 0, 0, 1, 1], [1, 0, 1, 0, 1, 0], [0, 0, 0, 1, 1, 0], [0, 0, 0, 0, 0, 0]]
+_PREDICTIONS = [[0, 1, 0, 0, 0, 1], [0, 1, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 
 
 class MetricsTest(CXTestCaseWithDir):
@@ -23,10 +23,10 @@ class MetricsTest(CXTestCaseWithDir):
         with tf.Session().as_default():
             labels = tf.constant(_LABELS, dtype=tf.int32)
             predictions = tf.constant(_PREDICTIONS, dtype=tf.int32)
-            expected_dice = np.array([(2*1.) / (3+2), 0])
-            computed_dice = bin_dice(predictions, labels).eval()
+            expected_dice = [(2*1.) / (3+2), 0, 0]
+            computed_dice = list(bin_dice(predictions, labels).eval())
 
-            self.assertTrue(np.all(expected_dice == computed_dice[:-1]))
+            self.assertListEqual(expected_dice, computed_dice[:-1])
             self.assertTrue(np.isnan(computed_dice[-1]))
 
     def test_stats(self):
@@ -35,14 +35,15 @@ class MetricsTest(CXTestCaseWithDir):
         with tf.Session().as_default():
             labels = tf.constant(_LABELS, dtype=tf.int32)
             predictions = tf.constant(_PREDICTIONS, dtype=tf.int32)
-            expected_recall = np.array([1./3, 0.])
-            expected_precision = np.array([1./2, 0.])
-            expected_f1 = 2/(1/expected_precision + 1/expected_recall)
+            expected_recall = [1./3, 0., 0.]
+            expected_precision = [1./2, 0.]
+            expected_f1 = [0.4, 0.0, 0.0]
             computed_f1, computed_precision, computed_recall = \
-                [computed.eval() for computed in bin_stats(predictions, labels)]
+                [list(computed.eval()) for computed in bin_stats(predictions, labels)]
 
-            self.assertTrue(np.all(expected_f1 == computed_f1[:-1]))
-            self.assertTrue(np.all(expected_precision == computed_precision[:-1]))
-            self.assertTrue(np.all(expected_recall == computed_recall[:-1]))
+            self.assertListEqual(expected_f1, computed_f1[:-1])
+            self.assertListEqual(expected_precision, computed_precision[:-2])
+            self.assertTrue(np.isnan(computed_precision[-2]))
+            self.assertListEqual(expected_recall, computed_recall[:-1])
             for computed in (computed_f1, computed_precision, computed_recall):
                 self.assertTrue(np.isnan(computed[-1]))
