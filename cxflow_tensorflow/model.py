@@ -135,7 +135,7 @@ class GraphTower:
         self._device.__exit__(*args)
 
 
-class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
+class BaseModel(AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
     """
     Cxflow :py:class:`AbstractModel <cxflow.models.AbstractModel>` implementation for TensorFlow models.
 
@@ -199,6 +199,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         logging.info('\tCreating TF model on %s GPU devices', n_gpus)
         self._graph = tf.Graph()
         self._session = self._create_session(session_config)
+        dependencies = []
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope()) as scope:
@@ -206,12 +207,13 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
+                        dependencies.append([]+self._graph.get_collection(tf.GraphKeys.UPDATE_OPS))
                         scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
                 try:
                     self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
-                except (KeyError, ValueError, TypeError) as ex:
+                except (KeyError, ValueError, TypeError):
                     logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
@@ -220,7 +222,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
             if restore_from is None:
                 logging.debug('\tCreating train ops')
-                self._create_train_ops(optimizer)
+                self._create_train_ops(dependencies, optimizer)
 
                 logging.debug('\tInitializing the variables')
                 self._session.run(tf.global_variables_initializer())
@@ -229,7 +231,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             logging.debug('\tSearching for the train ops in the created graph')
             try:
                 for i in range(len(self._towers)):
-                    self._train_ops.append(self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1)))
+                    self._train_ops.append(
+                        self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME+'_{}'.format(i + 1)))
             except (KeyError, ValueError, TypeError) as ex:
                 raise ValueError('Cannot find train op {} in graph. '
                                  'The op must be named `train_op_{}`.'.format(i+1, i+1)) from ex
@@ -238,12 +241,12 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             self._saver = tf.train.Saver(max_to_keep=100000000)
 
     @property
-    def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
+    def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
         """List of TF input tensor (placeholder) names."""
         return self._towers[0].input_names
 
     @property
-    def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
+    def output_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
         """List of TF output tensor names."""
         return self._towers[0].output_names
 
@@ -402,7 +405,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             session_config = tf.ConfigProto(**session_config)
         return tf.Session(graph=self._graph, config=session_config)
 
-    def _create_train_ops(self, optimizer_config: Optional[dict]) -> None:
+    def _create_train_ops(self, dependencies: List[List[tf.Operation]], optimizer_config: Optional[dict]) -> None:
         """
         Create the train ops for training. In order to handle incomplete batches, there must be one train op for
         each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
@@ -425,6 +428,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                     class: RMSPropOptimizer
                     learning_rate: 0.001
 
+        :param dependencies: a list of dependent operations (e.g. batch normalization updates) for each number of towers
         :param optimizer_config: optimizer configuration dict
         """
         if optimizer_config is None:
@@ -436,8 +440,9 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tower.loss))
         for i in range(len(self._towers)):
-            optimizer.apply_gradients(average_gradients(grads_and_vars[:(i+1)]),
-                                      name=BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1))
+            with tf.control_dependencies(dependencies[i]):
+                optimizer.apply_gradients(average_gradients(grads_and_vars[:(i + 1)]),
+                                          name=BaseModel.TRAIN_OP_NAME + '_{}'.format(i + 1))
 
     def _create_model(self, **kwargs) -> None:
         """
@@ -451,7 +456,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         .. warning::
             To support multi-GPU training, all the variables must be created with ``tf.get_variable``
             and appropriate variable scopes.
-        
+
         :param kwargs: model configuration as specified in ``model`` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
