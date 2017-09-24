@@ -206,7 +206,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
-                        dependencies.append([]+self._graph.get_collection(tf.GraphKeys.UPDATE_OPS))
+                        dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
                         scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
