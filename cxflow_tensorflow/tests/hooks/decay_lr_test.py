@@ -18,7 +18,7 @@ class LRModel(TrainableModel):
 
         super()._create_model(**kwargs)
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 

@@ -36,7 +36,7 @@ class DummyModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 
@@ -49,7 +49,7 @@ class TrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 
@@ -62,7 +62,7 @@ class NoTrainOpModel(BaseModel):
         # defining dummy variable as otherwise we would not be able to create the model saver
         tf.Variable(name='dummy', initial_value=[1])
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         pass
 
 
@@ -81,7 +81,7 @@ class SimpleModel(BaseModel):
 
         self.sum = tf.add(self.input1, self.input2, name='sum')
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 
@@ -111,7 +111,7 @@ class DetectTrainingModel(BaseModel):
         self.const = tf.Variable([1]*10, name='const')
         self.output = tf.identity((self.const + self.input1) * tf.cast(self.is_training, tf.int32), name='output')
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 
