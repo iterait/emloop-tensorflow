@@ -223,9 +223,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 logging.debug('\tCreating train ops')
                 self._create_train_ops(dependencies, optimizer)
 
+            logging.debug('\tCreating Saver')
+            self._saver = tf.train.Saver(max_to_keep=100000000)
+
+            if restore_from is None:
                 logging.debug('\tInitializing the variables')
-                self._session.run(tf.global_variables_initializer())
-                self._session.run(tf.local_variables_initializer())
+                self._initialize_variables(**kwargs)
 
             logging.debug('\tSearching for the train ops in the created graph')
             try:
@@ -235,9 +238,6 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             except (KeyError, ValueError, TypeError) as ex:
                 raise ValueError('Cannot find train op {} in graph. '
                                  'The op must be named `train_op_{}`.'.format(i+1, i+1)) from ex
-
-            logging.debug('\tCreating Saver')
-            self._saver = tf.train.Saver(max_to_keep=100000000)
 
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
@@ -463,3 +463,18 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param kwargs: model configuration as specified in ``model`` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
+
+    def _initialize_variables(self, **kwargs) -> None:
+        """
+        Initialize variables of your TensorFlow model.
+
+        By default variables are initialized randomly.
+
+        .. tip::
+
+            Override this method to load variables from some check-point and fine-tune the model.
+
+        :param kwargs: model configuration as specified in ``model`` section of the configuration file
+        """
+        self._session.run(tf.global_variables_initializer())
+        self._session.run(tf.local_variables_initializer())
