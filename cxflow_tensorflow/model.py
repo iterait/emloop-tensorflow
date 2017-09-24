@@ -417,7 +417,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         By default the train ops are constructed in the following way:
             - optimizer is created from the ``model.optimizer`` configuration dict
-            - gradients minimizing the respective tower losses are computed
+            - REGULARIZATION_LOSSSES collection is summed to ``regularization_loss``
+            - gradients minimizing the respective tower losses and ``regularization_loss`` are computed
             - for each number of non-empty towers
                 - gradients of the respective towers are averaged and applied
 
@@ -439,9 +440,10 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                              'Please specify the configuration in `model.optimizer`.')
         grads_and_vars = []
         optimizer = create_optimizer(optimizer_config)
+        regularization_loss = tf.reduce_sum(tf.stack(self.graph.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)))
         for tower in self._towers:
             with tower:
-                grads_and_vars.append(optimizer.compute_gradients(tower.loss))
+                grads_and_vars.append(optimizer.compute_gradients(tf.reduce_mean(tower.loss) + regularization_loss))
         for i in range(len(self._towers)):
             with tf.control_dependencies(dependencies[i]):
                 optimizer.apply_gradients(average_gradients(grads_and_vars[:(i + 1)]),
