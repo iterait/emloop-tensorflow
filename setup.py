@@ -2,7 +2,7 @@ from pip.req import parse_requirements
 from setuptools import setup
 
 setup(name='cxflow-tensorflow',
-      version='0.2.1',
+      version='0.3.0',
       description='TensorFlow extension for cxflow.',
       long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
