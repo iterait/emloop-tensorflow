@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Model regularization &#8212; cxflow-tensorflow 0.3.0 documentation</title>
+    <title>Model regularization &#8212; cxflow-tensorflow 0.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.0',
+        VERSION:     '0.3.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -118,7 +118,7 @@
 <ul class="nav nav-list">
 	<li><a href="https://cxflow.org">cxflow</a></li>
 	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
-	<li><a href="https://cxtream.org">cxtream</a> (C++)</li>
+	<li><a href="https://cxtream.org">cxtream (c++)</a></li>
 </ul>
         </div>
       </div>
@@ -144,8 +144,8 @@ In <strong>cxflow-tensorflow</strong>, this information is fed to the model via 
 <div class="code-block-caption"><span class="caption-text">tensorflow layers</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># ...</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_training</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dropout</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_training</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -202,7 +202,7 @@ simple and lucid.</p>
 <div class="code-block-caption"><span class="caption-text">adding batch normalization</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># ...</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dense</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="mi">512</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_training</span><span class="p">)</span>
 </pre></div>
 </div>
