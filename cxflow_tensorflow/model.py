@@ -5,10 +5,9 @@ from abc import ABCMeta
 from typing import List, Mapping, Optional, Iterable
 from glob import glob
 
-import tensorflow as tf
 import numpy as np
-
-from cxflow import AbstractModel, AbstractDataset
+import cxflow as cx
+import tensorflow as tf
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
@@ -135,7 +134,7 @@ class GraphTower:
         self._device.__exit__(*args)
 
 
-class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-instance-attributes
+class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
     """
     Cxflow :py:class:`AbstractModel <cxflow.models.AbstractModel>` implementation for TensorFlow models.
 
@@ -155,7 +154,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
     """Training flag variable name."""
 
     def __init__(self,  # pylint: disable=too-many-arguments
-                 dataset: Optional[AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
+                 dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, **kwargs):
         """
@@ -199,6 +198,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         logging.info('\tCreating TF model on %s GPU devices', n_gpus)
         self._graph = tf.Graph()
         self._session = self._create_session(session_config)
+        dependencies = []
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope()) as scope:
@@ -206,12 +206,13 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
+                        dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
                         scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
                 try:
                     self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
-                except (KeyError, ValueError, TypeError) as ex:
+                except (KeyError, ValueError, TypeError):
                     logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
@@ -220,30 +221,35 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
             if restore_from is None:
                 logging.debug('\tCreating train ops')
-                self._create_train_ops(optimizer)
-
-                logging.debug('\tInitializing the variables')
-                self._session.run(tf.global_variables_initializer())
-                self._session.run(tf.local_variables_initializer())
-
-            logging.debug('\tSearching for the train ops in the created graph')
-            try:
-                for i in range(len(self._towers)):
-                    self._train_ops.append(self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1)))
-            except (KeyError, ValueError, TypeError) as ex:
-                raise ValueError('Cannot find train op {} in graph. '
-                                 'The op must be named `train_op_{}`.'.format(i+1, i+1)) from ex
+                self._create_train_ops(dependencies, optimizer)
 
             logging.debug('\tCreating Saver')
             self._saver = tf.train.Saver(max_to_keep=100000000)
 
+            if restore_from is None:
+                logging.debug('\tInitializing the variables')
+                self._initialize_variables(**kwargs)
+
+            logging.debug('\tSearching for the train ops in the created graph')
+            try:
+                for i in range(len(self._towers)):
+                    self._train_ops.append(
+                        self._graph.get_operation_by_name(BaseModel.TRAIN_OP_NAME+'_{}'.format(i + 1)))
+            except (KeyError, ValueError, TypeError) as ex:
+                raise ValueError('Cannot find train op {} in graph. '
+                                 'The op must be named `train_op_{}`.'.format(i+1, i+1)) from ex
+
+            train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+            logging.debug('Trainable variables: %s', [var.name for var in train_vars])
+            logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+
     @property
-    def input_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
+    def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
         """List of TF input tensor (placeholder) names."""
         return self._towers[0].input_names
 
     @property
-    def output_names(self) -> List[str]:   # pylint: disable=invalid-sequence-index
+    def output_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
         """List of TF output tensor names."""
         return self._towers[0].output_names
 
@@ -266,7 +272,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         """TF session object."""
         return self._session
 
-    def run(self, batch: Mapping[str, object], train: bool) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -402,7 +408,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
             session_config = tf.ConfigProto(**session_config)
         return tf.Session(graph=self._graph, config=session_config)
 
-    def _create_train_ops(self, optimizer_config: Optional[dict]) -> None:
+    def _create_train_ops(self, dependencies: List[List[tf.Operation]], optimizer_config: Optional[dict]) -> None:
         """
         Create the train ops for training. In order to handle incomplete batches, there must be one train op for
         each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
@@ -411,7 +417,8 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
 
         By default the train ops are constructed in the following way:
             - optimizer is created from the ``model.optimizer`` configuration dict
-            - gradients minimizing the respective tower losses are computed
+            - REGULARIZATION_LOSSSES collection is summed to ``regularization_loss``
+            - gradients minimizing the respective tower losses and ``regularization_loss`` are computed
             - for each number of non-empty towers
                 - gradients of the respective towers are averaged and applied
 
@@ -425,6 +432,7 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                     class: RMSPropOptimizer
                     learning_rate: 0.001
 
+        :param dependencies: a list of dependent operations (e.g. batch normalization updates) for each number of towers
         :param optimizer_config: optimizer configuration dict
         """
         if optimizer_config is None:
@@ -432,12 +440,18 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
                              'Please specify the configuration in `model.optimizer`.')
         grads_and_vars = []
         optimizer = create_optimizer(optimizer_config)
+        regularization_losses = self.graph.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+        regularization_loss = tf.reduce_sum(tf.stack(regularization_losses))
+        if regularization_losses:
+            logging.info('\tAdding regularization losses')
+            logging.debug('\tRegularization losses: %s', [var.name for var in regularization_losses])
         for tower in self._towers:
             with tower:
-                grads_and_vars.append(optimizer.compute_gradients(tower.loss))
+                grads_and_vars.append(optimizer.compute_gradients(tf.reduce_mean(tower.loss) + regularization_loss))
         for i in range(len(self._towers)):
-            optimizer.apply_gradients(average_gradients(grads_and_vars[:(i+1)]),
-                                      name=BaseModel.TRAIN_OP_NAME+'_{}'.format(i+1))
+            with tf.control_dependencies(dependencies[i]):
+                optimizer.apply_gradients(average_gradients(grads_and_vars[:(i + 1)]),
+                                          name=BaseModel.TRAIN_OP_NAME + '_{}'.format(i + 1))
 
     def _create_model(self, **kwargs) -> None:
         """
@@ -451,7 +465,22 @@ class BaseModel(AbstractModel, metaclass=ABCMeta):   # pylint: disable=too-many-
         .. warning::
             To support multi-GPU training, all the variables must be created with ``tf.get_variable``
             and appropriate variable scopes.
-        
+
         :param kwargs: model configuration as specified in ``model`` section of the configuration file
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
+
+    def _initialize_variables(self, **kwargs) -> None:
+        """
+        Initialize variables of your TensorFlow model.
+
+        By default variables are initialized randomly.
+
+        .. tip::
+
+            Override this method to load variables from some check-point and fine-tune the model.
+
+        :param kwargs: model configuration as specified in ``model`` section of the configuration file
+        """
+        self._session.run(tf.global_variables_initializer())
+        self._session.run(tf.local_variables_initializer())

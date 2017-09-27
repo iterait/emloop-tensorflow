@@ -22,6 +22,7 @@ references:
         source <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/git-utils.sh)
         fallback_pip_install_branch https://github.com/Cognexa/cxflow.git "$CIRCLE_BRANCH"
         pip3 install .
+        pip3 install tensorflow
 
   test: &test
     run:

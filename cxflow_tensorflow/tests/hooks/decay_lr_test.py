@@ -1,5 +1,5 @@
 """
-Test module for cxflow_tensorflow.hooks.LRDecayHook.
+Test module for cxflow_tensorflow.hooks.DecayLR hook.
 """
 
 import tensorflow as tf
@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from cxflow_tensorflow import DecayLR
 
-from ..model_test import TrainableModel, _OPTIMIZER
+from ..model_test import TrainableModel
 
 
 class LRModel(TrainableModel):
@@ -18,17 +18,17 @@ class LRModel(TrainableModel):
 
         super()._create_model(**kwargs)
 
-    def _create_train_ops(self, _):
+    def _create_train_ops(self, *_):
         tf.no_op(name='train_op_1')
 
 
 class LRDecayHookTest(TestCase):
     """
-    Test case for LRDecayHook.
+    Test case for DecayLR.
     """
 
     def test_invalid_config(self):
-        """ Test ``LRDecayHook`` invalid configurations."""
+        """ Test ``DecayLR`` invalid configurations."""
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
@@ -38,7 +38,7 @@ class LRDecayHookTest(TestCase):
         self.assertRaises(KeyError, DecayLR, model, variable_name='missing_variable')
 
     def test_multiply(self):
-        """ Test if ``LRDecayHook`` works properly in multiply mode."""
+        """ Test if ``DecayLR`` works properly in multiply mode."""
 
         decay_value = 0.9
         repeats = 13
@@ -56,7 +56,7 @@ class LRDecayHookTest(TestCase):
                                2*(decay_value**(1+repeats)))
 
     def test_add(self):
-        """ Test if ``LRDecayHook`` works properly in addition mode."""
+        """ Test if ``DecayLR`` works properly in addition mode."""
         decay_value = 0.01
         repeats = 17
 

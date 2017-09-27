@@ -8,10 +8,10 @@ In fact, in most cases one will override only a single method :py:meth:`cxflow_t
 """
 from .model import BaseModel
 from .utils import create_activation, create_optimizer
-from .hooks import DecayLR, WriteTensorBoard
+from .hooks import DecayLR, InitLR, WriteTensorBoard
 from .metrics import bin_dice, bin_stats
 from .ops import repeat
 
 __all__ = ['BaseModel']
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
