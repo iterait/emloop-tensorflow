@@ -10,6 +10,7 @@
 
    getting_started
    tutorial
+   regularization
    multi_gpu
    cxflow_tensorflow/index
 
