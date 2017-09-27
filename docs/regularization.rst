@@ -65,3 +65,24 @@ Luckily, most of the common layer APIs will do that for you.
 
 .. tip::
     To see the list of utilized regularization loss names, run **cxflow** with ``--verbose`` argument.
+
+Batch normalization
+-------------------
+
+`Batch normalization <https://arxiv.org/abs/1502.03167>`_ appears to be quite popular method improving generalization
+abilities of deep learning models.
+Batch normalization layers maintain reasonable activations even in very deep networks by scaling the activations with
+learned batch statistics.
+Those statistics (means and variances) have to be updated during the training phase.
+The update TensorFlow ops are expected in the ``UPDATE_OPS`` TensorFlow graph collection.
+
+Again, both Keras and TensorFlow layers API do this for you so that adding batch normalization to your models is
+simple and lucid.
+
+.. code-block:: python
+    :caption: adding batch normalization
+
+    def _create_model(self):
+        # ...
+        output = tf.dense(input, 512)
+        output = tf.layers.batch_normalization(output, training=self.is_training)
