@@ -14,4 +14,4 @@ from .ops import repeat
 
 __all__ = ['BaseModel']
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'

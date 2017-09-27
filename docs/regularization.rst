@@ -25,8 +25,8 @@ E.g. we can add dropout layer during the model creation as follows:
 
     def _create_model(self):
         # ...
-        output = tf.dense(input, 512)
-        output = tf.dropout(input, 0.5, training=self.is_training)
+        output = tf.layers.dense(input, 512)
+        output = tf.layers.dropout(input, 0.5, training=self.is_training)
 
 or if we prefer Keras:
 
@@ -84,5 +84,5 @@ simple and lucid.
 
     def _create_model(self):
         # ...
-        output = tf.dense(input, 512)
+        output = tf.layers.dense(input, 512)
         output = tf.layers.batch_normalization(output, training=self.is_training)
