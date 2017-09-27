@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.model &#8212; cxflow-tensorflow 0.2.1 documentation</title>
+    <title>cxflow_tensorflow.model &#8212; cxflow-tensorflow 0.3.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -50,7 +50,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,6 +58,7 @@
             
                 <li><a href="../../getting_started.html">Getting Started</a></li>
                 <li><a href="../../tutorial.html">Tutorial</a></li>
+                <li><a href="../../regularization.html">Model Regularization</a></li>
                 <li><a href="../../multi_gpu.html">Multi GPU models</a></li>
                 <li><a href="../../cxflow_tensorflow/index.html">API Reference</a></li>
             
@@ -99,6 +100,7 @@
 <ul class="nav nav-list">
 	<li><a href="https://cxflow.org">cxflow</a></li>
 	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
+	<li><a href="https://cxtream.org">cxtream</a> (C++)</li>
 </ul>
         </div>
       </div>
@@ -112,10 +114,9 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Iterable</span>
 <span class="kn">from</span> <span class="nn">glob</span> <span class="k">import</span> <span class="n">glob</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">from</span> <span class="nn">cxflow</span> <span class="k">import</span> <span class="n">AbstractModel</span><span class="p">,</span> <span class="n">AbstractDataset</span>
+<span class="kn">import</span> <span class="nn">cxflow</span> <span class="k">as</span> <span class="nn">cx</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">from</span> <span class="nn">.third_party.tensorflow.freeze_graph</span> <span class="k">import</span> <span class="n">freeze_graph</span>
 <span class="kn">from</span> <span class="nn">.third_party.tensorflow.average_gradients</span> <span class="k">import</span> <span class="n">average_gradients</span>
@@ -242,7 +243,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="n">AbstractModel</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>   <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+<div class="viewcode-block" id="BaseModel"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel">[docs]</a><span class="k">class</span> <span class="nc">BaseModel</span><span class="p">(</span><span class="n">cx</span><span class="o">.</span><span class="n">AbstractModel</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>  <span class="c1"># pylint: disable=too-many-instance-attributes</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cxflow :py:class:`AbstractModel &lt;cxflow.models.AbstractModel&gt;` implementation for TensorFlow models.</span>
 
@@ -262,7 +263,7 @@
     <span class="sd">&quot;&quot;&quot;Training flag variable name.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseModel.__init__"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="c1"># pylint: disable=too-many-arguments</span>
-                 <span class="n">dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AbstractDataset</span><span class="p">],</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">cx</span><span class="o">.</span><span class="n">AbstractDataset</span><span class="p">],</span> <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                  <span class="n">session_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_gpus</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">restore_from</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">restore_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -306,6 +307,7 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating TF model on </span><span class="si">%s</span><span class="s1"> GPU devices&#39;</span><span class="p">,</span> <span class="n">n_gpus</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_session</span><span class="p">(</span><span class="n">session_config</span><span class="p">)</span>
+        <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">restore_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">get_variable_scope</span><span class="p">())</span> <span class="k">as</span> <span class="n">scope</span><span class="p">:</span>
@@ -313,12 +315,13 @@
                     <span class="k">for</span> <span class="n">tower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">:</span>
                         <span class="k">with</span> <span class="n">tower</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_create_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">UPDATE_OPS</span><span class="p">)))</span>
                         <span class="n">scope</span><span class="o">.</span><span class="n">reuse_variables</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_restore_model</span><span class="p">(</span><span class="n">restore_from</span><span class="o">=</span><span class="n">restore_from</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="o">=</span><span class="n">restore_model_name</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_tensor_by_name</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAINING_FLAG_NAME</span> <span class="o">+</span> <span class="s1">&#39;:0&#39;</span><span class="p">)</span>
-                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
                     <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Could not find training flag placeholder in the graph, creating a new one.&#39;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="p">[],</span> <span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAINING_FLAG_NAME</span><span class="p">)</span>
 
@@ -327,30 +330,35 @@
 
             <span class="k">if</span> <span class="n">restore_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating train ops&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_create_train_ops</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_create_train_ops</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
 
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating Saver&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">max_to_keep</span><span class="o">=</span><span class="mi">100000000</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">restore_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Initializing the variables&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">())</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">local_variables_initializer</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_variables</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Searching for the train ops in the created graph&#39;</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">)):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_train_ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_operation_by_name</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span><span class="o">+</span><span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_train_ops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_operation_by_name</span><span class="p">(</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span><span class="o">+</span><span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
             <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot find train op </span><span class="si">{}</span><span class="s1"> in graph. &#39;</span>
                                  <span class="s1">&#39;The op must be named `train_op_</span><span class="si">{}</span><span class="s1">`.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">ex</span>
 
-            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Creating Saver&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">(</span><span class="n">max_to_keep</span><span class="o">=</span><span class="mi">100000000</span><span class="p">)</span></div>
+            <span class="n">train_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">TRAINABLE_VARIABLES</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Trainable variables: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">train_vars</span><span class="p">])</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Number of parameters: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">train_vars</span><span class="p">]))</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">input_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>   <span class="c1"># pylint: disable=invalid-sequence-index</span>
+    <span class="k">def</span> <span class="nf">input_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># pylint: disable=invalid-sequence-index</span>
         <span class="sd">&quot;&quot;&quot;List of TF input tensor (placeholder) names.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_names</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>   <span class="c1"># pylint: disable=invalid-sequence-index</span>
+    <span class="k">def</span> <span class="nf">output_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>  <span class="c1"># pylint: disable=invalid-sequence-index</span>
         <span class="sd">&quot;&quot;&quot;List of TF output tensor names.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_names</span>
 
@@ -373,7 +381,7 @@
         <span class="sd">&quot;&quot;&quot;TF session object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
 
-<div class="viewcode-block" id="BaseModel.run"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span> <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<div class="viewcode-block" id="BaseModel.run"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">cx</span><span class="o">.</span><span class="n">Batch</span><span class="p">,</span> <span class="n">train</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.</span>
 
@@ -509,7 +517,7 @@
             <span class="n">session_config</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ConfigProto</span><span class="p">(</span><span class="o">**</span><span class="n">session_config</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span><span class="n">graph</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graph</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">session_config</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseModel._create_train_ops"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">[docs]</a>    <span class="k">def</span> <span class="nf">_create_train_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BaseModel._create_train_ops"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">[docs]</a>    <span class="k">def</span> <span class="nf">_create_train_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dependencies</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Operation</span><span class="p">]],</span> <span class="n">optimizer_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create the train ops for training. In order to handle incomplete batches, there must be one train op for</span>
 <span class="sd">        each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers</span>
@@ -518,7 +526,8 @@
 
 <span class="sd">        By default the train ops are constructed in the following way:</span>
 <span class="sd">            - optimizer is created from the ``model.optimizer`` configuration dict</span>
-<span class="sd">            - gradients minimizing the respective tower losses are computed</span>
+<span class="sd">            - REGULARIZATION_LOSSSES collection is summed to ``regularization_loss``</span>
+<span class="sd">            - gradients minimizing the respective tower losses and ``regularization_loss`` are computed</span>
 <span class="sd">            - for each number of non-empty towers</span>
 <span class="sd">                - gradients of the respective towers are averaged and applied</span>
 
@@ -532,6 +541,7 @@
 <span class="sd">                    class: RMSPropOptimizer</span>
 <span class="sd">                    learning_rate: 0.001</span>
 
+<span class="sd">        :param dependencies: a list of dependent operations (e.g. batch normalization updates) for each number of towers</span>
 <span class="sd">        :param optimizer_config: optimizer configuration dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">optimizer_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -539,12 +549,18 @@
                              <span class="s1">&#39;Please specify the configuration in `model.optimizer`.&#39;</span><span class="p">)</span>
         <span class="n">grads_and_vars</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">optimizer</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">optimizer_config</span><span class="p">)</span>
+        <span class="n">regularization_losses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">REGULARIZATION_LOSSES</span><span class="p">)</span>
+        <span class="n">regularization_loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">regularization_losses</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">regularization_losses</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Adding regularization losses&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Regularization losses: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">regularization_losses</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">tower</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">tower</span><span class="p">:</span>
-                <span class="n">grads_and_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">optimizer</span><span class="o">.</span><span class="n">compute_gradients</span><span class="p">(</span><span class="n">tower</span><span class="o">.</span><span class="n">loss</span><span class="p">))</span>
+                <span class="n">grads_and_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">optimizer</span><span class="o">.</span><span class="n">compute_gradients</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tower</span><span class="o">.</span><span class="n">loss</span><span class="p">)</span> <span class="o">+</span> <span class="n">regularization_loss</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_towers</span><span class="p">)):</span>
-            <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">average_gradients</span><span class="p">(</span><span class="n">grads_and_vars</span><span class="p">[:(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]),</span>
-                                      <span class="n">name</span><span class="o">=</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span><span class="o">+</span><span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+            <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">(</span><span class="n">dependencies</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="n">average_gradients</span><span class="p">(</span><span class="n">grads_and_vars</span><span class="p">[:(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]),</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">BaseModel</span><span class="o">.</span><span class="n">TRAIN_OP_NAME</span> <span class="o">+</span> <span class="s1">&#39;_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="BaseModel._create_model"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_model">[docs]</a>    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -558,10 +574,25 @@
 <span class="sd">        .. warning::</span>
 <span class="sd">            To support multi-GPU training, all the variables must be created with ``tf.get_variable``</span>
 <span class="sd">            and appropriate variable scopes.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param kwargs: model configuration as specified in ``model`` section of the configuration file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;`_create_model` method must be implemented in order to construct a new model.&#39;</span><span class="p">)</span></div></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;`_create_model` method must be implemented in order to construct a new model.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseModel._initialize_variables"><a class="viewcode-back" href="../../cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._initialize_variables">[docs]</a>    <span class="k">def</span> <span class="nf">_initialize_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize variables of your TensorFlow model.</span>
+
+<span class="sd">        By default variables are initialized randomly.</span>
+
+<span class="sd">        .. tip::</span>
+
+<span class="sd">            Override this method to load variables from some check-point and fine-tune the model.</span>
+
+<span class="sd">        :param kwargs: model configuration as specified in ``model`` section of the configuration file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">global_variables_initializer</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">local_variables_initializer</span><span class="p">())</span></div></div>
 </pre></div>
 
     </div>

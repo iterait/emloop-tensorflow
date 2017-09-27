@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.2.1 documentation</title>
+    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -60,6 +60,7 @@
             
                 <li><a href="../getting_started.html">Getting Started</a></li>
                 <li><a href="../tutorial.html">Tutorial</a></li>
+                <li><a href="../regularization.html">Model Regularization</a></li>
                 <li><a href="../multi_gpu.html">Multi GPU models</a></li>
                 <li><a href="index.html">API Reference</a></li>
             
@@ -116,6 +117,7 @@
 <ul class="nav nav-list">
 	<li><a href="https://cxflow.org">cxflow</a></li>
 	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
+	<li><a href="https://cxtream.org">cxtream</a> (C++)</li>
 </ul>
         </div>
       </div>
@@ -142,13 +144,13 @@ In fact, in most cases one will override only a single method <a class="referenc
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
-Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.8)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
+Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.9)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[.datasets.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
-<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.8)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
+<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.9)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
 <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a> method.</p>
 <p>See the method references for additional customization options.</p>
@@ -266,7 +268,7 @@ the given <code class="docutils literal"><span class="pre">session_config</span>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel._create_train_ops">
-<code class="descname">_create_train_ops</code><span class="sig-paren">(</span><em>optimizer_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._create_train_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._create_train_ops" title="Permalink to this definition">¶</a></dt>
+<code class="descname">_create_train_ops</code><span class="sig-paren">(</span><em>dependencies</em>, <em>optimizer_config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._create_train_ops"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._create_train_ops" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create the train ops for training. In order to handle incomplete batches, there must be one train op for
 each number of empty towers. E.g. for 2 GPU training, one must define 2 train ops for 1 and 2 towers
 respectively. The train ops must be named <code class="docutils literal"><span class="pre">train_op_1</span></code>, <code class="docutils literal"><span class="pre">train_op_2</span></code> etc.
@@ -275,7 +277,8 @@ wherein the suffixed number stands for the number of towers.</p>
 <dt>By default the train ops are constructed in the following way:</dt>
 <dd><ul class="first last simple">
 <li>optimizer is created from the <code class="docutils literal"><span class="pre">model.optimizer</span></code> configuration dict</li>
-<li>gradients minimizing the respective tower losses are computed</li>
+<li>REGULARIZATION_LOSSSES collection is summed to <code class="docutils literal"><span class="pre">regularization_loss</span></code></li>
+<li>gradients minimizing the respective tower losses and <code class="docutils literal"><span class="pre">regularization_loss</span></code> are computed</li>
 <li><dl class="first docutils">
 <dt>for each number of non-empty towers</dt>
 <dd><ul class="first last">
@@ -301,7 +304,33 @@ wherein the suffixed number stands for the number of towers.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>optimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; optimizer configuration dict</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dependencies</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Operation</span></code>]]) &#8211; a list of dependent operations (e.g. batch normalization updates) for each number of towers</li>
+<li><strong>optimizer_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; optimizer configuration dict</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">None</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cxflow_tensorflow.BaseModel._initialize_variables">
+<code class="descname">_initialize_variables</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._initialize_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._initialize_variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize variables of your TensorFlow model.</p>
+<p>By default variables are initialized randomly.</p>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Override this method to load variables from some check-point and fine-tune the model.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; model configuration as specified in <code class="docutils literal"><span class="pre">model</span></code> section of the configuration file</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
@@ -414,7 +443,7 @@ wherein the suffixed number stands for the number of towers.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
+<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
 <li><strong>train</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; flag whether parameters update (<code class="docutils literal"><span class="pre">train_op</span></code>) should be included in fetches</li>
 </ul>
 </td>
