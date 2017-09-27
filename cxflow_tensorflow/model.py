@@ -440,7 +440,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                              'Please specify the configuration in `model.optimizer`.')
         grads_and_vars = []
         optimizer = create_optimizer(optimizer_config)
-        regularization_loss = tf.reduce_sum(tf.stack(self.graph.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)))
+        regularization_losses = self.graph.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+        regularization_loss = tf.reduce_sum(tf.stack(regularization_losses))
+        if regularization_losses:
+            logging.info('\tAdding regularization losses')
+            logging.debug('\tRegularization losses: %s', [var.name for var in regularization_losses])
         for tower in self._towers:
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tf.reduce_mean(tower.loss) + regularization_loss))
