@@ -33,6 +33,7 @@ html_theme_options.update({
     'navbar_links': [
         ("Getting Started", "getting_started"),
         ("Tutorial", "tutorial"),
+        ("Model Regularization", "regularization"),
         ("Multi GPU models", "multi_gpu"),
         ("API Reference", "cxflow_tensorflow/index"),
     ],
