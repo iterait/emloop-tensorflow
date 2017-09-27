@@ -43,7 +43,7 @@ Weight decay
 
 Weight decay, also known as L2 regularization is yet another common way to regularize deep learning models.
 To apply weight decay in **cxflow-tensorflow**, add the regularization cost the ``REGULARIZATION_LOSSES``
- TensorFlow graph collection.
+TensorFlow graph collection.
 
 E.g.:
 
@@ -54,10 +54,10 @@ E.g.:
         # ...
         self.graph.add_to_collection(tf.GraphKeys.REGULARIZATION_LOSSES, my_loss)
 
-Luckily, most of the common layer APIs will do that for you. E.g.
+Luckily, most of the common layer APIs will do that for you.
 
 .. code-block:: python
-    :caption: implicit regularization
+    :caption: Keras adds the regularization cost implicitly
 
     def _create_model(self):
         # ...
