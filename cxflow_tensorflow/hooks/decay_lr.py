@@ -29,9 +29,9 @@ class DecayLR(AbstractHook):
 
         hooks:
           - cxflow_tensorflow.DecayLR:
-              decay_value=-0.00001
-              variable_name='my_learning_rate'
-              decay_type='multiply'
+              decay_value: -0.00001
+              variable_name: my_learning_rate
+              decay_type: add
 
     """
 
