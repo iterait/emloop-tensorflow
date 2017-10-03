@@ -35,15 +35,12 @@ class MetricsTest(CXTestCaseWithDir):
         with tf.Session().as_default():
             labels = tf.constant(_LABELS, dtype=tf.int32)
             predictions = tf.constant(_PREDICTIONS, dtype=tf.int32)
-            expected_recall = [1./3, 0., 0.]
-            expected_precision = [1./2, 0.]
-            expected_f1 = [0.4, 0.0, 0.0]
+            expected_recall =    [1./3, 0., 0.,     np.nan]
+            expected_precision = [1./2, 0., np.nan, np.nan]
+            expected_f1 =        [0.4,  0., 0.,     np.nan]
             computed_f1, computed_precision, computed_recall = \
-                [list(computed.eval()) for computed in bin_stats(predictions, labels)]
+                [computed.eval() for computed in bin_stats(predictions, labels)]
 
-            self.assertListEqual(expected_f1, computed_f1[:-1])
-            self.assertListEqual(expected_precision, computed_precision[:-2])
-            self.assertTrue(np.isnan(computed_precision[-2]))
-            self.assertListEqual(expected_recall, computed_recall[:-1])
-            for computed in (computed_f1, computed_precision, computed_recall):
-                self.assertTrue(np.isnan(computed[-1]))
+            np.testing.assert_equal(expected_f1, computed_f1)
+            np.testing.assert_equal(expected_precision, computed_precision)
+            np.testing.assert_equal(expected_recall, computed_recall)
