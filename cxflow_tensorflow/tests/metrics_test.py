@@ -37,7 +37,7 @@ class MetricsTest(CXTestCaseWithDir):
             predictions = tf.constant(_PREDICTIONS, dtype=tf.int32)
             expected_recall =    [1./3, 0., 0.,     np.nan]
             expected_precision = [1./2, 0., np.nan, np.nan]
-            expected_f1 =        [0.4,  0., 0.,     np.nan]
+            expected_f1 =        [0.4,  0., np.nan, np.nan]
             computed_f1, computed_precision, computed_recall = \
                 [computed.eval() for computed in bin_stats(predictions, labels)]
 

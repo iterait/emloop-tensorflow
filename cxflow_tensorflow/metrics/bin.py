@@ -23,9 +23,7 @@ def bin_stats(predictions: tf.Tensor, labels: tf.Tensor) -> Tuple[tf.Tensor, tf.
 
     recall = true_positives / (true_positives + false_negatives)
     precision = true_positives / (true_positives + false_positives)
-
     f1_score = 2 / (1 / precision + 1 / recall)
-    f1_score = tf.where(tf.is_nan(f1_score), recall, f1_score)
 
     return f1_score, precision, recall
 
