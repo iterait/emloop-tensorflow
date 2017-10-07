@@ -4,11 +4,12 @@ Module with learning rate initializing hook.
 import logging
 
 import tensorflow as tf
-from cxflow.hooks.abstract_hook import AbstractHook
-from cxflow_tensorflow import BaseModel
+import cxflow as cx
+
+from ..model import BaseModel
 
 
-class InitLR(AbstractHook):
+class InitLR(cx.AbstractHook):
     """
     Hook for initializing the learning rate (or any other variable) before the training.
 

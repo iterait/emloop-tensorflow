@@ -4,11 +4,12 @@ Module with learning rate decaying hook.
 import logging
 
 import tensorflow as tf
-from cxflow.hooks.abstract_hook import AbstractHook
-from cxflow_tensorflow import BaseModel
+import cxflow as cx
+
+from ..model import BaseModel
 
 
-class DecayLR(AbstractHook):
+class DecayLR(cx.AbstractHook):
     """
     Hook for modifying (decaying) the learning rate (or any other variable) during the training.
 
