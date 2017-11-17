@@ -5,12 +5,12 @@ import logging
 
 import numpy as np
 import tensorflow as tf
+import cxflow as cx
 
-from cxflow.hooks import AbstractHook
-from cxflow_tensorflow.model import BaseModel
+from ..model import BaseModel
 
 
-class WriteTensorBoard(AbstractHook):
+class WriteTensorBoard(cx.AbstractHook):
     """
     Write scalar epoch variables to TensorBoard summaries.
 
@@ -54,7 +54,7 @@ class WriteTensorBoard(AbstractHook):
         logging.debug('Creating TensorBoard writer')
         self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=model.graph, flush_secs=flush_secs)
 
-    def after_epoch(self, epoch_id: int, epoch_data: AbstractHook.EpochData) -> None:
+    def after_epoch(self, epoch_id: int, epoch_data: cx.EpochData) -> None:
         """
         Log the specified epoch data variables to the tensorboard.
 
