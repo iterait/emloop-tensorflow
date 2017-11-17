@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.3.1 documentation</title>
+    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.3.2 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.1',
+        VERSION:     '0.3.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -162,14 +162,14 @@ info.</p>
 </div>
 <img src="../_images/inheritance-64853e5bb7478b8a84427a3c25d0f5bd8e10d84e.png" alt="Inheritance diagram of WriteTensorBoard" usemap="#inheritance97ace323b0" class="inheritance"/>
 <map id="inheritance97ace323b0" name="inheritance97ace323b0">
-<area shape="rect" id="node2" title="Write scalar epoch variables to TensorBoard summaries." alt="" coords="163,5,295,31"/>
+<area shape="rect" id="node2" title="Write scalar epoch variables to TensorBoard summaries." alt="" coords="164,5,300,31"/>
 </map>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS">
-<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'error', 'ignore', 'warn'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'ignore', 'error', 'warn'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible actions to take on unknown variable type.</p>
 </dd></dl>
 
@@ -203,7 +203,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>epoch_id</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; epoch ID</li>
-<li><strong>epoch_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]]) &#8211; epoch data as created by other hooks</li>
+<li><strong>epoch_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]) &#8211; epoch data as created by other hooks</li>
 </ul>
 </td>
 </tr>
@@ -234,22 +234,22 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <div class="code-block-caption"><span class="caption-text">linear decay of <code class="docutils literal"><span class="pre">my_learning_rate</span></code> variable</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.DecayLR</span><span class="p p-Indicator">:</span>
-      <span class="l l-Scalar l-Scalar-Plain">decay_value=-0.00001</span>
-      <span class="l l-Scalar l-Scalar-Plain">variable_name=&#39;my_learning_rate&#39;</span>
-      <span class="l l-Scalar l-Scalar-Plain">decay_type=&#39;multiply&#39;</span>
+      <span class="l l-Scalar l-Scalar-Plain">decay_value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">-0.00001</span>
+      <span class="l l-Scalar l-Scalar-Plain">variable_name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my_learning_rate</span>
+      <span class="l l-Scalar l-Scalar-Plain">decay_type</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">add</span>
 </pre></div>
 </div>
 </div>
 <img src="../_images/inheritance-6520996eb35ecf9c7fcefdc8510da0604d43b52c.png" alt="Inheritance diagram of DecayLR" usemap="#inheritance4c00d285d1" class="inheritance"/>
 <map id="inheritance4c00d285d1" name="inheritance4c00d285d1">
-<area shape="rect" id="node2" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="163,5,240,31"/>
+<area shape="rect" id="node2" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="164,5,243,31"/>
 </map>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES">
-<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'multiply', 'add'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
+<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'add', 'multiply'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible LR decay types.</p>
 </dd></dl>
 
@@ -317,7 +317,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 </div>
 <img src="../_images/inheritance-8e7c348243c57ccf1aa286eeb900166501b296ac.png" alt="Inheritance diagram of InitLR" usemap="#inheritance5203418f13" class="inheritance"/>
 <map id="inheritance5203418f13" name="inheritance5203418f13">
-<area shape="rect" id="node2" title="Hook for initializing the learning rate (or any other variable) before the training." alt="" coords="163,5,235,31"/>
+<area shape="rect" id="node2" title="Hook for initializing the learning rate (or any other variable) before the training." alt="" coords="164,5,236,31"/>
 </map>
 <div class="line-block">
 <div class="line"><br /></div>
@@ -365,6 +365,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
       
   </div>
 </div>
+
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
@@ -373,9 +374,12 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
     </p>
   </div>
 </footer>
+
+
+
   </body>
 </html>
