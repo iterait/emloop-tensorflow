@@ -23,7 +23,7 @@ class WriteTensorBoard(cx.AbstractHook):
         :caption: default usage
 
         hooks:
-          - cxflow_tensorflow.WriteTensorboard
+          - cxflow_tensorflow.hooks.WriteTensorboard
 
     .. code-block:: yaml
         :caption: cast variables with unknown types to strings
