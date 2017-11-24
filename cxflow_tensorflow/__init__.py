@@ -9,7 +9,6 @@ In fact, in most cases one will override only a single method :py:meth:`cxflow_t
 from .model import BaseModel
 from .utils import create_activation, create_optimizer
 from .metrics import bin_dice, bin_stats
-from .ops import repeat
 
 __all__ = ['BaseModel']
 
