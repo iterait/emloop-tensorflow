@@ -22,6 +22,8 @@ release = pkg_resources.get_distribution("cxflow-tensorflow").version
 
 html_static_path.append("_static")
 
+html_context.update(analytics_id="UA-108931454-1")
+
 html_theme_options.update({
     # Navigation bar title. (Default: ``project`` value)
     'navbar_title': "cxflow-tensorflow",
