@@ -1,11 +1,12 @@
 """
 Test module for cxflow_tensorflow.hooks.DecayLR hook.
 """
-
-import tensorflow as tf
+import mock
 from unittest import TestCase
+import tensorflow as tf
 
-from cxflow_tensorflow import DecayLR
+from cxflow_tensorflow.hooks import DecayLR, DecayLROnPlateau
+from cxflow.hooks import OnPlateau
 
 from ..model_test import TrainableModel
 
@@ -22,7 +23,7 @@ class LRModel(TrainableModel):
         tf.no_op(name='train_op_1')
 
 
-class LRDecayHookTest(TestCase):
+class DecayLRTest(TestCase):
     """
     Test case for DecayLR.
     """
@@ -71,3 +72,43 @@ class LRDecayHookTest(TestCase):
             hook.after_epoch()
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+(decay_value*(1+repeats)), places=3)
+
+
+class DecayLROnPlateauTest(TestCase):
+    """
+    Test case for DecayLROnPlateau.
+
+    Both OnPlateau and DecayLR are already tested, we only need to check if they are properly integrated.
+    """
+
+    def get_model(self):
+        return LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+
+    def get_epoch_data(self):
+        return {'valid': {'loss': [0]}}
+
+    def test_arg_forward(self):
+        """ Test if ``DecayLROnPlateau`` forwards args properly."""
+        hook = DecayLROnPlateau(model=self.get_model(), short_term=5, variable='my_lr')
+        self.assertEqual(hook._variable, 'my_lr')
+        self.assertEqual(hook._short_term, 5)
+
+    def test_call_forward(self):
+        """ Test if ``DecayLROnPlateau`` forwards event calls properly."""
+        with mock.patch.object(DecayLR, 'after_epoch') as decay_ae, \
+             mock.patch.object(OnPlateau, 'after_epoch') as plateau_ae:
+            hook = DecayLROnPlateau(model=self.get_model())
+            hook.after_epoch(epoch_id=0, epoch_data=self.get_epoch_data())
+            self.assertEqual(decay_ae.call_count, 0)
+            self.assertEqual(plateau_ae.call_count, 1)
+
+    def test_wait(self):
+        """ Test if ``DecayLROnPlateau`` waits short_term epochs between decays."""
+        with mock.patch.object(DecayLR, '_decay_variable') as decay:
+            hook = DecayLROnPlateau(model=self.get_model(), short_term=3)
+            hook._on_plateau_action()
+            for i in range(hook._short_term):
+                self.assertEqual(decay.call_count, 1)
+                hook.after_epoch(epoch_id=i, epoch_data=self.get_epoch_data())
+                hook._on_plateau_action()
+            self.assertEqual(decay.call_count, 2)

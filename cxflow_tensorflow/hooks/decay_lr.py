@@ -22,14 +22,14 @@ class DecayLR(cx.AbstractHook):
         :caption: multiply ``learning_rate`` variable by 0.98 after every epoch
 
         hooks:
-          - cxflow_tensorflow.DecayLR
+          - cxflow_tensorflow.hooks.DecayLR
 
 
     .. code-block:: yaml
         :caption: linear decay of ``my_learning_rate`` variable
 
         hooks:
-          - cxflow_tensorflow.DecayLR:
+          - cxflow_tensorflow.hooks.DecayLR:
               decay_value: -0.00001
               variable_name: my_learning_rate
               decay_type: add
@@ -69,7 +69,7 @@ class DecayLR(cx.AbstractHook):
 
         super().__init__(**kwargs)
 
-    def after_epoch(self, **_) -> None:
+    def _decay_variable(self) -> None:
         """
         Modify the specified TF variable (now saved in ``self._lr``) using ``self._decay_value``.
 
@@ -80,3 +80,55 @@ class DecayLR(cx.AbstractHook):
 
         tf.assign(self._lr,  new_value).eval(session=self._model.session)
         logging.info('LR updated to `%s`', self._lr.eval(session=self._model.session))
+
+    def after_epoch(self, **_) -> None:
+        """Call :py:meth:`_decay_variable`."""
+        self._decay_variable()
+
+
+
+class DecayLROnPlateau(cx.hooks.OnPlateau, DecayLR):
+    """
+    Decay learning rate on plateau.
+
+    After decaying, LR may be decayed again only after additional ``short_term`` epochs.
+
+    Shares args from both :py:class:`DecayLR` and :py:class:`cx.hooks.OnPlateau`.
+
+    .. code-block:: yaml
+        :caption: multiply the learning rate by 0.1 when the mean of last 100 valid ``accuracy`` values is
+                  greater than the mean of last 30 ``accuracy`` values.
+
+        hooks:
+          - cxflow_tensorflow.hooks.DecayLROnPlateau:
+              long_term: 100
+              short_term: 30
+              variable: accuracy
+              objective: max
+
+
+    .. code-block:: yaml
+        :caption: decay LR by 0.01 when valid ``loss`` plateau is detected
+
+        hooks:
+          - cxflow_tensorflow.hooks.DecayLROnPlateau:
+              decay_value: 0.01
+
+    """
+
+    def __init__(self, decay_value: float=0.1, **kwargs):
+        cx.hooks.OnPlateau.__init__(self, **kwargs)
+        DecayLR.__init__(self, decay_value=decay_value, **kwargs)
+        self._prevent_decay = 0
+
+    def _on_plateau_action(self, **kwargs) -> None:
+        """Call :py:meth:`_decay_variable`."""
+        if self._prevent_decay == 0:
+            logging.info('Plateau detected, decaying learning rate')
+            self._decay_variable()
+            self._prevent_decay = self._short_term
+
+    def after_epoch(self, **kwargs) -> None:
+        if self._prevent_decay > 0:
+            self._prevent_decay -= 1
+        cx.hooks.OnPlateau.after_epoch(self, **kwargs)

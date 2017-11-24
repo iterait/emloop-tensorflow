@@ -2,3 +2,4 @@
 tensorflow-tensorboard>=0.1.4
 cxflow>=0.8.1
 numpy>=1.13.1
+mock>=2.0.0

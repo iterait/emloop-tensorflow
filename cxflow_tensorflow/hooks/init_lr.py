@@ -21,14 +21,14 @@ class InitLR(cx.AbstractHook):
         :caption: initialize ``learning_rate`` variable to 0.001
 
         hooks:
-          - cxflow_tensorflow.InitLR:
+          - cxflow_tensorflow.hooks.InitLR:
               value: 0.001
 
     .. code-block:: yaml
         :caption: initialize ``my_variable`` variable to 42
 
         hooks:
-          - cxflow_tensorflow.InitLR:
+          - cxflow_tensorflow.hooks.InitLR:
               variable_name: my_variable
               value: 42
 
