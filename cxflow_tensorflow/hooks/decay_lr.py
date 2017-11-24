@@ -24,7 +24,6 @@ class DecayLR(cx.AbstractHook):
         hooks:
           - cxflow_tensorflow.hooks.DecayLR
 
-
     .. code-block:: yaml
         :caption: linear decay of ``my_learning_rate`` variable
 
@@ -86,7 +85,6 @@ class DecayLR(cx.AbstractHook):
         self._decay_variable()
 
 
-
 class DecayLROnPlateau(cx.hooks.OnPlateau, DecayLR):
     """
     Decay learning rate on plateau.
@@ -105,7 +103,6 @@ class DecayLROnPlateau(cx.hooks.OnPlateau, DecayLR):
               short_term: 30
               variable: accuracy
               objective: max
-
 
     .. code-block:: yaml
         :caption: decay LR by 0.01 when valid ``loss`` plateau is detected

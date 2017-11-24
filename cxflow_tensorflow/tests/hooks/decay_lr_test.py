@@ -1,7 +1,7 @@
 """
 Test module for cxflow_tensorflow.hooks.DecayLR hook.
 """
-import mock
+import unittest.mock as mock
 from unittest import TestCase
 import tensorflow as tf
 
