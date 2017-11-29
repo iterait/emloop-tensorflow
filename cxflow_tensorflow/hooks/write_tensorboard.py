@@ -33,11 +33,11 @@ class WriteTensorBoard(cx.AbstractHook):
               on_unknown_type: str
 
     .. code-block:: yaml
-        :caption: disable plotting the network architecture
+        :caption: visualize the computational graph
 
         hooks:
           - cxflow_tensorflow.hooks.WriteTensorboard:
-              visualize_graph: false
+              visualize_graph: true
 
     """
 
@@ -45,7 +45,7 @@ class WriteTensorBoard(cx.AbstractHook):
     """Possible actions to take on unknown variable type."""
 
     def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore',
-                 visualize_graph: bool=True, **kwargs):
+                 visualize_graph: bool=False, **kwargs):
         """
         Create new WriteTensorBoard hook.
 
@@ -53,7 +53,7 @@ class WriteTensorBoard(cx.AbstractHook):
         :param output_dir: output dir to save the tensorboard logs
         :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list),
             one of :py:attr:`UNKNOWN_TYPE_ACTIONS`
-        :param visualize_graph: should the network graph be visualized?
+        :param visualize_graph: include visualization of the computational graph (may be resource-extensive)
         """
         assert isinstance(model, BaseModel)
 
