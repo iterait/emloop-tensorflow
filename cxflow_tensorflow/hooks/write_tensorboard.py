@@ -82,9 +82,11 @@ class WriteTensorBoard(cx.AbstractHook):
                     result = value
                 elif isinstance(value, dict) and 'mean' in value:  # or the mean
                     result = value['mean']
+                elif isinstance(value, dict) and 'nanmean' in value:  # or the nanmean
+                    result = value['nanmean']
                 else:
-                    err_message = 'Variable `{}` in stream `{}` is not scalar and does not contain `mean` aggregation'\
-                                  .format(variable, stream_name)
+                    err_message = 'Variable `{}` in stream `{}` is not scalar and does not contain `mean` or' \
+                                  '`nanmean` aggregation'.format(variable, stream_name)
                     if self._on_unknown_type == 'warn':
                         logging.warning(err_message)
                         result = str(value)
