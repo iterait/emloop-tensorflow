@@ -32,12 +32,20 @@ class WriteTensorBoard(cx.AbstractHook):
           - cxflow_tensorflow.WriteTensorboard:
               on_unknown_type: str
 
+    .. code-block:: yaml
+        :caption: visualize the computational graph
+
+        hooks:
+          - cxflow_tensorflow.hooks.WriteTensorboard:
+              visualize_graph: true
+
     """
 
     UNKNOWN_TYPE_ACTIONS = {'error', 'warn', 'ignore'}
     """Possible actions to take on unknown variable type."""
 
-    def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore', **kwargs):
+    def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore',
+                 visualize_graph: bool=False, **kwargs):
         """
         Create new WriteTensorBoard hook.
 
@@ -45,6 +53,7 @@ class WriteTensorBoard(cx.AbstractHook):
         :param output_dir: output dir to save the tensorboard logs
         :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list),
             one of :py:attr:`UNKNOWN_TYPE_ACTIONS`
+        :param visualize_graph: include visualization of the computational graph (may be resource-extensive)
         """
         assert isinstance(model, BaseModel)
 
@@ -52,7 +61,8 @@ class WriteTensorBoard(cx.AbstractHook):
         self._on_unknown_type = on_unknown_type
 
         logging.debug('Creating TensorBoard writer')
-        self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=model.graph, flush_secs=flush_secs)
+        graph = model.graph if visualize_graph else None
+        self._summary_writer = tf.summary.FileWriter(logdir=output_dir, graph=graph, flush_secs=flush_secs)
 
     def after_epoch(self, epoch_id: int, epoch_data: cx.EpochData) -> None:
         """
