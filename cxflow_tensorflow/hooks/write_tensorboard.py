@@ -2,6 +2,7 @@
 Module with a tensorboard logging hook.
 """
 import logging
+from typing import Optional, Iterable
 
 import numpy as np
 import tensorflow as tf
@@ -44,21 +45,33 @@ class WriteTensorBoard(cx.AbstractHook):
     UNKNOWN_TYPE_ACTIONS = {'error', 'warn', 'ignore'}
     """Possible actions to take on unknown variable type."""
 
-    def __init__(self, model: BaseModel, output_dir: str, flush_secs: int=10, on_unknown_type: str='ignore',
-                 visualize_graph: bool=False, **kwargs):
+    MISSING_VARIABLE_ACTIONS = {'error', 'warn', 'ignore'}
+    """Action executed on missing variable."""
+
+    def __init__(self, model: BaseModel, output_dir: str, image_variables: Optional[Iterable[str]] = None,
+                 flush_secs: int = 10, visualize_graph: bool = False, on_unknown_type: str = 'ignore',
+                 on_missing_variable: str = 'error', **kwargs):
         """
         Create new WriteTensorBoard hook.
 
         :param model: a BaseModel being trained
         :param output_dir: output dir to save the tensorboard logs
+        :param image_variables: list of image variable names
+        :param flush_secs: flush interval in seconds
+        :param visualize_graph: include visualization of the computational graph (may be resource-extensive)
         :param on_unknown_type: an action to be taken if the variable value type is not supported (e.g. a list),
             one of :py:attr:`UNKNOWN_TYPE_ACTIONS`
-        :param visualize_graph: include visualization of the computational graph (may be resource-extensive)
+        :param on_missing_variable: an action to be taken if the specified variable is not present,
+            one of :py:attr:`MISSING_VARIABLE_ACTIONS`
         """
         assert isinstance(model, BaseModel)
+        assert on_unknown_type in WriteTensorBoard.UNKNOWN_TYPE_ACTIONS
+        assert on_missing_variable in WriteTensorBoard.MISSING_VARIABLE_ACTIONS
 
-        super().__init__(model=model, output_dir=output_dir, **kwargs)
+        super().__init__(**kwargs)
         self._on_unknown_type = on_unknown_type
+        self._image_variables = image_variables or []
+        self._on_missing_variable = on_missing_variable
 
         logging.debug('Creating TensorBoard writer')
         graph = model.graph if visualize_graph else None
@@ -71,12 +84,20 @@ class WriteTensorBoard(cx.AbstractHook):
         :param epoch_id: epoch ID
         :param epoch_data: epoch data as created by other hooks
         """
+        if self._image_variables:
+            try:
+                import cv2
+            except ImportError as ex:
+                raise ImportError('OpenCV cv2 package is required for writing images to tensorboard.') from ex
+
         logging.debug('TensorBoard logging after epoch %d', epoch_id)
-        measures = []
+        summaries = []
 
         for stream_name in epoch_data.keys():
             stream_data = epoch_data[stream_name]
-            for variable in stream_data.keys():
+            for variable in stream_data.keys():  # try to treat all the variables but images as scalars
+                if variable in self._image_variables:
+                    continue  # we'll deal with image variables later
                 value = stream_data[variable]
                 if np.isscalar(value):  # try logging the scalar values
                     result = value
@@ -95,6 +116,27 @@ class WriteTensorBoard(cx.AbstractHook):
                     else:
                         continue
 
-                measures.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
+                summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
 
-        self._summary_writer.add_summary(tf.Summary(value=measures), epoch_id)
+            for variable in self._image_variables:
+                if variable not in stream_data:
+                    err_message = '`{}` not found in epoch data.'.format(variable)
+                    if self._on_missing_variable == 'error':
+                        raise KeyError(err_message)
+                    elif self._on_missing_variable == 'warn':
+                        logging.warning(err_message)
+                    else:
+                        continue
+                image = stream_data[variable]
+                assert isinstance(image, np.ndarray)
+                if image.dtype == np.float32:
+                    image = ((image - np.min(image))*(255./(np.max(image)-np.min(image)))).astype(np.uint8)
+                image_string = cv2.imencode('.png', image)[1].tostring()
+
+                image_summary = tf.Summary.Image(encoded_image_string=image_string,
+                                                 height=image.shape[0],
+                                                 width=image.shape[1])
+
+                summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), image=image_summary))
+
+        self._summary_writer.add_summary(tf.Summary(value=summaries), epoch_id)
