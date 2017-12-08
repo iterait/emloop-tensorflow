@@ -87,7 +87,7 @@ class WriteTensorBoard(cx.AbstractHook):
         if self._image_variables:
             try:
                 import cv2
-            except ImportError as ex:
+            except (ImportError, ModuleNotFoundError) as ex:
                 raise ImportError('OpenCV cv2 package is required for writing images to tensorboard.') from ex
 
         logging.debug('TensorBoard logging after epoch %d', epoch_id)
@@ -99,22 +99,23 @@ class WriteTensorBoard(cx.AbstractHook):
                 if variable in self._image_variables:
                     continue  # we'll deal with image variables later
                 value = stream_data[variable]
+                result = None
                 if np.isscalar(value):  # try logging the scalar values
                     result = value
                 elif isinstance(value, dict) and 'mean' in value:  # or the mean
                     result = value['mean']
                 elif isinstance(value, dict) and 'nanmean' in value:  # or the nanmean
                     result = value['nanmean']
-                else:
-                    err_message = 'Variable `{}` in stream `{}` is not scalar and does not contain `mean` or' \
-                                  '`nanmean` aggregation'.format(variable, stream_name)
+
+                if type(result) not in [int, float]:
+                    err_message = 'Variable `{}` in stream `{}` has to be of type `int` or `float` ' \
+                                  '(or a `dict` with a key named `mean` or `nanmean` whose corresponding value ' \
+                                  'is of type `int` or `float`).'.format(variable, stream_name)
                     if self._on_unknown_type == 'warn':
                         logging.warning(err_message)
-                        result = str(value)
                     elif self._on_unknown_type == 'error':
                         raise ValueError(err_message)
-                    else:
-                        continue
+                    continue
 
                 summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
 
@@ -125,12 +126,13 @@ class WriteTensorBoard(cx.AbstractHook):
                         raise KeyError(err_message)
                     elif self._on_missing_variable == 'warn':
                         logging.warning(err_message)
-                    else:
-                        continue
+                    continue
                 image = stream_data[variable]
                 assert isinstance(image, np.ndarray)
-                if image.dtype == np.float32:
+                assert image.ndim == 3 and image.shape[2] == 3
+                if image.dtype in [np.float16, np.float32]:
                     image = ((image - np.min(image))*(255./(np.max(image)-np.min(image)))).astype(np.uint8)
+                image = image.astype(np.uint8)
                 image_string = cv2.imencode('.png', image)[1].tostring()
 
                 image_summary = tf.Summary.Image(encoded_image_string=image_string,
