@@ -14,6 +14,10 @@ from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
 
 
+DEFAULT_LOSS_NAME = 'loss'
+"""Default loss tensor name."""
+
+
 class GraphTower:
     """
     ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
@@ -41,13 +45,13 @@ class GraphTower:
     The sub-graphs must be defined in the order corresponding to the tower ids!
     """
 
-    def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name: str='loss'):
+    def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name: str=DEFAULT_LOSS_NAME):
         """
         Create new GraphTower.
         :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
         :param inputs: tower input names
         :param outputs: tower output names
-        :param loss_name: expected loss tensor name
+        :param loss_name: loss tensor name
         """
         self._id = id_
         self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
@@ -154,7 +158,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str='loss', **kwargs):
+                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
+                 **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
 
@@ -180,7 +185,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
         :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
-        :param loss_name: expected loss tensor name
+        :param loss_name: loss tensor name
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)

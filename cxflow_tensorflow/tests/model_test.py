@@ -16,13 +16,13 @@ from cxflow.hooks import StopAfter
 
 from cxflow_tensorflow import BaseModel
 
-_LOSS_NAME = 'custom_loss'
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
-_IO = {'inputs': ['input', 'target'], 'outputs': ['output', _LOSS_NAME]}
+_IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
+
 
 def create_simple_main_loop(epochs: int, tmpdir: str):
     dataset = SimpleDataset()
-    model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+    model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER)
     mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=epochs)], skip_zeroth_epoch=False)
     return dataset, model, mainloop
 
@@ -100,7 +100,8 @@ class TrainableModel(BaseModel):
         self.output = tf.multiply(self.input, self.var, name='output')
 
         self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1)
-        tf.identity(self.loss, name=_LOSS_NAME)
+        tf.identity(self.loss, name=self._loss_name)
+
 
 class DetectTrainingModel(BaseModel):
     """Model with output variable depending on the training flag."""
@@ -161,7 +162,7 @@ class BaseModelTest(CXTestCaseWithDir):
         self.assertTrue(np.allclose(results['sum'], [3]*10))
 
         # test variables update if and only if ``train=True``
-        trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # single run with ``train=False``
@@ -197,6 +198,39 @@ class BaseModelTest(CXTestCaseWithDir):
         outputs2 = detect_training_model.run(detect_training_batch, train=True)
         self.assertTrue(np.allclose(outputs2['output'], [[2]*10]))
 
+    def test_run_custom_loss(self):
+        CUSTOM_LOSS = 'custom_loss'
+        IO_CUSTOM = {'inputs': ['input', 'target'], 'outputs': ['output', CUSTOM_LOSS]}
+
+        # test variables update if and only if ``train=True``
+        trainable_model = TrainableModel(dataset=None, log_dir='', **IO_CUSTOM, optimizer=_OPTIMIZER,
+                                         loss_name=CUSTOM_LOSS)
+        batch = {'input': [[1] * 10], 'target': [[0] * 10]}
+
+        # single run with ``train=False``
+        orig_value = trainable_model.var.eval(session=trainable_model.session)
+        trainable_model.run(batch, train=False)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose(orig_value, after_value))
+
+        # multiple runs with ``train=False``
+        for _ in range(100):
+            trainable_model.run(batch, train=False)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose(orig_value, after_value))
+
+        # single run with ``train=True``
+        trainable_model.run(batch, train=True)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertFalse(np.allclose(orig_value, after_value))
+
+        # multiple runs with ``train=True``
+        trainable_model.run(batch, train=True)
+        for _ in range(1000):
+            trainable_model.run(batch, train=True)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose([0] * 10, after_value))
+
     def test_mainloop_model_training(self):
         """Test the model is being trained properly."""
         _, model, mainloop = create_simple_main_loop(130, self.tmpdir)
@@ -215,7 +249,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with one valid checkpoint."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -233,7 +267,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with two checkpoints and a specification of which one to restore from."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -253,7 +287,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with two checkpoints and no specification of which one to restore from."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -268,7 +302,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with no checkpoints."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -281,7 +315,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test model training after restoring."""
 
         # save a model that is not trained
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
         trainable_model.save('')
 
         # restored the model
@@ -332,8 +366,8 @@ class TFBaseModelManagementTest(CXTestCaseWithDir):
 
         This is regression test for issue #83 (One can not create and use more than one instance of ``BaseModel``).
         """
-        model1 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
-        model2 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        model1 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
+        model2 = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10], 'target': [[0]*10]}
 
         # test if one can train one model while the other remains intact
@@ -358,8 +392,8 @@ class TFBaseModelManagementTest(CXTestCaseWithDir):
         """
         tmpdir2 = tempfile.mkdtemp()
 
-        model1 = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
-        model2 = TrainableModel(dataset=None, log_dir=tmpdir2, **_IO, optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        model1 = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        model2 = TrainableModel(dataset=None, log_dir=tmpdir2, **_IO, optimizer=_OPTIMIZER)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             model1.run(batch, train=True)
@@ -387,8 +421,7 @@ class TFBaseModelMultiGPUTest(CXTestCaseWithDir):
     def test_incomplete_batches(self):
         """Test if incomplete batches are handled properly in multi-tower env."""
         multi_gpu_model = TrainableModel(dataset=None, log_dir='', **_IO, n_gpus=4,
-                                         session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER,
-                                         loss_name=_LOSS_NAME)
+                                         session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER)
         batch = {'input': [[1]*10]*8, 'target': [[0]*10]*8}
         small_batch = {'input': [[1]*10]*3, 'target': [[0]*10]*3}
 
@@ -407,8 +440,7 @@ class TFBaseModelMultiGPUTest(CXTestCaseWithDir):
         self.assertTrue(np.allclose(after_value, [0]*10))
 
         multi_gpu_model2 = TrainableModel(dataset=None, log_dir='', **_IO, n_gpus=4,
-                                          session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER,
-                                          loss_name=_LOSS_NAME)
+                                          session_config={'allow_soft_placement': True}, optimizer=_OPTIMIZER)
         # multiple train runs with small batch
         for _ in range(1000):
             multi_gpu_model2.run(small_batch, train=True)

@@ -12,15 +12,15 @@ from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow_tensorflow.hooks import WriteTensorBoard
 
 from . import cv2_mock
-from ..model_test import TrainableModel, _LOSS_NAME, _OPTIMIZER
+from ..model_test import TrainableModel, _OPTIMIZER
 
 
 class WriteTensorBoardTest(CXTestCaseWithDir):
     """Test case for :py:class:cxflow_tensorflow.hooks.WriteTensorBoard` hook. """
 
     def get_model(self):
-        return TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output', _LOSS_NAME],
-                              optimizer=_OPTIMIZER, loss_name=_LOSS_NAME)
+        return TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output', 'loss'],
+                              optimizer=_OPTIMIZER)
 
     def test_args(self):
         """Test WriteTensorBoard argument handling and ``SummaryWriter`` creation."""
