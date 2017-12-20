@@ -100,7 +100,7 @@ class TrainableModel(BaseModel):
         self.output = tf.multiply(self.input, self.var, name='output')
 
         self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1)
-        tf.identity(self.loss, name='loss')
+        tf.identity(self.loss, name=self._loss_name)
 
 
 class DetectTrainingModel(BaseModel):
@@ -197,6 +197,39 @@ class BaseModelTest(CXTestCaseWithDir):
         self.assertTrue(np.allclose(outputs['output'], [[0]*10]))
         outputs2 = detect_training_model.run(detect_training_batch, train=True)
         self.assertTrue(np.allclose(outputs2['output'], [[2]*10]))
+
+    def test_run_custom_loss(self):
+        CUSTOM_LOSS = 'custom_loss'
+        IO_CUSTOM = {'inputs': ['input', 'target'], 'outputs': ['output', CUSTOM_LOSS]}
+
+        # test variables update if and only if ``train=True``
+        trainable_model = TrainableModel(dataset=None, log_dir='', **IO_CUSTOM, optimizer=_OPTIMIZER,
+                                         loss_name=CUSTOM_LOSS)
+        batch = {'input': [[1] * 10], 'target': [[0] * 10]}
+
+        # single run with ``train=False``
+        orig_value = trainable_model.var.eval(session=trainable_model.session)
+        trainable_model.run(batch, train=False)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose(orig_value, after_value))
+
+        # multiple runs with ``train=False``
+        for _ in range(100):
+            trainable_model.run(batch, train=False)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose(orig_value, after_value))
+
+        # single run with ``train=True``
+        trainable_model.run(batch, train=True)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertFalse(np.allclose(orig_value, after_value))
+
+        # multiple runs with ``train=True``
+        trainable_model.run(batch, train=True)
+        for _ in range(1000):
+            trainable_model.run(batch, train=True)
+        after_value = trainable_model.var.eval(session=trainable_model.session)
+        self.assertTrue(np.allclose([0] * 10, after_value))
 
     def test_mainloop_model_training(self):
         """Test the model is being trained properly."""
