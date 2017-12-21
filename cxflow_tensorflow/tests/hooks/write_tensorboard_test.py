@@ -48,7 +48,7 @@ class WriteTensorBoardTest(CXTestCaseWithDir):
             self.assertEqual(mocked_add_summary.call_count, 1)
             hook.after_epoch(43, {'valid': {'accuracy': 1.0}})
             self.assertEqual(mocked_add_summary.call_count, 2)
-        hook.after_epoch(44, {'valid': {'accuracy': {'mean': 1.0}}})
+        hook.after_epoch(44, {'valid': {'accuracy': {'mean': np.float32(1.0)}}})
         hook.after_epoch(45, {'valid': {'accuracy': {'nanmean': 1.0}}})
         hook._summary_writer.close()
 
@@ -82,7 +82,8 @@ class WriteTensorBoardTest(CXTestCaseWithDir):
             warn_hook.after_epoch(42, bad_epoch_data)
         log_capture2.check(('root', 'WARNING', 'Variable `accuracy` in stream `valid` has to be of type `int` '
                                                'or `float` (or a `dict` with a key named `mean` or `nanmean` '
-                                               'whose corresponding value is of type `int` or `float`).'))
+                                               'whose corresponding value is of type `int` or `float`), '
+                                               'found `<class \'str\'>` instead.'))
 
         # test error
         raise_hook = WriteTensorBoard(output_dir=self.tmpdir, model=self.get_model(), on_unknown_type='error')

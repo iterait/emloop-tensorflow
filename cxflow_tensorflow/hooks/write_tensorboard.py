@@ -107,17 +107,18 @@ class WriteTensorBoard(cx.AbstractHook):
                 elif isinstance(value, dict) and 'nanmean' in value:  # or the nanmean
                     result = value['nanmean']
 
-                if type(result) not in [int, float]:
+                result_type = type(result)
+                if np.issubdtype(result_type, float) or np.issubdtype(result_type, int):
+                    summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
+                else:
                     err_message = 'Variable `{}` in stream `{}` has to be of type `int` or `float` ' \
                                   '(or a `dict` with a key named `mean` or `nanmean` whose corresponding value ' \
-                                  'is of type `int` or `float`).'.format(variable, stream_name)
+                                  'is of type `int` or `float`), found `{}` instead.'.format(variable, stream_name,
+                                                                                             type(result))
                     if self._on_unknown_type == 'warn':
                         logging.warning(err_message)
                     elif self._on_unknown_type == 'error':
                         raise ValueError(err_message)
-                    continue
-
-                summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
 
             for variable in self._image_variables:
                 if variable not in stream_data:
