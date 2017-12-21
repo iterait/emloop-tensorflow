@@ -14,6 +14,10 @@ from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
 
 
+DEFAULT_LOSS_NAME = 'loss'
+"""Default loss tensor name."""
+
+
 class GraphTower:
     """
     ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
@@ -41,12 +45,13 @@ class GraphTower:
     The sub-graphs must be defined in the order corresponding to the tower ids!
     """
 
-    def __init__(self, id_: int, inputs: List[str], outputs: List[str]):
+    def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name: str=DEFAULT_LOSS_NAME):
         """
         Create new GraphTower.
         :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
         :param inputs: tower input names
         :param outputs: tower output names
+        :param loss_name: loss tensor name
         """
         self._id = id_
         self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
@@ -54,7 +59,7 @@ class GraphTower:
         self._output_names = outputs
         self._inputs = {}
         self._outputs = {}
-        self._loss = None
+        self._loss_name = loss_name
 
     def _get_full_name(self, tensor_name: str) -> str:
         """
@@ -88,7 +93,7 @@ class GraphTower:
     @property
     def loss(self) -> tf.Tensor:
         """Return the loss tensor."""
-        return self[BaseModel.LOSS_NAME]
+        return self[self._loss_name]
 
     @property
     def inputs(self) -> Iterable[tf.Tensor]:
@@ -147,16 +152,14 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     TRAIN_OP_NAME = 'train_op'
     """Expected train op tensor name prefix."""
 
-    LOSS_NAME = 'loss'
-    """Expected loss tensor name."""
-
     TRAINING_FLAG_NAME = 'cxf_is_training'
     """Training flag variable name."""
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, **kwargs):
+                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
+                 **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
 
@@ -182,6 +185,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
         :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
+        :param loss_name: loss tensor name
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
@@ -189,11 +193,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
+        self._loss_name = loss_name
         self._train_ops = []
         self._graph = self._saver = None
-        self._towers = [GraphTower(i, inputs, outputs) for i in range(n_gpus)]
+        self._towers = [GraphTower(i, inputs, outputs, loss_name) for i in range(n_gpus)]
         if n_gpus == 0:
-            self._towers.append(GraphTower(-1, inputs, outputs))
+            self._towers.append(GraphTower(-1, inputs, outputs, loss_name))
 
         logging.info('\tCreating TF model on %s GPU devices', n_gpus)
         self._graph = tf.Graph()
@@ -459,7 +464,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         Every model has to define:
 
-        - loss tensor named according to :py:attr:`LOSS_NAME`
+        - loss tensor named according to given ``loss_name``
         - input placeholders and output tensors named according to the specified input and output names
 
         .. warning::

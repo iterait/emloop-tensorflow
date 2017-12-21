@@ -1,6 +1,8 @@
 # cxflow-tensorflow
 [![CircleCI](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master.svg?style=shield)](https://circleci.com/gh/Cognexa/cxflow-tensorflow/tree/master)
 [![PyPI version](https://badge.fury.io/py/cxflow-tensorflow.svg)](https://badge.fury.io/py/cxflow-tensorflow)
+[![Coverage 
+Status](https://coveralls.io/repos/github/Cognexa/cxflow-tensorflow/badge.svg?branch=master)](https://coveralls.io/github/Cognexa/cxflow-tensorflow?branch=master)
 [![Development Status](https://img.shields.io/badge/status-CX%20Regular-brightgreen.svg?style=flat)]()
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)]()
 [![Master Developer](https://img.shields.io/badge/master-Adam%20Blažek-lightgrey.svg?style=flat)]()
@@ -29,7 +31,3 @@ pip install cxflow-tensorflow
 
 All contributions are welcomed. Please read our [contributor's guide](CONTRIBUTING.md).
 
-
-## License
-
-[MIT](LICENSE)

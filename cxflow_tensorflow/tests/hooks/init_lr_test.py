@@ -2,7 +2,7 @@
 Test module for cxflow_tensorflow.hooks.InitLR hook.
 """
 from unittest import TestCase
-from cxflow_tensorflow import InitLR
+from cxflow_tensorflow.hooks import InitLR
 from .decay_lr_test import LRModel
 
 

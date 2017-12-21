@@ -1,4 +1,5 @@
 # tensorflow>=1.3.0 to be installed manually
-tensorflow-tensorboard>=0.1.4
+# tensorflow-tensorboard>=0.1.4 to be installed manually
 cxflow>=0.8.1
 numpy>=1.13.1
+testfixtures>=5.1.1
