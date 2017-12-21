@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &#8212; cxflow-tensorflow 0.3.2 documentation</title>
+    <title>Index &#8212; cxflow-tensorflow 0.3.3 documentation</title>
     
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.2',
+        VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -116,9 +116,11 @@
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -142,13 +144,17 @@
       </ul></li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_model">_create_model() (cxflow_tensorflow.BaseModel method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_session">_create_session() (cxflow_tensorflow.BaseModel method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">_create_train_ops() (cxflow_tensorflow.BaseModel method)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR._decay_variable">_decay_variable() (cxflow_tensorflow.hooks.DecayLR method)</a>
+</li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._initialize_variables">_initialize_variables() (cxflow_tensorflow.BaseModel method)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLROnPlateau._on_plateau_action">_on_plateau_action() (cxflow_tensorflow.hooks.DecayLROnPlateau method)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._restore_checkpoint">_restore_checkpoint() (cxflow_tensorflow.BaseModel method)</a>
 </li>
@@ -213,6 +219,20 @@
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR">DecayLR (class in cxflow_tensorflow.hooks)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLROnPlateau">DecayLROnPlateau (class in cxflow_tensorflow.hooks)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.dense_to_sparse">dense_to_sparse() (in module cxflow_tensorflow.ops)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.flatten3D">flatten3D() (in module cxflow_tensorflow.ops)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
@@ -240,11 +260,15 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.LOSS_NAME">LOSS_NAME (cxflow_tensorflow.BaseModel attribute)</a>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES">LR_DECAY_TYPES (cxflow_tensorflow.hooks.DecayLR attribute)</a>
 </li>
   </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES">LR_DECAY_TYPES (cxflow_tensorflow.hooks.DecayLR attribute)</a>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS">MISSING_VARIABLE_ACTIONS (cxflow_tensorflow.hooks.WriteTensorBoard attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -328,6 +352,14 @@
     </p>
   </div>
 </footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
 
 
 

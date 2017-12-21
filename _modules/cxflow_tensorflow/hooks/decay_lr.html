@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.3.2 documentation</title>
+    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.3.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -131,14 +131,13 @@
 <span class="sd">        :caption: multiply ``learning_rate`` variable by 0.98 after every epoch</span>
 
 <span class="sd">        hooks:</span>
-<span class="sd">          - cxflow_tensorflow.DecayLR</span>
-
+<span class="sd">          - cxflow_tensorflow.hooks.DecayLR</span>
 
 <span class="sd">    .. code-block:: yaml</span>
 <span class="sd">        :caption: linear decay of ``my_learning_rate`` variable</span>
 
 <span class="sd">        hooks:</span>
-<span class="sd">          - cxflow_tensorflow.DecayLR:</span>
+<span class="sd">          - cxflow_tensorflow.hooks.DecayLR:</span>
 <span class="sd">              decay_value: -0.00001</span>
 <span class="sd">              variable_name: my_learning_rate</span>
 <span class="sd">              decay_type: add</span>
@@ -178,7 +177,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DecayLR.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DecayLR._decay_variable"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR._decay_variable">[docs]</a>    <span class="k">def</span> <span class="nf">_decay_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modify the specified TF variable (now saved in ``self._lr``) using ``self._decay_value``.</span>
 
@@ -188,7 +187,57 @@
         <span class="n">new_value</span> <span class="o">=</span> <span class="n">old_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_type</span> <span class="o">==</span> <span class="s1">&#39;multiply&#39;</span> <span class="k">else</span> <span class="n">old_value</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decay_value</span>
 
         <span class="n">tf</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="p">,</span>  <span class="n">new_value</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LR updated to `</span><span class="si">%s</span><span class="s1">`&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">))</span></div></div>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LR updated to `</span><span class="si">%s</span><span class="s1">`&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="DecayLR.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Call :py:meth:`_decay_variable`.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decay_variable</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="DecayLROnPlateau"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLROnPlateau">[docs]</a><span class="k">class</span> <span class="nc">DecayLROnPlateau</span><span class="p">(</span><span class="n">cx</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">OnPlateau</span><span class="p">,</span> <span class="n">DecayLR</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decay learning rate on plateau.</span>
+
+<span class="sd">    After decaying, LR may be decayed again only after additional ``short_term`` epochs.</span>
+
+<span class="sd">    Shares args from both :py:class:`DecayLR` and :py:class:`cx.hooks.OnPlateau`.</span>
+
+<span class="sd">    .. code-block:: yaml</span>
+<span class="sd">        :caption: multiply the learning rate by 0.1 when the mean of last 100 valid ``accuracy`` values is</span>
+<span class="sd">                  greater than the mean of last 30 ``accuracy`` values.</span>
+
+<span class="sd">        hooks:</span>
+<span class="sd">          - cxflow_tensorflow.hooks.DecayLROnPlateau:</span>
+<span class="sd">              long_term: 100</span>
+<span class="sd">              short_term: 30</span>
+<span class="sd">              variable: accuracy</span>
+<span class="sd">              objective: max</span>
+
+<span class="sd">    .. code-block:: yaml</span>
+<span class="sd">        :caption: decay LR by 0.01 when valid ``loss`` plateau is detected</span>
+
+<span class="sd">        hooks:</span>
+<span class="sd">          - cxflow_tensorflow.hooks.DecayLROnPlateau:</span>
+<span class="sd">              decay_value: 0.01</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay_value</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">cx</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">OnPlateau</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">DecayLR</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay_value</span><span class="o">=</span><span class="n">decay_value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="DecayLROnPlateau._on_plateau_action"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLROnPlateau._on_plateau_action">[docs]</a>    <span class="k">def</span> <span class="nf">_on_plateau_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Call :py:meth:`_decay_variable`.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Plateau detected, decaying learning rate&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decay_variable</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_short_term</span></div>
+
+    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">cx</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">OnPlateau</span><span class="o">.</span><span class="n">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </pre></div>
 
     </div>
@@ -208,6 +257,14 @@
     </p>
   </div>
 </footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
 
 
 

@@ -20,6 +20,9 @@ Classes
 - :py:class:`InitLR`:
   Hook for initializing the learning rate (or any other variable) before the training.
 
+- :py:class:`DecayLROnPlateau`:
+  Decay learning rate on plateau.
+
 
 
 .. autoclass:: WriteTensorBoard
@@ -58,6 +61,20 @@ Classes
    :exclude-members: __weakref__
 
    .. inheritance-diagram:: InitLR
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: DecayLROnPlateau
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: DecayLROnPlateau
       :parts: 1
 
    |

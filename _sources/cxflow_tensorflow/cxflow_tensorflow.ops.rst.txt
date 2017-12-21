@@ -14,5 +14,15 @@ Functions
 - :py:func:`repeat`:
   Repeat elements of the input tensor in the specified axis ``repeats``-times.
 
+- :py:func:`flatten3D`:
+  Flatten the given ``inputs`` tensor to 3 dimensions.
+
+- :py:func:`dense_to_sparse`:
+  Convert the given ``inputs`` tensor to a ``SparseTensor`` of its non-zero values.
+
 
 .. autofunction:: repeat
+
+.. autofunction:: flatten3D
+
+.. autofunction:: dense_to_sparse

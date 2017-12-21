@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.ops &#8212; cxflow-tensorflow 0.3.2 documentation</title>
+    <title>cxflow_tensorflow.ops &#8212; cxflow-tensorflow 0.3.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -130,6 +130,10 @@
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.ops.repeat" title="cxflow_tensorflow.ops.repeat"><code class="xref py py-func docutils literal"><span class="pre">repeat()</span></code></a>:
 Repeat elements of the input tensor in the specified axis <code class="docutils literal"><span class="pre">repeats</span></code>-times.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.ops.flatten3D" title="cxflow_tensorflow.ops.flatten3D"><code class="xref py py-func docutils literal"><span class="pre">flatten3D()</span></code></a>:
+Flatten the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to 3 dimensions.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.ops.dense_to_sparse" title="cxflow_tensorflow.ops.dense_to_sparse"><code class="xref py py-func docutils literal"><span class="pre">dense_to_sparse()</span></code></a>:
+Convert the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to a <code class="docutils literal"><span class="pre">SparseTensor</span></code> of its non-zero values.</li>
 </ul>
 <dl class="function">
 <dt id="cxflow_tensorflow.ops.repeat">
@@ -160,6 +164,49 @@ Repeat elements of the input tensor in the specified axis <code class="docutils 
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="cxflow_tensorflow.ops.flatten3D">
+<code class="descclassname">cxflow_tensorflow.ops.</code><code class="descname">flatten3D</code><span class="sig-paren">(</span><em>inputs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/ops/flatten3d.html#flatten3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.ops.flatten3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flatten the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to 3 dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputs</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; &gt;=4d tensor to be flattened</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">3d flatten tensor</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cxflow_tensorflow.ops.dense_to_sparse">
+<code class="descclassname">cxflow_tensorflow.ops.</code><code class="descname">dense_to_sparse</code><span class="sig-paren">(</span><em>inputs</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/ops/sparse.html#dense_to_sparse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.ops.dense_to_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to a <code class="docutils literal"><span class="pre">SparseTensor</span></code> of its non-zero values.</p>
+<p>Optionally, use the given mask tensor for determining the values to be included in the <code class="docutils literal"><span class="pre">SparseTensor</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputs</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; input dense tensor</li>
+<li><strong>mask</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) &#8211; optional mask tensor</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">SparseTensor</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">sparse tensor of non-zero (or masked) values</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 </div>
 
@@ -181,6 +228,14 @@ Repeat elements of the input tensor in the specified axis <code class="docutils 
     </p>
   </div>
 </footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
 
 
 

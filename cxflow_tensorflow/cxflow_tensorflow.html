@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.2 documentation</title>
+    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.2',
+        VERSION:     '0.3.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -144,13 +144,13 @@ In fact, in most cases one will override only a single method <a class="referenc
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
-Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.10)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
+Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
-<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[.datasets.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[.datasets.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, loss_name: str = 'loss', **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
-<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.10)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
+<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
 <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a> method.</p>
 <p>See the method references for additional customization options.</p>
@@ -161,12 +161,6 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
-<dl class="attribute">
-<dt id="cxflow_tensorflow.BaseModel.LOSS_NAME">
-<code class="descname">LOSS_NAME</code><em class="property"> = 'loss'</em><a class="headerlink" href="#cxflow_tensorflow.BaseModel.LOSS_NAME" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expected loss tensor name.</p>
-</dd></dl>
-
 <dl class="attribute">
 <dt id="cxflow_tensorflow.BaseModel.TRAINING_FLAG_NAME">
 <code class="descname">TRAINING_FLAG_NAME</code><em class="property"> = 'cxf_is_training'</em><a class="headerlink" href="#cxflow_tensorflow.BaseModel.TRAINING_FLAG_NAME" title="Permalink to this definition">¶</a></dt>
@@ -181,7 +175,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new cxflow trainable TensorFlow model.</p>
 <p>TF Graph, train ops etc. are constructed with the following procedure:</p>
 <ol class="arabic simple">
@@ -211,6 +205,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <code class="docutils literal"><span class="pre">model.ckpt</span></code>)</li>
 <li><strong>optimizer</strong> &#8211; TF optimizer configuration dict</li>
 <li><strong>freeze</strong> &#8211; freeze the graph after each save</li>
+<li><strong>loss_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; loss tensor name</li>
 <li><strong>kwargs</strong> &#8211; additional kwargs forwarded to <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a></li>
 </ul>
 </td>
@@ -225,7 +220,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <dd><p>Create your TensorFlow model.</p>
 <p>Every model has to define:</p>
 <ul class="simple">
-<li>loss tensor named according to <a class="reference internal" href="#cxflow_tensorflow.BaseModel.LOSS_NAME" title="cxflow_tensorflow.BaseModel.LOSS_NAME"><code class="xref py py-attr docutils literal"><span class="pre">LOSS_NAME</span></code></a></li>
+<li>loss tensor named according to given <code class="docutils literal"><span class="pre">loss_name</span></code></li>
 <li>input placeholders and output tensors named according to the specified input and output names</li>
 </ul>
 <div class="admonition warning">
@@ -509,6 +504,14 @@ wherein the suffixed number stands for the number of towers.</p>
     </p>
   </div>
 </footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
 
 
 

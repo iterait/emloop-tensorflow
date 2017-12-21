@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.ops.repeat &#8212; cxflow-tensorflow 0.3.3 documentation</title>
+    <title>cxflow_tensorflow.ops.flatten3d &#8212; cxflow-tensorflow 0.3.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -106,34 +106,20 @@
       </div>
     <div class="col-md-9 content">
       
-  <h1>Source code for cxflow_tensorflow.ops.repeat</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+  <h1>Source code for cxflow_tensorflow.ops.flatten3d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with flatten3D op.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
-
-<div class="viewcode-block" id="repeat"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.repeat">[docs]</a><span class="k">def</span> <span class="nf">repeat</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">repeats</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="flatten3D"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.flatten3D">[docs]</a><span class="k">def</span> <span class="nf">flatten3D</span><span class="p">(</span><span class="n">inputs</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Repeat elements of the input tensor in the specified axis ``repeats``-times.</span>
+<span class="sd">    Flatten the given ``inputs`` tensor to 3 dimensions.</span>
 
-<span class="sd">    .. note::</span>
-<span class="sd">        Chaining of this op may produce TF warnings although the performance seems to be unaffected.</span>
-
-<span class="sd">    :param tensor: TF tensor to be repeated</span>
-<span class="sd">    :param repeats: number of repeats</span>
-<span class="sd">    :param axis: axis to repeat</span>
-<span class="sd">    :return: tensor with repeated elements</span>
+<span class="sd">    :param inputs: &gt;=4d tensor to be flattened</span>
+<span class="sd">    :return: 3d flatten tensor</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">shape</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
-
-    <span class="n">dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
-    <span class="n">prepare_perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">axis</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">dims</span><span class="p">,</span> <span class="n">axis</span><span class="p">)))</span>
-    <span class="n">restore_perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">dims</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dims</span><span class="p">[</span><span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">:]))</span>
-
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">*</span><span class="n">repeats</span><span class="p">)</span><span class="o">/</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">repeats</span><span class="p">)),</span> <span class="s1">&#39;int32&#39;</span><span class="p">)</span>
-
-    <span class="n">shuffled</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">prepare_perm</span><span class="p">)</span>
-    <span class="n">repeated</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">shuffled</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">repeated</span><span class="p">,</span> <span class="n">restore_perm</span><span class="p">)</span></div>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">3</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">2</span><span class="p">:])])</span></div>
 </pre></div>
 
     </div>
