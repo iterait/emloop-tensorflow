@@ -5,6 +5,7 @@ import os
 from os import path
 import tempfile
 import shutil
+import unittest.mock as mock
 
 import numpy as np
 import tensorflow as tf
@@ -160,6 +161,12 @@ class BaseModelTest(CXTestCaseWithDir):
             self.assertTrue(output_name in results)
         self.assertTrue(np.allclose(results['output'], [2]*10))
         self.assertTrue(np.allclose(results['sum'], [3]*10))
+
+        # test if buffering is properly allowed
+        stream_mock = mock.MagicMock()
+        results = model.run(batch=valid_batch, train=False, stream=stream_mock)
+        self.assertEqual(stream_mock.allow_buffering.__enter__.call_count, 1)
+        self.assertEqual(stream_mock.allow_buffering.__exit__.call_count, 1)
 
         # test variables update if and only if ``train=True``
         trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
