@@ -277,7 +277,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """TF session object."""
         return self._session
 
-    def run(self, batch: cx.Batch, train: bool) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -285,6 +285,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         :param batch: batch dict ``{source_name: values}``
         :param train: flag whether parameters update (``train_op``) should be included in fetches
+        :param stream: stream wrapper (useful for precise buffer management)
         :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
         :return: outputs dict
         """
@@ -304,8 +305,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 for output_name in self.output_names:
                     fetches.append(tower[output_name])
 
-        # run the computational graph for one batch
-        outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        # run the computational graph for one batch and allow buffering in the meanwhile
+        if stream is not None:
+            with stream.allow_buffering:
+                outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        else:
+            outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
 
         if train:
             outputs = outputs[1:]
