@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.3 documentation</title>
+    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.4 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.3',
+        VERSION:     '0.3.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -148,7 +148,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
-<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset: typing.Union[.datasets.AbstractDataset, NoneType], log_dir: str, inputs: typing.List[str], outputs: typing.List[str], session_config: typing.Union[dict, NoneType] = None, n_gpus: int = 0, restore_from: typing.Union[str, NoneType] = None, restore_model_name: typing.Union[str, NoneType] = None, optimizer=None, freeze=False, loss_name: str = 'loss', **kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
 <p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
@@ -430,7 +430,7 @@ wherein the suffixed number stands for the number of towers.</p>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the model with the given <code class="docutils literal"><span class="pre">batch</span></code>. Update the trainable variables only if <code class="docutils literal"><span class="pre">train</span></code> is true.</p>
 <p>Fetch and return all the model outputs as a dict.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -438,8 +438,9 @@ wherein the suffixed number stands for the number of towers.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
+<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
 <li><strong>train</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; flag whether parameters update (<code class="docutils literal"><span class="pre">train_op</span></code>) should be included in fetches</li>
+<li><strong>stream</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">StreamWrapper</span></code>]) &#8211; stream wrapper (useful for precise buffer management)</li>
 </ul>
 </td>
 </tr>
