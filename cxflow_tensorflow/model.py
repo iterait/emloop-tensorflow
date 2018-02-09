@@ -373,13 +373,18 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """
         Restore TF model from the given ``restore_from`` path and ``restore_model_name``.
 
-        The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.
+        The model name can be derived if the ``restore_from`` is a directory containing exactly one checkpoint or if
+        its base name specifies a checkpoint.
 
-        :param restore_from: path to directory from which the model is restored
+        :param restore_from: path to directory from which the model is restored, optionally with model name as the last
+        part
         :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
+        if restore_model_name is None and not path.isdir(restore_from):
+            restore_model_name = path.basename(restore_from)
+            restore_from = path.dirname(restore_from)
         assert path.isdir(restore_from), '`BaseModel` expect `restore_from` to be an existing directory.'
         meta_files = glob('{}/*.ckpt.meta'.format(restore_from))
 
