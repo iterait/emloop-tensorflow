@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow import MainLoop
-from cxflow.tests.main_loop_test import SimpleDataset
+from cxflow.tests.main_loop_test import SimpleDataset, _DATASET_SHAPE
 from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow.hooks import StopAfter
 
@@ -335,6 +335,21 @@ class BaseModelTest(CXTestCaseWithDir):
 
         after_value = restored_model.graph.get_tensor_by_name('var:0').eval(session=restored_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
+
+    def test_mainloop_model_training(self):
+        """Test the model monitoring works properly."""
+        dataset = SimpleDataset()
+        model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        batch = next(iter(dataset.train_stream()))
+        outputs = model.run(batch, False, None)
+        self.assertNotIn(BaseModel.SIGNAL_VAR_NAME, outputs)
+        self.assertNotIn(BaseModel.SIGNAL_MEAN_NAME, outputs)
+
+        monitored_model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                                         monitor='output')
+        monitored_output = monitored_model.run(batch, False, None)
+        self.assertTrue(np.allclose([2.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_MEAN_NAME], atol=0.01))
+        self.assertTrue(np.allclose([0.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_VAR_NAME], atol=0.01))
 
 
 class TFBaseModelSaverTest(CXTestCaseWithDir):

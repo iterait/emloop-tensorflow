@@ -155,6 +155,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     TRAINING_FLAG_NAME = 'cxf_is_training'
     """Training flag variable name."""
 
+    SIGNAL_MEAN_NAME = 'signal_mean'
+    """Name of the monitored signal mean tensor/output."""
+
+    SIGNAL_VAR_NAME = 'signal_variance'
+    """Name of the monitored signal variance tensor/output."""
+
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
@@ -240,8 +246,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                             layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
                             means.append(layer_mean)
                             vars.append(layer_var)
-                signal_mean = tf.reduce_mean(means, axis=0, name='signal_mean')
-                signal_var = tf.reduce_mean(vars, axis=0, name='signal_variance')
+                signal_mean = tf.reduce_mean(means, axis=0, name=BaseModel.SIGNAL_MEAN_NAME)
+                signal_var = tf.reduce_mean(vars, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
                 self._extra_outputs += [signal_mean, signal_var]
 
             for tower in self._towers:
