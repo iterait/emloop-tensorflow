@@ -186,7 +186,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             It is often useful to monitor signal/weights/gradients ranges, means and/or variances during the training.
             **cxflow-tensorflow** base model actually provides monitoring of the feed-forward signal through the net.
             Simply set up the ``monitor`` paramater to the name of the layers to be monitored (e.g. `Conv2D` or `Relu`).
-            Layer activation means and variances (named ``signal_mean`` and ``signal_variance`` will be include
+            Layer activation means and variances (named ``signal_mean`` and ``signal_variance``) will be include
             in the output.
 
         :param dataset: dataset to be trained with
@@ -238,16 +238,16 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
             if monitor:
-                means, vars = [], []
+                means, variances = [], []
                 for op in self.graph.get_operations():
                     if monitor in op.name and 'grad' not in op.name.lower() and len(op.values()) > 0:
                         out_tensor = op.values()[0]
                         if len(out_tensor.get_shape().as_list()) > 1:
                             layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
                             means.append(layer_mean)
-                            vars.append(layer_var)
+                            variances.append(layer_var)
                 signal_mean = tf.reduce_mean(means, axis=0, name=BaseModel.SIGNAL_MEAN_NAME)
-                signal_var = tf.reduce_mean(vars, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
+                signal_var = tf.reduce_mean(variances, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
                 self._extra_outputs += [signal_mean, signal_var]
 
             for tower in self._towers:
@@ -317,7 +317,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param train: flag whether parameters update (``train_op``) should be included in fetches
         :param stream: stream wrapper (useful for precise buffer management)
         :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
-        :return: outputs dictB
+        :return: outputs dict
         """
         # setup the feed dict
         batch_size = len(batch[next(iter(batch))])
