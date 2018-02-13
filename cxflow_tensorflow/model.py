@@ -159,6 +159,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
+                 monitor: Optional[str]=None,
                  **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
@@ -175,6 +176,13 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         .. note::
             In most cases, it is not required to re-define the ``__init__`` method for your models.
 
+        .. tip::
+            It is often useful to monitor signal/weights/gradients ranges, means and/or variances during the training.
+            **cxflow-tensorflow** base model actually provides monitoring of the feed-forward signal through the net.
+            Simply set up the ``monitor`` paramater to the name of the layers to be monitored (e.g. `Conv2D` or `Relu`).
+            Layer activation means and variances (named ``signal_mean`` and ``signal_variance`` will be include
+            in the output.
+
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
@@ -186,10 +194,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
         :param loss_name: loss tensor name
+        :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
+        self._extra_outputs = []
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
@@ -221,6 +231,19 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                     logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
+            if monitor:
+                means, vars = [], []
+                for op in self.graph.get_operations():
+                    if monitor in op.name and 'grad' not in op.name.lower() and len(op.values()) > 0:
+                        out_tensor = op.values()[0]
+                        if len(out_tensor.get_shape().as_list()) > 1:
+                            layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
+                            means.append(layer_mean)
+                            vars.append(layer_var)
+                signal_mean = tf.reduce_mean(means, axis=0, name='signal_mean')
+                signal_var = tf.reduce_mean(vars, axis=0, name='signal_variance')
+                self._extra_outputs += [signal_mean, signal_var]
+
             for tower in self._towers:
                 tower.find_io_tensors()
 
@@ -247,6 +270,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
             logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
@@ -287,7 +311,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param train: flag whether parameters update (``train_op``) should be included in fetches
         :param stream: stream wrapper (useful for precise buffer management)
         :raise ValueError: if an output is wrongly typed or its batch size differs from the input batch size
-        :return: outputs dict
+        :return: outputs dictB
         """
         # setup the feed dict
         batch_size = len(batch[next(iter(batch))])
@@ -296,6 +320,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         feed_dict = {self._is_training: train}
         fetches = [self._train_ops[nonempty_towers-1]] if train else []
+        fetches += self._extra_outputs
 
         for i, tower in enumerate(self._towers):
             if i*tower_batch_size < batch_size:
@@ -315,6 +340,9 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         if train:
             outputs = outputs[1:]
 
+        extra_outputs = outputs[:len(self._extra_outputs)]
+        outputs = outputs[len(self._extra_outputs):]
+
         for i, output in enumerate(outputs):
             if not isinstance(output, (list, tuple, np.ndarray)):
                 output_name = self.output_names[i % len(self.output_names)]
@@ -331,7 +359,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 raise ValueError('Input-output batch size mismatch. Input: {} Output: {} for `{}`'
                                  .format(batch_size, len(output), self.output_names[i]))
 
-        return dict(zip(self.output_names, stacked_outputs))
+        extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
+        return dict(zip(self.output_names+extra_outputs_names,  stacked_outputs+extra_outputs))
 
     def save(self, name_suffix: str) -> str:
         """
