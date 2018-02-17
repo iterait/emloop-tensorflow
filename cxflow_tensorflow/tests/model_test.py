@@ -18,6 +18,7 @@ from cxflow.hooks import StopAfter
 from cxflow_tensorflow import BaseModel
 
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
+_OPTIMIZER_NO_MODULE = {'class': 'AdamOptimizer', 'learning_rate': 0.1}
 _IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
 
@@ -256,7 +257,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with one valid checkpoint."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER_NO_MODULE)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
