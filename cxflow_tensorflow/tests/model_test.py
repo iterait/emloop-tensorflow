@@ -118,6 +118,11 @@ class BaseModelTest(CXTestCaseWithDir):
         with self.assertRaises(NotImplementedError):
             BaseModel(dataset=None, log_dir='', **{'inputs': [], 'outputs': ['dummy']})
 
+    def test_missing_optimizer(self):
+        """Test raise if the optimizer config is missing."""
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=None, log_dir='', **_IO)
+
     def test_finding_train_op(self):
         """Test finding train op in graph."""
 
