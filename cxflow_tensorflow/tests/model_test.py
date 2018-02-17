@@ -29,19 +29,6 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
     return dataset, model, mainloop
 
 
-class DummyModel(BaseModel):
-    """Dummy TF model with empty graph."""
-
-    def _create_model(self, **kwargs):
-        """Create dummy tf model."""
-
-        # defining dummy variable as otherwise we would not be able to create the model saver
-        tf.Variable(name='dummy', initial_value=[1])
-
-    def _create_train_ops(self, *_):
-        tf.no_op(name='train_op_1')
-
-
 class TrainOpModel(BaseModel):
     """Dummy TF model with train op saved in self."""
 
