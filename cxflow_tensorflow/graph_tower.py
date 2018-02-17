@@ -1,4 +1,4 @@
-from typing import List, Iterable
+from typing import List
 
 import tensorflow as tf
 
@@ -9,31 +9,42 @@ class GraphTower:
     It allows to work with multiple copies of the same sub-graph distributed on multiple devices
     with only one set of input and output names.
 
-    ---------------------------------------------
-    USAGE
-    ---------------------------------------------
-    1. create the desired number of GraphTowers:
+    **Usage**
+
+    .. code-block:: python
+        :caption: **1** create the desired number of GraphTowers
+
         towers = [GraphTower(i, inputs, outputs) for i in range(4)]
-    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):
+
+    .. code-block:: python
+        :caption: **2** create the TF sub-graphs in the tower environments (uses with ``tf.device(...)``)
+
         for tower in towers:
             with tower:
                 # define the TF graph with the respective inputs and outputs
-    3. find the input placeholders and output variables:
+
+    .. code-block:: python
+        :caption: **3** find the input placeholders and output variables
+
         for tower in towers:
             tower.find_io_tensors()
-    4. access the io tensors, loss etc.
+
+
+    .. code-block:: python
+        :caption: **4** access the io tensors, loss etc
+
         towers[3]['my_input']  # my_input placeholder which is actually named 'my_input_3:0'
 
-    ---------------------------------------------
-    WARNING
-    ---------------------------------------------
-    The sub-graphs must be defined in the order corresponding to the tower ids!
+    .. warning:
+        The sub-graphs must be defined in the order corresponding to the tower ids!
+
     """
 
     def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name):
         """
         Create new GraphTower.
-        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
+
+        :param id_: tower (gpu) id, towers with negative ids are placed on ``/cpu:0``
         :param inputs: tower input names
         :param outputs: tower output names
         :param loss_name: loss tensor name
@@ -48,19 +59,21 @@ class GraphTower:
 
     def _get_full_name(self, tensor_name: str) -> str:
         """
-        Translates a simple tensor name to the actual tensor name in the sub-graph.
+        Translate the given simple tensor name to the actual tensor name in the tower graph.
 
         E.g.:
-        variable named `loss` in the 0th tower will be named `loss:0`
-        variable name `predictions` in the 1st tower will be name `predictions_1:0`
+        variable named ``loss`` in the 0th tower will be named ``loss:0``
+        variable name ``predictions`` in the 1st tower will be name ``predictions_1:0``
         """
         return tensor_name + ('' if self._id < 1 else '_{}'.format(self._id)) + ':0'
 
     def _find_or_raise(self, tensor_name: str) -> tf.Tensor:
         """
         Find the tensor with the given name in the default graph or raise an exception.
+
         :param tensor_name: tensor name to be find
-        :return: tf.Tensor
+        :return: tensor with the given name
+        :raise ValueError: if the tensor with the given name could not be found
         """
         full_name = self._get_full_name(tensor_name)
         try:
@@ -91,7 +104,13 @@ class GraphTower:
         return self._output_names
 
     def __getitem__(self, item) -> tf.Tensor:
-        """Return input/output tensor with the given name."""
+        """
+        Return input/output tensor with the given name.
+
+        :param item: tensor name
+        :return: tensor with the given name
+        :raise KeyError: If the given tensor name is not listed as input/output
+        """
         if item in self._outputs:
             return self._outputs[item]
         elif item in self._inputs:
@@ -100,10 +119,10 @@ class GraphTower:
             raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
 
     def __enter__(self) -> None:
-        """Enter with tf.device(...): env."""
+        """Enter ``with tf.device(...):`` env."""
         self._device = tf.device(self._device_name)
         self._device.__enter__()
 
     def __exit__(self, *args) -> None:
-        """Exit with tf.device(...): env."""
+        """Exit ``with tf.device(...):`` env."""
         self._device.__exit__(*args)
