@@ -81,16 +81,6 @@ class GraphTower:
         return self[self._loss_name]
 
     @property
-    def inputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of input tensors."""
-        return self._inputs.values()
-
-    @property
-    def outputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of output tensors."""
-        return self._outputs.values()
-
-    @property
     def input_names(self) -> List[str]:
         """Return list of the input names."""
         return self._input_names
@@ -99,11 +89,6 @@ class GraphTower:
     def output_names(self) -> List[str]:
         """Return list of the output names."""
         return self._output_names
-
-    @property
-    def batch_size(self) -> tf.Tensor:
-        """Return the current batch size."""
-        return tf.shape(self[self._input_names[0]])[0]
 
     def __getitem__(self, item) -> tf.Tensor:
         """Return input/output tensor with the given name."""
