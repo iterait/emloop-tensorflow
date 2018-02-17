@@ -28,19 +28,6 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
     return dataset, model, mainloop
 
 
-class DummyModel(BaseModel):
-    """Dummy TF model with empty graph."""
-
-    def _create_model(self, **kwargs):
-        """Create dummy tf model."""
-
-        # defining dummy variable as otherwise we would not be able to create the model saver
-        tf.Variable(name='dummy', initial_value=[1])
-
-    def _create_train_ops(self, *_):
-        tf.no_op(name='train_op_1')
-
-
 class TrainOpModel(BaseModel):
     """Dummy TF model with train op saved in self."""
 
@@ -336,7 +323,7 @@ class BaseModelTest(CXTestCaseWithDir):
         after_value = restored_model.graph.get_tensor_by_name('var:0').eval(session=restored_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
 
-    def test_mainloop_model_training(self):
+    def test_model_monitoring(self):
         """Test the model monitoring works properly."""
         dataset = SimpleDataset()
         model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
@@ -350,6 +337,13 @@ class BaseModelTest(CXTestCaseWithDir):
         monitored_output = monitored_model.run(batch, False, None)
         self.assertTrue(np.allclose([2.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_MEAN_NAME], atol=0.01))
         self.assertTrue(np.allclose([0.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_VAR_NAME], atol=0.01))
+
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target', BaseModel.SIGNAL_MEAN_NAME],
+                          outputs=['output', 'loss'], optimizer=_OPTIMIZER, monitor='output')
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target'], optimizer=_OPTIMIZER,
+                          outputs=['output', 'loss', BaseModel.SIGNAL_VAR_NAME], monitor='output')
 
 
 class TFBaseModelSaverTest(CXTestCaseWithDir):

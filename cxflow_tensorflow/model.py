@@ -238,6 +238,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
 
             if monitor:
+                for protected_var_name in [BaseModel.SIGNAL_MEAN_NAME, BaseModel.SIGNAL_VAR_NAME]:
+                    for io, io_name in [(inputs, 'inputs'), (outputs, 'outputs')]:
+                        if protected_var_name in io:
+                            raise ValueError('Variable `{}` in model {} is reserved when monitoring is turned on.'
+                                             .format(protected_var_name, io_name))
                 means, variances = [], []
                 for op in self.graph.get_operations():
                     if monitor in op.name and 'grad' not in op.name.lower() and len(op.values()) > 0:
