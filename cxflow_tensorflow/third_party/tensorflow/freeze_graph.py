@@ -85,12 +85,7 @@ def freeze_graph(input_graph: str, input_checkpoint: str, output_node_names: Ite
         reader = pywrap_tensorflow.NewCheckpointReader(input_checkpoint)
         var_to_shape_map = reader.get_variable_to_shape_map()
         for key in var_to_shape_map:
-            try:
-                tensor = sess.graph.get_tensor_by_name(key + ':0')
-            except KeyError:
-                # This tensor doesn't exist in the graph (for example it's
-                # 'global_step' or a similar housekeeping element) so skip it.
-                continue
+            tensor = sess.graph.get_tensor_by_name(key + ':0')
             var_list[key] = tensor
         saver = saver_lib.Saver(var_list=var_list)
         saver.restore(sess, input_checkpoint)

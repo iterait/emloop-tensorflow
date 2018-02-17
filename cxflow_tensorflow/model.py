@@ -85,20 +85,15 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         dependencies = []
         with self._graph.as_default():
             if restore_from is None:
-                with tf.variable_scope(tf.get_variable_scope()) as scope:
+                with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE) as scope:
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
                         dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
-                        scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-                try:
-                    self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
-                except (KeyError, ValueError, TypeError):
-                    logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
-                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+                self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -156,7 +151,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """TF session object."""
         return self._session
 
-    def run(self, batch: cx.Batch, train: bool, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool=False, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -212,7 +207,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         return dict(zip(self.output_names, stacked_outputs))
 
-    def save(self, name_suffix: str) -> str:
+    def save(self, name_suffix: str='') -> str:
         """
         Save current tensorflow graph to a checkpoint named with the given name suffix.
 
@@ -220,9 +215,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param name_suffix: saved checkpoint name suffix
         :return: path to the saved checkpoint
         """
-        graph_path = path.join(self._log_dir, 'model_{}.graph'.format(name_suffix))
-        checkpoint_path = path.join(self._log_dir, 'model_{}.ckpt'.format(name_suffix))
-        frozen_graph_path = path.join(self._log_dir, 'model_{}.pb'.format(name_suffix))
+        if name_suffix != '':
+            name_suffix = '_'+name_suffix
+        graph_path = path.join(self._log_dir, 'model{}.graph'.format(name_suffix))
+        checkpoint_path = path.join(self._log_dir, 'model{}.ckpt'.format(name_suffix))
+        frozen_graph_path = path.join(self._log_dir, 'model{}.pb'.format(name_suffix))
 
         tf.train.write_graph(self._session.graph_def, '', graph_path, as_text=False)
 

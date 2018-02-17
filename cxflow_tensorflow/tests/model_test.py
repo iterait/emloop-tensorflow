@@ -16,6 +16,7 @@ from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow.hooks import StopAfter
 
 from cxflow_tensorflow import BaseModel
+from cxflow_tensorflow.third_party.tensorflow.freeze_graph import freeze_graph
 
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
 _OPTIMIZER_NO_MODULE = {'class': 'AdamOptimizer', 'learning_rate': 0.1}
@@ -87,9 +88,10 @@ class TrainableModel(BaseModel):
                                    initializer=tf.constant_initializer([2] * 10))
 
         self.output = tf.multiply(self.input, self.var, name='output')
+        tf.constant(0, name='scalar_output')
+        tf.constant([1, 2, 3], name='batched_output')
 
-        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1)
-        tf.identity(self.loss, name=self._loss_name)
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1, name=self._loss_name)
 
 
 class DetectTrainingModel(BaseModel):
@@ -110,6 +112,11 @@ class BaseModelTest(CXTestCaseWithDir):
 
     Note: do not forget to reset the default graph after every model creation!
     """
+
+    def test_base_class(self):
+        """Test BaseModel can not be instantiated."""
+        with self.assertRaises(NotImplementedError):
+            BaseModel(dataset=None, log_dir='', **{'inputs': [], 'outputs': ['dummy']})
 
     def test_finding_train_op(self):
         """Test finding train op in graph."""
@@ -141,6 +148,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test TF model run."""
         good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
         model = SimpleModel(dataset=None, log_dir='', **good_io)
+        self.assertEqual(model.restore_fallback, 'cxflow_tensorflow.BaseModel')
         valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
 
         # test if outputs are correctly returned
@@ -192,6 +200,20 @@ class BaseModelTest(CXTestCaseWithDir):
         self.assertTrue(np.allclose(outputs['output'], [[0]*10]))
         outputs2 = detect_training_model.run(detect_training_batch, train=True)
         self.assertTrue(np.allclose(outputs2['output'], [[2]*10]))
+
+    def test_run_bad_outputs(self):
+        """Test if Exceptions are raised when bad output is encountered."""
+
+        batch = {'input': [[1]*10], 'target': [[0]*10]}
+        scalar_output_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'],
+                                             outputs=['loss', 'scalar_output'], optimizer=_OPTIMIZER)
+        with self.assertRaises(ValueError):
+            scalar_output_model.run(batch)  # scalar (non-batched) output
+
+        batch_output_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'],
+                                             outputs=['loss', 'batched_output'], optimizer=_OPTIMIZER)
+        with self.assertRaises(ValueError):
+            batch_output_model.run(batch)  # batch size mismatch
 
     def test_run_custom_loss(self):
         CUSTOM_LOSS = 'custom_loss'
@@ -348,6 +370,26 @@ class TFBaseModelSaverTest(CXTestCaseWithDir):
             data_prefix = path.basename(checkpoint)+'.data'
             data_files = [file for file in os.listdir(path.dirname(checkpoint)) if file.startswith(data_prefix)]
             self.assertGreater(len(data_files), 0)
+
+    def test_freeze(self):
+        """
+        Test if the checkpoints are kept.
+
+        This is regression test for issue #71 (TF ``Saver`` is keeping only the last 5 checkpoints).
+        """
+        dummy_model = SimpleModel(dataset=None, log_dir=self.tmpdir, inputs=[], outputs=['output'], freeze=True)
+        checkpoint = dummy_model.save('')
+
+        self.assertTrue(path.exists(checkpoint+'.index'))
+        self.assertTrue(path.exists(checkpoint+'.meta'))
+        self.assertTrue(path.exists(checkpoint[:-4]+'pb'))
+
+        with self.assertRaises(ValueError):
+            freeze_graph(input_graph='does_not_exists.graph', input_checkpoint=checkpoint, output_node_names=[],
+                         output_graph=path.join(self.tmpdir, 'out.pb'))
+        with self.assertRaises(ValueError):
+            freeze_graph(input_graph=checkpoint[:-4]+'graph', input_checkpoint='does_not_exists.ckpt',
+                         output_node_names=[], output_graph=path.join(self.tmpdir, 'out.pb'))
 
 
 class TFBaseModelManagementTest(CXTestCaseWithDir):
