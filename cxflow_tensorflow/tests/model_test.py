@@ -94,6 +94,17 @@ class TrainableModel(BaseModel):
         self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1, name=self._loss_name)
 
 
+class RegularizedModel(TrainableModel):
+    """Trainable TF model with regularization loss."""
+
+    def _create_model(self, **kwargs):
+        """Create regularized trainable TF model."""
+        super()._create_model(**kwargs)
+        ratio = tf.placeholder(tf.float32, shape=[1], name='ratio')
+        reg_term = tf.reduce_sum(self.var)
+        self.graph.add_to_collection(tf.GraphKeys.REGULARIZATION_LOSSES, ratio[0]*reg_term)
+
+
 class DetectTrainingModel(BaseModel):
     """Model with output variable depending on the training flag."""
 
@@ -350,6 +361,19 @@ class BaseModelTest(CXTestCaseWithDir):
 
         after_value = restored_model.graph.get_tensor_by_name('var:0').eval(session=restored_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
+
+    def test_regularization(self):
+        """Test if tensors in REGULARIZATION_LOSSES collections are properly utilized for training."""
+        regularized_model = RegularizedModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
+        batch = {'input': [[1]*10], 'target': [[0]*10]}
+
+        with self.assertRaises(tf.errors.InvalidArgumentError):  # placeholder ratio is required for computing the loss
+            regularized_model.run(batch, train=True)
+
+        regularized_model2 = RegularizedModel(dataset=None, log_dir='', inputs=['input', 'target', 'ratio'],
+                                              outputs=['loss', 'output'], optimizer=_OPTIMIZER)
+        good_batch = {'input': [[1]*10], 'target': [[0]*10], 'ratio': [1.0]}
+        regularized_model2.run(good_batch, train=True)
 
 
 class TFBaseModelSaverTest(CXTestCaseWithDir):
