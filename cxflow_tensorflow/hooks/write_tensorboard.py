@@ -131,7 +131,7 @@ class WriteTensorBoard(cx.AbstractHook):
                 if image.dtype in [np.float16, np.float32]:
                     min_value = np.min(image)
                     max_value = np.max(image)
-                    if (max_value - min_value) > 0:
+                    if max_value > min_value:
                         image = ((image-min_value)*(255./(max_value-min_value)))
                     image = image.astype(np.uint8)
                 image = image.astype(np.uint8)
