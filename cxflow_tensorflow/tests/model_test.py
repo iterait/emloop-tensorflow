@@ -371,6 +371,10 @@ class BaseModelTest(CXTestCaseWithDir):
         self.assertNotIn(BaseModel.SIGNAL_VAR_NAME, outputs)
         self.assertNotIn(BaseModel.SIGNAL_MEAN_NAME, outputs)
 
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                           monitor='can_not_be_found')
+
         monitored_model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
                                          monitor='output')
         monitored_output = monitored_model.run(batch, False, None)

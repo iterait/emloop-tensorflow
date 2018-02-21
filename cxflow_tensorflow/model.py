@@ -125,6 +125,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                             layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
                             means.append(layer_mean)
                             variances.append(layer_var)
+                if not means:
+                    raise ValueError('No ops to be monitored found with `{}` in their name.'.format(monitor))
                 signal_mean = tf.reduce_mean(means, axis=0, name=BaseModel.SIGNAL_MEAN_NAME)
                 signal_var = tf.reduce_mean(variances, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
                 self._extra_outputs += [signal_mean, signal_var]
@@ -155,7 +157,6 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
             logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
-
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
@@ -245,7 +246,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                                  .format(batch_size, len(output), self.output_names[i]))
 
         extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
-        return dict(zip(self.output_names+extra_outputs_names,  stacked_outputs+extra_outputs))
+        return dict(zip(self.output_names+extra_outputs_names, stacked_outputs+extra_outputs))
 
     def save(self, name_suffix: str='') -> str:
         """
