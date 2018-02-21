@@ -89,7 +89,7 @@ class DecayLROnPlateau(cx.hooks.OnPlateau, DecayLR):
     """
     Decay learning rate on plateau.
 
-    After decaying, LR may be decayed again only after additional ``short_term`` epochs.
+    After decaying, LR may be decayed again only after additional ``long_term`` epochs.
 
     Shares args from both :py:class:`DecayLR` and :py:class:`cx.hooks.OnPlateau`.
 
@@ -123,7 +123,7 @@ class DecayLROnPlateau(cx.hooks.OnPlateau, DecayLR):
         if self._prevent_decay == 0:
             logging.info('Plateau detected, decaying learning rate')
             self._decay_variable()
-            self._prevent_decay = self._short_term
+            self._prevent_decay = self._long_term
 
     def after_epoch(self, **kwargs) -> None:
         if self._prevent_decay > 0:

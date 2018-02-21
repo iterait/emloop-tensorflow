@@ -2,7 +2,7 @@ import math
 import logging
 from os import path
 from abc import ABCMeta
-from typing import List, Mapping, Optional, Iterable
+from typing import List, Mapping, Optional
 from glob import glob
 
 import numpy as np
@@ -12,131 +12,10 @@ import tensorflow as tf
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
-
+from .graph_tower import GraphTower
 
 DEFAULT_LOSS_NAME = 'loss'
 """Default loss tensor name."""
-
-
-class GraphTower:
-    """
-    ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
-    It allows to work with multiple copies of the same sub-graph distributed on multiple devices
-    with only one set of input and output names.
-
-    ---------------------------------------------
-    USAGE
-    ---------------------------------------------
-    1. create the desired number of GraphTowers:
-        towers = [GraphTower(i, inputs, outputs) for i in range(4)]
-    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):
-        for tower in towers:
-            with tower:
-                # define the TF graph with the respective inputs and outputs
-    3. find the input placeholders and output variables:
-        for tower in towers:
-            tower.find_io_tensors()
-    4. access the io tensors, loss etc.
-        towers[3]['my_input']  # my_input placeholder which is actually named 'my_input_3:0'
-
-    ---------------------------------------------
-    WARNING
-    ---------------------------------------------
-    The sub-graphs must be defined in the order corresponding to the tower ids!
-    """
-
-    def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name: str=DEFAULT_LOSS_NAME):
-        """
-        Create new GraphTower.
-        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
-        :param inputs: tower input names
-        :param outputs: tower output names
-        :param loss_name: loss tensor name
-        """
-        self._id = id_
-        self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
-        self._input_names = inputs
-        self._output_names = outputs
-        self._inputs = {}
-        self._outputs = {}
-        self._loss_name = loss_name
-
-    def _get_full_name(self, tensor_name: str) -> str:
-        """
-        Translates a simple tensor name to the actual tensor name in the sub-graph.
-
-        E.g.:
-        variable named `loss` in the 0th tower will be named `loss:0`
-        variable name `predictions` in the 1st tower will be name `predictions_1:0`
-        """
-        return tensor_name + ('' if self._id < 1 else '_{}'.format(self._id)) + ':0'
-
-    def _find_or_raise(self, tensor_name: str) -> tf.Tensor:
-        """
-        Find the tensor with the given name in the default graph or raise an exception.
-        :param tensor_name: tensor name to be find
-        :return: tf.Tensor
-        """
-        full_name = self._get_full_name(tensor_name)
-        try:
-            return tf.get_default_graph().get_tensor_by_name(full_name)
-        except (KeyError, ValueError, TypeError) as ex:
-            raise ValueError('Tensor `{}` with full name `{}` was not found.'.format(tensor_name, full_name)) from ex
-
-    def find_io_tensors(self) -> None:
-        """Find the tower's input and output tensors in the default graph."""
-        for input_name in self._input_names:
-            self._inputs[input_name] = self._find_or_raise(input_name)
-        for output_name in self._output_names:
-            self._outputs[output_name] = self._find_or_raise(output_name)
-
-    @property
-    def loss(self) -> tf.Tensor:
-        """Return the loss tensor."""
-        return self[self._loss_name]
-
-    @property
-    def inputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of input tensors."""
-        return self._inputs.values()
-
-    @property
-    def outputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of output tensors."""
-        return self._outputs.values()
-
-    @property
-    def input_names(self) -> List[str]:
-        """Return list of the input names."""
-        return self._input_names
-
-    @property
-    def output_names(self) -> List[str]:
-        """Return list of the output names."""
-        return self._output_names
-
-    @property
-    def batch_size(self) -> tf.Tensor:
-        """Return the current batch size."""
-        return tf.shape(self[self._input_names[0]])[0]
-
-    def __getitem__(self, item) -> tf.Tensor:
-        """Return input/output tensor with the given name."""
-        if item in self._outputs:
-            return self._outputs[item]
-        elif item in self._inputs:
-            return self._inputs[item]
-        else:
-            raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
-
-    def __enter__(self) -> None:
-        """Enter with tf.device(...): env."""
-        self._device = tf.device(self._device_name)
-        self._device.__enter__()
-
-    def __exit__(self, *args) -> None:
-        """Exit with tf.device(...): env."""
-        self._device.__exit__(*args)
 
 
 class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
@@ -222,20 +101,15 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         dependencies = []
         with self._graph.as_default():
             if restore_from is None:
-                with tf.variable_scope(tf.get_variable_scope()) as scope:
+                with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE) as scope:
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
                         dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
-                        scope.reuse_variables()
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-                try:
-                    self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
-                except (KeyError, ValueError, TypeError):
-                    logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
-                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+                self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
 
             if monitor:
                 for protected_var_name in [BaseModel.SIGNAL_MEAN_NAME, BaseModel.SIGNAL_VAR_NAME]:
@@ -312,7 +186,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """TF session object."""
         return self._session
 
-    def run(self, batch: cx.Batch, train: bool, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool=False, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -373,7 +247,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
         return dict(zip(self.output_names+extra_outputs_names,  stacked_outputs+extra_outputs))
 
-    def save(self, name_suffix: str) -> str:
+    def save(self, name_suffix: str='') -> str:
         """
         Save current tensorflow graph to a checkpoint named with the given name suffix.
 
@@ -381,9 +255,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param name_suffix: saved checkpoint name suffix
         :return: path to the saved checkpoint
         """
-        graph_path = path.join(self._log_dir, 'model_{}.graph'.format(name_suffix))
-        checkpoint_path = path.join(self._log_dir, 'model_{}.ckpt'.format(name_suffix))
-        frozen_graph_path = path.join(self._log_dir, 'model_{}.pb'.format(name_suffix))
+        if name_suffix != '':
+            name_suffix = '_'+name_suffix
+        graph_path = path.join(self._log_dir, 'model{}.graph'.format(name_suffix))
+        checkpoint_path = path.join(self._log_dir, 'model{}.ckpt'.format(name_suffix))
+        frozen_graph_path = path.join(self._log_dir, 'model{}.pb'.format(name_suffix))
 
         tf.train.write_graph(self._session.graph_def, '', graph_path, as_text=False)
 
