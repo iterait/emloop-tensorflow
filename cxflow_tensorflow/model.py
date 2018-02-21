@@ -34,10 +34,17 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     TRAINING_FLAG_NAME = 'cxf_is_training'
     """Training flag variable name."""
 
+    SIGNAL_MEAN_NAME = 'signal_mean'
+    """Name of the monitored signal mean tensor/output."""
+
+    SIGNAL_VAR_NAME = 'signal_variance'
+    """Name of the monitored signal variance tensor/output."""
+
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
+                 monitor: Optional[str]=None,
                  **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
@@ -54,6 +61,13 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         .. note::
             In most cases, it is not required to re-define the ``__init__`` method for your models.
 
+        .. tip::
+            It is often useful to monitor signal/weights/gradients ranges, means and/or variances during the training.
+            **cxflow-tensorflow** base model actually provides monitoring of the feed-forward signal through the net.
+            Simply set up the ``monitor`` paramater to the name of the layers to be monitored (e.g. `Conv2D` or `Relu`).
+            Layer activation means and variances (named ``signal_mean`` and ``signal_variance``) will be include
+            in the output.
+
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
@@ -65,10 +79,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
         :param loss_name: loss tensor name
+        :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
+        self._extra_outputs = []
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
@@ -94,6 +110,26 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             else:
                 self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
                 self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
+
+            if monitor:
+                for protected_var_name in [BaseModel.SIGNAL_MEAN_NAME, BaseModel.SIGNAL_VAR_NAME]:
+                    for io, io_name in [(inputs, 'inputs'), (outputs, 'outputs')]:
+                        if protected_var_name in io:
+                            raise ValueError('Variable `{}` in model {} is reserved when monitoring is turned on.'
+                                             .format(protected_var_name, io_name))
+                means, variances = [], []
+                for op in self.graph.get_operations():
+                    if monitor in op.name and 'grad' not in op.name.lower() and len(op.values()) > 0:
+                        out_tensor = op.values()[0]
+                        if len(out_tensor.get_shape().as_list()) > 1:
+                            layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
+                            means.append(layer_mean)
+                            variances.append(layer_var)
+                if not means:
+                    raise ValueError('No ops to be monitored found with `{}` in their name.'.format(monitor))
+                signal_mean = tf.reduce_mean(means, axis=0, name=BaseModel.SIGNAL_MEAN_NAME)
+                signal_var = tf.reduce_mean(variances, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
+                self._extra_outputs += [signal_mean, signal_var]
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -170,6 +206,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         feed_dict = {self._is_training: train}
         fetches = [self._train_ops[nonempty_towers-1]] if train else []
+        fetches += self._extra_outputs
 
         for i, tower in enumerate(self._towers):
             if i*tower_batch_size < batch_size:
@@ -189,6 +226,9 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         if train:
             outputs = outputs[1:]
 
+        extra_outputs = outputs[:len(self._extra_outputs)]
+        outputs = outputs[len(self._extra_outputs):]
+
         for i, output in enumerate(outputs):
             if not isinstance(output, (list, tuple, np.ndarray)):
                 output_name = self.output_names[i % len(self.output_names)]
@@ -205,7 +245,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 raise ValueError('Input-output batch size mismatch. Input: {} Output: {} for `{}`'
                                  .format(batch_size, len(output), self.output_names[i]))
 
-        return dict(zip(self.output_names, stacked_outputs))
+        extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
+        return dict(zip(self.output_names+extra_outputs_names, stacked_outputs+extra_outputs))
 
     def save(self, name_suffix: str='') -> str:
         """
