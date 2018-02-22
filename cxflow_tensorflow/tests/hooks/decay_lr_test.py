@@ -105,9 +105,9 @@ class DecayLROnPlateauTest(TestCase):
     def test_wait(self):
         """ Test if ``DecayLROnPlateau`` waits short_term epochs between decays."""
         with mock.patch.object(DecayLR, '_decay_variable') as decay:
-            hook = DecayLROnPlateau(model=self.get_model(), short_term=3)
+            hook = DecayLROnPlateau(model=self.get_model(), long_term=4, short_term=3)
             hook._on_plateau_action()
-            for i in range(hook._short_term):
+            for i in range(hook._long_term):
                 self.assertEqual(decay.call_count, 1)
                 hook.after_epoch(epoch_id=i, epoch_data=self.get_epoch_data())
                 hook._on_plateau_action()

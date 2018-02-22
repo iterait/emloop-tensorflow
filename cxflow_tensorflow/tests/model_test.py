@@ -11,13 +11,15 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow import MainLoop
-from cxflow.tests.main_loop_test import SimpleDataset
+from cxflow.tests.main_loop_test import SimpleDataset, _DATASET_SHAPE
 from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow.hooks import StopAfter
 
 from cxflow_tensorflow import BaseModel
+from cxflow_tensorflow.third_party.tensorflow.freeze_graph import freeze_graph
 
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
+_OPTIMIZER_NO_MODULE = {'class': 'AdamOptimizer', 'learning_rate': 0.1}
 _IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
 
@@ -26,19 +28,6 @@ def create_simple_main_loop(epochs: int, tmpdir: str):
     model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER)
     mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=epochs)], skip_zeroth_epoch=False)
     return dataset, model, mainloop
-
-
-class DummyModel(BaseModel):
-    """Dummy TF model with empty graph."""
-
-    def _create_model(self, **kwargs):
-        """Create dummy tf model."""
-
-        # defining dummy variable as otherwise we would not be able to create the model saver
-        tf.Variable(name='dummy', initial_value=[1])
-
-    def _create_train_ops(self, *_):
-        tf.no_op(name='train_op_1')
 
 
 class TrainOpModel(BaseModel):
@@ -99,9 +88,21 @@ class TrainableModel(BaseModel):
                                    initializer=tf.constant_initializer([2] * 10))
 
         self.output = tf.multiply(self.input, self.var, name='output')
+        tf.constant(0, name='scalar_output')
+        tf.constant([1, 2, 3], name='batched_output')
 
-        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1)
-        tf.identity(self.loss, name=self._loss_name)
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1, name=self._loss_name)
+
+
+class RegularizedModel(TrainableModel):
+    """Trainable TF model with regularization loss."""
+
+    def _create_model(self, **kwargs):
+        """Create regularized trainable TF model."""
+        super()._create_model(**kwargs)
+        ratio = tf.placeholder(tf.float32, shape=[1], name='ratio')
+        reg_term = tf.reduce_sum(self.var)
+        self.graph.add_to_collection(tf.GraphKeys.REGULARIZATION_LOSSES, ratio[0]*reg_term)
 
 
 class DetectTrainingModel(BaseModel):
@@ -122,6 +123,16 @@ class BaseModelTest(CXTestCaseWithDir):
 
     Note: do not forget to reset the default graph after every model creation!
     """
+
+    def test_base_class(self):
+        """Test BaseModel can not be instantiated."""
+        with self.assertRaises(NotImplementedError):
+            BaseModel(dataset=None, log_dir='', **{'inputs': [], 'outputs': ['dummy']})
+
+    def test_missing_optimizer(self):
+        """Test raise if the optimizer config is missing."""
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=None, log_dir='', **_IO)
 
     def test_finding_train_op(self):
         """Test finding train op in graph."""
@@ -153,6 +164,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test TF model run."""
         good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
         model = SimpleModel(dataset=None, log_dir='', **good_io)
+        self.assertEqual(model.restore_fallback, 'cxflow_tensorflow.BaseModel')
         valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
 
         # test if outputs are correctly returned
@@ -205,6 +217,20 @@ class BaseModelTest(CXTestCaseWithDir):
         outputs2 = detect_training_model.run(detect_training_batch, train=True)
         self.assertTrue(np.allclose(outputs2['output'], [[2]*10]))
 
+    def test_run_bad_outputs(self):
+        """Test if Exceptions are raised when bad output is encountered."""
+
+        batch = {'input': [[1]*10], 'target': [[0]*10]}
+        scalar_output_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'],
+                                             outputs=['loss', 'scalar_output'], optimizer=_OPTIMIZER)
+        with self.assertRaises(ValueError):
+            scalar_output_model.run(batch)  # scalar (non-batched) output
+
+        batch_output_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'],
+                                             outputs=['loss', 'batched_output'], optimizer=_OPTIMIZER)
+        with self.assertRaises(ValueError):
+            batch_output_model.run(batch)  # batch size mismatch
+
     def test_run_custom_loss(self):
         CUSTOM_LOSS = 'custom_loss'
         IO_CUSTOM = {'inputs': ['input', 'target'], 'outputs': ['output', CUSTOM_LOSS]}
@@ -256,7 +282,7 @@ class BaseModelTest(CXTestCaseWithDir):
         """Test restore from directory with one valid checkpoint."""
 
         # test model saving
-        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        trainable_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER_NO_MODULE)
         batch = {'input': [[1] * 10], 'target': [[0] * 10]}
         for _ in range(1000):
             trainable_model.run(batch, train=True)
@@ -355,6 +381,45 @@ class BaseModelTest(CXTestCaseWithDir):
         after_value = restored_model.graph.get_tensor_by_name('var:0').eval(session=restored_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
 
+    def test_model_monitoring(self):
+        """Test the model monitoring works properly."""
+        dataset = SimpleDataset()
+        model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        batch = next(iter(dataset.train_stream()))
+        outputs = model.run(batch, False, None)
+        self.assertNotIn(BaseModel.SIGNAL_VAR_NAME, outputs)
+        self.assertNotIn(BaseModel.SIGNAL_MEAN_NAME, outputs)
+
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                           monitor='can_not_be_found')
+
+        monitored_model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                                         monitor='output')
+        monitored_output = monitored_model.run(batch, False, None)
+        self.assertTrue(np.allclose([2.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_MEAN_NAME], atol=0.01))
+        self.assertTrue(np.allclose([0.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_VAR_NAME], atol=0.01))
+
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target', BaseModel.SIGNAL_MEAN_NAME],
+                          outputs=['output', 'loss'], optimizer=_OPTIMIZER, monitor='output')
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target'], optimizer=_OPTIMIZER,
+                          outputs=['output', 'loss', BaseModel.SIGNAL_VAR_NAME], monitor='output')
+
+    def test_regularization(self):
+        """Test if tensors in REGULARIZATION_LOSSES collections are properly utilized for training."""
+        regularized_model = RegularizedModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER)
+        batch = {'input': [[1]*10], 'target': [[0]*10]}
+
+        with self.assertRaises(tf.errors.InvalidArgumentError):  # placeholder ratio is required for computing the loss
+            regularized_model.run(batch, train=True)
+
+        regularized_model2 = RegularizedModel(dataset=None, log_dir='', inputs=['input', 'target', 'ratio'],
+                                              outputs=['loss', 'output'], optimizer=_OPTIMIZER)
+        good_batch = {'input': [[1]*10], 'target': [[0]*10], 'ratio': [1.0]}
+        regularized_model2.run(good_batch, train=True)
+
 
 class TFBaseModelSaverTest(CXTestCaseWithDir):
     """
@@ -379,6 +444,26 @@ class TFBaseModelSaverTest(CXTestCaseWithDir):
             data_prefix = path.basename(checkpoint)+'.data'
             data_files = [file for file in os.listdir(path.dirname(checkpoint)) if file.startswith(data_prefix)]
             self.assertGreater(len(data_files), 0)
+
+    def test_freeze(self):
+        """
+        Test if the checkpoints are kept.
+
+        This is regression test for issue #71 (TF ``Saver`` is keeping only the last 5 checkpoints).
+        """
+        dummy_model = SimpleModel(dataset=None, log_dir=self.tmpdir, inputs=[], outputs=['output'], freeze=True)
+        checkpoint = dummy_model.save('')
+
+        self.assertTrue(path.exists(checkpoint+'.index'))
+        self.assertTrue(path.exists(checkpoint+'.meta'))
+        self.assertTrue(path.exists(checkpoint[:-4]+'pb'))
+
+        with self.assertRaises(ValueError):
+            freeze_graph(input_graph='does_not_exists.graph', input_checkpoint=checkpoint, output_node_names=[],
+                         output_graph=path.join(self.tmpdir, 'out.pb'))
+        with self.assertRaises(ValueError):
+            freeze_graph(input_graph=checkpoint[:-4]+'graph', input_checkpoint='does_not_exists.ckpt',
+                         output_node_names=[], output_graph=path.join(self.tmpdir, 'out.pb'))
 
 
 class TFBaseModelManagementTest(CXTestCaseWithDir):

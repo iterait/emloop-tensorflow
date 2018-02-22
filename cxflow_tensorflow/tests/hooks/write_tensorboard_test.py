@@ -63,7 +63,8 @@ class WriteTensorBoardTest(CXTestCaseWithDir):
             with self.assertRaises(AssertionError):
                 hook.after_epoch(1, {'train': {'plot': np.zeros((10,))}})
 
-            hook.after_epoch(2, {'train': {'plot': np.zeros((10, 10, 3))}})
+            hook.after_epoch(2, {'train': {'plot': np.zeros((10, 10, 3), dtype=np.float32)}})
+            hook.after_epoch(2, {'train': {'plot': np.arange(10*10*3).reshape((10, 10, 3)).astype(np.float32)}})
         hook._summary_writer.close()
 
     def test_unknown_type(self):

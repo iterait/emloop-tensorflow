@@ -39,7 +39,7 @@ class MetricsTest(CXTestCaseWithDir):
             expected_precision = [1./2, 0., np.nan, np.nan]
             expected_f1 =        [0.4,  0., np.nan, np.nan]
 
-            # test suffixless
+            # test prefixless and suffixless
             f1_tensor, precision_tensor, recall_tensor = bin_stats(predictions, labels)
             self.assertEqual(f1_tensor.name, 'f1:0')
             self.assertEqual(precision_tensor.name, 'precision:0')
@@ -49,11 +49,12 @@ class MetricsTest(CXTestCaseWithDir):
             np.testing.assert_equal(expected_precision, precision_tensor.eval())
             np.testing.assert_equal(expected_recall, recall_tensor.eval())
 
-            # test with suffix "gold"
-            f1_named_tensor, precision_named_tensor, recall_named_tensor = bin_stats(predictions, labels, suffix='gold')
-            self.assertEqual(f1_named_tensor.name, 'f1_gold:0')
-            self.assertEqual(precision_named_tensor.name, 'precision_gold:0')
-            self.assertEqual(recall_named_tensor.name, 'recall_gold:0')
+            # test with prefix "silver" and suffix "gold"
+            f1_named_tensor, precision_named_tensor, recall_named_tensor = bin_stats(predictions, labels,
+                                                                                     prefix='silver', suffix='gold')
+            self.assertEqual(f1_named_tensor.name, 'silver_f1_gold:0')
+            self.assertEqual(precision_named_tensor.name, 'silver_precision_gold:0')
+            self.assertEqual(recall_named_tensor.name, 'silver_recall_gold:0')
 
             np.testing.assert_equal(expected_f1, f1_named_tensor.eval())
             np.testing.assert_equal(expected_precision, precision_named_tensor.eval())
