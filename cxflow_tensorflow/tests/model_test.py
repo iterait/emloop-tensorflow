@@ -11,7 +11,7 @@ import numpy as np
 import tensorflow as tf
 
 from cxflow import MainLoop
-from cxflow.tests.main_loop_test import SimpleDataset
+from cxflow.tests.main_loop_test import SimpleDataset, _DATASET_SHAPE
 from cxflow.tests.test_core import CXTestCaseWithDir
 from cxflow.hooks import StopAfter
 
@@ -361,6 +361,32 @@ class BaseModelTest(CXTestCaseWithDir):
 
         after_value = restored_model.graph.get_tensor_by_name('var:0').eval(session=restored_model.session)
         self.assertTrue(np.allclose([0]*10, after_value))
+
+    def test_model_monitoring(self):
+        """Test the model monitoring works properly."""
+        dataset = SimpleDataset()
+        model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER)
+        batch = next(iter(dataset.train_stream()))
+        outputs = model.run(batch, False, None)
+        self.assertNotIn(BaseModel.SIGNAL_VAR_NAME, outputs)
+        self.assertNotIn(BaseModel.SIGNAL_MEAN_NAME, outputs)
+
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                           monitor='can_not_be_found')
+
+        monitored_model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, optimizer=_OPTIMIZER,
+                                         monitor='output')
+        monitored_output = monitored_model.run(batch, False, None)
+        self.assertTrue(np.allclose([2.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_MEAN_NAME], atol=0.01))
+        self.assertTrue(np.allclose([0.]*_DATASET_SHAPE[0], monitored_output[BaseModel.SIGNAL_VAR_NAME], atol=0.01))
+
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target', BaseModel.SIGNAL_MEAN_NAME],
+                          outputs=['output', 'loss'], optimizer=_OPTIMIZER, monitor='output')
+        with self.assertRaises(ValueError):
+            TrainableModel(dataset=dataset, log_dir=self.tmpdir, inputs=['input', 'target'], optimizer=_OPTIMIZER,
+                          outputs=['output', 'loss', BaseModel.SIGNAL_VAR_NAME], monitor='output')
 
     def test_regularization(self):
         """Test if tensors in REGULARIZATION_LOSSES collections are properly utilized for training."""
