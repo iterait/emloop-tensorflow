@@ -41,7 +41,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     """Name of the monitored signal variance tensor/output."""
 
     def __init__(self,  # pylint: disable=too-many-arguments
-                 dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
+                 dataset: Optional[cx.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
                  monitor: Optional[str]=None,
@@ -157,6 +157,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
             logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index

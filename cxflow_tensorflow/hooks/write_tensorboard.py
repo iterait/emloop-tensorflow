@@ -112,6 +112,7 @@ class WriteTensorBoard(cx.AbstractHook):
                                   '(or a `dict` with a key named `mean` or `nanmean` whose corresponding value ' \
                                   'is of type `int` or `float`), found `{}` instead.'.format(variable, stream_name,
                                                                                              type(result))
+
                     if self._on_unknown_type == 'warn':
                         logging.warning(err_message)
                     elif self._on_unknown_type == 'error':

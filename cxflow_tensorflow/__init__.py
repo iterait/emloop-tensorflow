@@ -14,6 +14,7 @@ from . import hooks
 from . import ops
 from . import utils
 from . import metrics
+from . import models
 
 __all__ = ['BaseModel']
 
