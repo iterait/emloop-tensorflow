@@ -26,6 +26,7 @@ setup(name='cxflow-tensorflow',
       packages=[
           'cxflow_tensorflow',
           'cxflow_tensorflow.hooks',
+          'cxflow_tensorflow.models',
           'cxflow_tensorflow.ops',
           'cxflow_tensorflow.utils',
           'cxflow_tensorflow.metrics',
