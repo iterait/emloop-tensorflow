@@ -43,8 +43,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[cx.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
-                 monitor: Optional[str]=None,
+                 optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
                  **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
@@ -108,7 +107,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                             self._create_model(**kwargs)
                         dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
             else:
-                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
+                self._restore_model(restore_from=restore_from)
                 self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
 
             if monitor:
@@ -287,7 +286,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         logging.debug('Restoring model')
         saver.restore(self._session, checkpoint_path)
 
-    def _restore_model(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
+    def _restore_model(self, restore_from: str) -> None:
         """
         Restore TF model from the given ``restore_from`` path and ``restore_model_name``.
 
@@ -296,11 +295,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         :param restore_from: path to directory from which the model is restored, optionally with model name as the last
         part
-        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
-        if restore_model_name is None and not path.isdir(restore_from):
+        restore_model_name = None
+        if not path.isdir(restore_from):
             restore_model_name = path.basename(restore_from)
             restore_from = path.dirname(restore_from)
         assert path.isdir(restore_from), '`BaseModel` expect `restore_from` to be an existing directory.'
