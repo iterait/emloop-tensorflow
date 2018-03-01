@@ -31,18 +31,41 @@ class ConvBaseBlock(BaseBlock):
 
 
 class ConvBlock(ConvBaseBlock):
-    """Simple convolution layer."""
+    """
+    2D/3D convolutional layer.
+
+    **code**: ``(num_filters)c[(time_kernel_size)-](kernel_size)[s(stride)]``
+
+    **examples**: ``64c3``, ``64c3s2``, ``64c3-5s2`` (convolution with kernel (3x5x5) assuming BTHWC data)
+    """
 
     def __init__(self, **kwargs):
         """Try to parse and create new :py:class:`ConvBlock`."""
-        super().__init__(regexp='([1-9][0-9]*)c([1-9][0-9]*)(s([1-9][0-9]*))?', defaults=(None, None, None, 1),
+        super().__init__(regexp='([1-9][0-9]*)c(([1-9][0-9]*)-)?([1-9][0-9]*)(s([1-9][0-9]*))?',
+                         defaults=(None, None, 1, None,  None, 1),
                          **kwargs)
 
-    def _handle_parsed_args(self, channels: str, kernel: str, _, stride: Union[str, int]) -> None:
-        self._channels, self._kernel, self._stride = int(channels), int(kernel), int(stride)
+    def _handle_parsed_args(self, channels: str, _, time_kernel: Union[str, int], kernel: str,
+                            __, stride: Union[str, int]) -> None:
+        """
+        Handle parsed arguments.
+
+        :param channels: number of output channels
+        :param time_kernel: time kernel size (default 1)
+        :param kernel: spatial kernel size
+        :param stride: spatial stride (default 1)
+        """
+        self._channels, self._kernel, self._time_kernel, self._stride = \
+            int(channels), int(kernel), int(time_kernel), int(stride)
 
     def apply(self, x: tf.Tensor) -> tf.Tensor:
-        x = self._conv_fn(x, num_outputs=self._channels, kernel_size=self._extra_dim+(self._kernel, self._kernel),
+        time_kernel = self._extra_dim
+        if self._time_kernel > 1:
+            if len(x.shape) != 5:
+                raise ValueError('Conv block with time kernel size {} can be applied only to 5-dim tensors '
+                                 '({} were given).'.format(self._time_kernel, len(x.shape)))
+            time_kernel = (self._time_kernel,)
+        x = self._conv_fn(x, num_outputs=self._channels, kernel_size=time_kernel+(self._kernel, self._kernel),
                           stride=self._extra_dim+(self._stride, self._stride), scope='inner')
         x = self._bn_fn(x)
         x = self._ln_fn(x)
