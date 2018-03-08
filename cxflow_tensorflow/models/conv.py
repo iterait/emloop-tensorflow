@@ -18,7 +18,19 @@ UNPOOL_BLOCK = UnPoolBlock
 """Unpooling block (inverse to the pooling blocks)."""
 
 
-__all__ = ['cnn_encoder', 'cnn_autoencoder', 'CONV_BLOCKS', 'POOL_BLOCKS', 'UNPOOL_BLOCK']
+__all__ = ['cnn_encoder', 'cnn_autoencoder', 'compute_pool_amount', 'CONV_BLOCKS', 'POOL_BLOCKS', 'UNPOOL_BLOCK']
+
+
+def compute_pool_amount(encoder_config: Sequence[str]):
+    """
+    Compute the amount of pooling in the given ``encoder_config``.
+    E.g.: with two max pool layers with kernel size 2, the outputs would be 4.
+
+    :param encoder_config: a sequence of CNN encoder config codes
+    :return: the amount of pooling in the given ``encoder_config``
+    """
+    blocks_and_types = [get_block_instance(code, CONV_BLOCKS) for code in encoder_config]
+    return np.prod([block.kernel_size for block, block_type in blocks_and_types if block_type in POOL_BLOCKS])
 
 
 def cnn_encoder(x: tf.Tensor,
@@ -189,7 +201,7 @@ def cnn_autoencoder(x: tf.Tensor,
 
     # compute
     blocks_and_types = [get_block_instance(code, CONV_BLOCKS) for code in encoder_config]
-    pool_product = np.prod([block.kernel_size for block, block_type in blocks_and_types if block_type in POOL_BLOCKS])
+    pool_product = compute_pool_amount(encoder_config)
     padded = False
     if pool_product > 1:
         rows, cols = x.get_shape().as_list()[1:3]
