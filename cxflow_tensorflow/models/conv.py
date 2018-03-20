@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Callable, Sequence, List
+from typing import Optional, Callable, Sequence, List, Tuple
 
 import numpy as np
 import tensorflow as tf
@@ -162,7 +162,7 @@ def cnn_autoencoder(x: tf.Tensor,
                     ln_kwargs: Optional[dict]=None,
                     skip_connections: bool=True,
                     use_bn: bool=False,
-                    use_ln: bool=False) -> tf.Tensor:
+                    use_ln: bool=False) -> Tuple[tf.Tensor, tf.Tensor]:
     """
     Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).
 
@@ -186,7 +186,7 @@ def cnn_autoencoder(x: tf.Tensor,
     :param skip_connections: include encoder-decoder skip connections around pooling operations
     :param use_bn: add batch normalization layers after each convolution (including res and inception modules)
     :param use_ln: add layer normalization layers after each convolution/module
-    :return: output tensor of the specified auto-encoder CNN when applied to the given input tensor
+    :return: a tuple of encoded tensor and output (decoded) tensor
     :raise ValueError: if some of the layer configs cannot be correctly parsed
     :raise AssertionError: if the configuration does not meet the requirements
     """
@@ -227,9 +227,8 @@ def cnn_autoencoder(x: tf.Tensor,
     skip_connections = [] if skip_connections else None
     # build an encoder
     with tf.variable_scope('encoder'):
-        x = cnn_encoder(x, encoder_config, is_training, activation, conv_kwargs, bn_kwargs, ln_kwargs,
-                        skip_connections, use_bn, use_ln)
-
+        encoded = cnn_encoder(x, encoder_config, is_training, activation, conv_kwargs, bn_kwargs, ln_kwargs,
+                              skip_connections, use_bn, use_ln)
     # re-arrange the pooling layers so that the decoder is symmetrical
     if len(encoder_config) > 1:
         for i, (_, block_type) in enumerate(blocks_and_types):
@@ -238,12 +237,11 @@ def cnn_autoencoder(x: tf.Tensor,
 
     decoder_config = [get_block_instance(code, CONV_BLOCKS)[0].inverse_code() for code in reversed(encoder_config)]
     with tf.variable_scope('decoder'):
-        x = cnn_encoder(x, decoder_config, is_training, activation, conv_kwargs, bn_kwargs, ln_kwargs,
-                        skip_connections, use_bn, use_ln)
+        decoded_raw = cnn_encoder(encoded, decoder_config, is_training, activation, conv_kwargs, bn_kwargs, ln_kwargs,
+                                  skip_connections, use_bn, use_ln)
 
-    logging.debug('Shape of the padded auto-encoder: %s', x.get_shape().as_list())
-    if padded:
-        x = x[:, pad_top:-pad_bot, pad_left:-pad_right, :]
-    logging.debug('Shape of the final slice: %s', x.get_shape())
+    logging.debug('Shape of the padded auto-encoder: %s', decoded_raw.get_shape())
+    decoded = decoded_raw[:, pad_top:-pad_bot, pad_left:-pad_right, :] if padded else decoded_raw
+    logging.debug('Shape of the final slice: %s', decoded.get_shape())
 
-    return x
+    return encoded, decoded

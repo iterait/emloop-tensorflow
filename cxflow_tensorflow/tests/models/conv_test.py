@@ -19,8 +19,8 @@ class SimpleAutoencoder(cxtf.BaseModel):
     def _create_model(self, use_bn=False) -> None:
         images = tf.placeholder(dtype=tf.float32, shape=(None, 100, 100, 3), name='images')
         masks = tf.placeholder(dtype=tf.float32, shape=(None, 100, 100), name='masks')
-        net = cxtf.models.cnn_autoencoder(images, ['8c3', 'mp2', '16inc', 'ap2', '32res'], is_training=self.is_training,
-                                          use_bn=use_bn)
+        _, net = cxtf.models.cnn_autoencoder(images, ['8c3', 'mp2', '16inc', 'ap2', '32res'],
+                                             is_training=self.is_training, use_bn=use_bn)
         net = slim.conv2d(net, 1, (5, 5), activation_fn=tf.nn.sigmoid, scope='cnn_final_inner')
         probabilities = tf.identity(net[:, :, :, 0], name='probabilities')
         pixel_loss = tf.losses.mean_squared_error(labels=masks, predictions=probabilities,
@@ -100,13 +100,19 @@ class CNNAutoEncoderTest(TestCase):
     def test_padding(self):
         """Test cnn auto-encoder pads the input if needed and outputs the same shape anyways."""
         padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '48c3']
+        fitted_encoder = ['3c3', 'mp2', '24c3', 'mp2', '48c3']  # pooling fits to the shape, no padding is required
         with tf.Graph().as_default(), tf.Session() as ses:
             x4 = tf.ones((10, 100, 100, 3))  # 100 is not divisible by 9 -> padding will be required
-            out = cxtf.models.cnn_autoencoder(x4, padding_encoder, use_bn=False)
+            with tf.variable_scope('padded'):
+                _, decoded = cxtf.models.cnn_autoencoder(x4, padding_encoder, use_bn=False)
+            with tf.variable_scope('fitted'):
+                encoded, _ = cxtf.models.cnn_autoencoder(x4, fitted_encoder, use_bn=False)
             ses.run(tf.local_variables_initializer())
             ses.run(tf.global_variables_initializer())
-            value = out.eval(session=ses)
-            self.assertEqual(value.shape, tuple(x4.get_shape().as_list()))
+            encoded_value = encoded.eval(session=ses)
+            self.assertEqual(encoded_value.shape, (10, 25, 25, 48))
+            decoded_value = decoded.eval(session=ses)
+            self.assertEqual(decoded_value.shape, tuple(x4.get_shape().as_list()))
 
     def test_model_integration(self):
         """Test if cnn (auto)encoder is well integrated with cxtf BaseModel."""
