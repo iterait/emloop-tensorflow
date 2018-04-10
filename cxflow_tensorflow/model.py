@@ -314,8 +314,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             logging.info('Multiple checkpoint metafiles found.')
 
             if restore_model_name is None:
-                raise ValueError('There are multiple checkpoint metafiles found in the directory {}. However, config '
-                                 'lacks `model.restore_model_name`. Please, specify it.'.format(restore_from))
+                raise ValueError('There are multiple checkpoint metafiles found in the directory {}. '
+                                 'Please specify the full checkpoint path.'.format(restore_from))
 
             logging.info('Restoring model from checkpoint `{}` located in directory `{}`'.format(restore_model_name,
                                                                                                  restore_from))
