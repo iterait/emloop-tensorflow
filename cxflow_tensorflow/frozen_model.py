@@ -81,11 +81,7 @@ class FrozenModel(cx.AbstractModel):
         for output_name in self.output_names:
             fetches.append(self._tower[output_name])
 
-        if stream is not None:
-            with stream.allow_buffering:
-                outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
-        else:
-            outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
 
         return dict(zip(self.output_names, outputs))
 
