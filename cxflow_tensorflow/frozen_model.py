@@ -119,7 +119,8 @@ class FrozenModel(cx.AbstractModel):
         if not path.isdir(restore_from):
             restore_model_name = path.basename(restore_from)
             restore_from = path.dirname(restore_from)
-        assert path.isdir(restore_from), '`FrozenModel` expects `restore_from` to be an existing directory.'
+        if not path.isdir(restore_from):
+            raise ValueError('Frozen model restore path `{}` is not a directory.'.format(restore_from))
 
         # attempt to derive the model name
         if restore_model_name is None:

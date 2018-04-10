@@ -35,10 +35,13 @@ class FrozenModelTest(CXTestCaseWithDir):
         # restore from file
         FrozenModel(**_IO, restore_from=path.join(self.tmpdir, 'model.pb'))
 
+        # wrong configurations
         dummy_model.save('another')
-
         with self.assertRaises(ValueError):
             FrozenModel(**_IO, restore_from=self.tmpdir)  # multiple .pb files
+
+        with self.assertRaises(ValueError):
+            FrozenModel(**_IO, restore_from='/something/that/does/not/exist')
 
     def test_frozen_model_misc(self):
         """
