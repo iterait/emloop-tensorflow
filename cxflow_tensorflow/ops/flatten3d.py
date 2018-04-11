@@ -2,6 +2,7 @@
 import numpy as np
 import tensorflow as tf
 
+
 def flatten3D(inputs: tf.Tensor) -> tf.Tensor:
     """
     Flatten the given ``inputs`` tensor to 3 dimensions.

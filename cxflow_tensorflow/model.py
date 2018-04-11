@@ -2,7 +2,7 @@ import math
 import logging
 from os import path
 from abc import ABCMeta
-from typing import List, Mapping, Optional, Iterable
+from typing import List, Mapping, Optional
 from glob import glob
 
 import numpy as np
@@ -12,131 +12,10 @@ import tensorflow as tf
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
 from .utils import create_optimizer
-
+from .graph_tower import GraphTower
 
 DEFAULT_LOSS_NAME = 'loss'
 """Default loss tensor name."""
-
-
-class GraphTower:
-    """
-    ``GraphTower`` is a lightweight wrapper around a tower (TF sub-graph) in multi-GPU models.
-    It allows to work with multiple copies of the same sub-graph distributed on multiple devices
-    with only one set of input and output names.
-
-    ---------------------------------------------
-    USAGE
-    ---------------------------------------------
-    1. create the desired number of GraphTowers:
-        towers = [GraphTower(i, inputs, outputs) for i in range(4)]
-    2. create the TF sub-graphs in the tower environments (uses with tf.device(...)):
-        for tower in towers:
-            with tower:
-                # define the TF graph with the respective inputs and outputs
-    3. find the input placeholders and output variables:
-        for tower in towers:
-            tower.find_io_tensors()
-    4. access the io tensors, loss etc.
-        towers[3]['my_input']  # my_input placeholder which is actually named 'my_input_3:0'
-
-    ---------------------------------------------
-    WARNING
-    ---------------------------------------------
-    The sub-graphs must be defined in the order corresponding to the tower ids!
-    """
-
-    def __init__(self, id_: int, inputs: List[str], outputs: List[str], loss_name: str=DEFAULT_LOSS_NAME):
-        """
-        Create new GraphTower.
-        :param id_: tower (gpu) id, towers with negative ids are placed on /cpu:0
-        :param inputs: tower input names
-        :param outputs: tower output names
-        :param loss_name: loss tensor name
-        """
-        self._id = id_
-        self._device_name = '/cpu:0' if id_ < 0 else '/gpu:{}'.format(id_)
-        self._input_names = inputs
-        self._output_names = outputs
-        self._inputs = {}
-        self._outputs = {}
-        self._loss_name = loss_name
-
-    def _get_full_name(self, tensor_name: str) -> str:
-        """
-        Translates a simple tensor name to the actual tensor name in the sub-graph.
-
-        E.g.:
-        variable named `loss` in the 0th tower will be named `loss:0`
-        variable name `predictions` in the 1st tower will be name `predictions_1:0`
-        """
-        return tensor_name + ('' if self._id < 1 else '_{}'.format(self._id)) + ':0'
-
-    def _find_or_raise(self, tensor_name: str) -> tf.Tensor:
-        """
-        Find the tensor with the given name in the default graph or raise an exception.
-        :param tensor_name: tensor name to be find
-        :return: tf.Tensor
-        """
-        full_name = self._get_full_name(tensor_name)
-        try:
-            return tf.get_default_graph().get_tensor_by_name(full_name)
-        except (KeyError, ValueError, TypeError) as ex:
-            raise ValueError('Tensor `{}` with full name `{}` was not found.'.format(tensor_name, full_name)) from ex
-
-    def find_io_tensors(self) -> None:
-        """Find the tower's input and output tensors in the default graph."""
-        for input_name in self._input_names:
-            self._inputs[input_name] = self._find_or_raise(input_name)
-        for output_name in self._output_names:
-            self._outputs[output_name] = self._find_or_raise(output_name)
-
-    @property
-    def loss(self) -> tf.Tensor:
-        """Return the loss tensor."""
-        return self[self._loss_name]
-
-    @property
-    def inputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of input tensors."""
-        return self._inputs.values()
-
-    @property
-    def outputs(self) -> Iterable[tf.Tensor]:
-        """Return an iterable collection of output tensors."""
-        return self._outputs.values()
-
-    @property
-    def input_names(self) -> List[str]:
-        """Return list of the input names."""
-        return self._input_names
-
-    @property
-    def output_names(self) -> List[str]:
-        """Return list of the output names."""
-        return self._output_names
-
-    @property
-    def batch_size(self) -> tf.Tensor:
-        """Return the current batch size."""
-        return tf.shape(self[self._input_names[0]])[0]
-
-    def __getitem__(self, item) -> tf.Tensor:
-        """Return input/output tensor with the given name."""
-        if item in self._outputs:
-            return self._outputs[item]
-        elif item in self._inputs:
-            return self._inputs[item]
-        else:
-            raise KeyError('Tensor `{}` is not within the input/output tensors'.format(item))
-
-    def __enter__(self) -> None:
-        """Enter with tf.device(...): env."""
-        self._device = tf.device(self._device_name)
-        self._device.__enter__()
-
-    def __exit__(self, *args) -> None:
-        """Exit with tf.device(...): env."""
-        self._device.__exit__(*args)
 
 
 class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-many-instance-attributes
@@ -155,10 +34,16 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
     TRAINING_FLAG_NAME = 'cxf_is_training'
     """Training flag variable name."""
 
+    SIGNAL_MEAN_NAME = 'signal_mean'
+    """Name of the monitored signal mean tensor/output."""
+
+    SIGNAL_VAR_NAME = 'signal_variance'
+    """Name of the monitored signal variance tensor/output."""
+
     def __init__(self,  # pylint: disable=too-many-arguments
-                 dataset: Optional[cx.AbstractDataset], log_dir: str, inputs: List[str], outputs: List[str],
+                 dataset: Optional[cx.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
-                 restore_model_name: Optional[str]=None, optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME,
+                 optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
                  **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
@@ -175,6 +60,13 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         .. note::
             In most cases, it is not required to re-define the ``__init__`` method for your models.
 
+        .. tip::
+            It is often useful to monitor signal/weights/gradients ranges, means and/or variances during the training.
+            **cxflow-tensorflow** base model actually provides monitoring of the feed-forward signal through the net.
+            Simply set up the ``monitor`` paramater to the name of the layers to be monitored (e.g. `Conv2D` or `Relu`).
+            Layer activation means and variances (named ``signal_mean`` and ``signal_variance``) will be include
+            in the output.
+
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
@@ -186,10 +78,12 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param optimizer: TF optimizer configuration dict
         :param freeze: freeze the graph after each save
         :param loss_name: loss tensor name
+        :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
 
+        self._extra_outputs = []
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
@@ -206,20 +100,35 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         dependencies = []
         with self._graph.as_default():
             if restore_from is None:
-                with tf.variable_scope(tf.get_variable_scope()) as scope:
+                with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE) as scope:
                     self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
                         dependencies.append(list(self._graph.get_collection(tf.GraphKeys.UPDATE_OPS)))
-                        scope.reuse_variables()
             else:
-                self._restore_model(restore_from=restore_from, restore_model_name=restore_model_name)
-                try:
-                    self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
-                except (KeyError, ValueError, TypeError):
-                    logging.warning('Could not find training flag placeholder in the graph, creating a new one.')
-                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+                self._restore_model(restore_from=restore_from)
+                self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
+
+            if monitor:
+                for protected_var_name in [BaseModel.SIGNAL_MEAN_NAME, BaseModel.SIGNAL_VAR_NAME]:
+                    for io, io_name in [(inputs, 'inputs'), (outputs, 'outputs')]:
+                        if protected_var_name in io:
+                            raise ValueError('Variable `{}` in model {} is reserved when monitoring is turned on.'
+                                             .format(protected_var_name, io_name))
+                means, variances = [], []
+                for op in self.graph.get_operations():
+                    if monitor in op.name and 'grad' not in op.name.lower() and len(op.values()) > 0:
+                        out_tensor = op.values()[0]
+                        if len(out_tensor.get_shape().as_list()) > 1:
+                            layer_mean, layer_var = tf.nn.moments(tf.layers.flatten(out_tensor), axes=[1])
+                            means.append(layer_mean)
+                            variances.append(layer_var)
+                if not means:
+                    raise ValueError('No ops to be monitored found with `{}` in their name.'.format(monitor))
+                signal_mean = tf.reduce_mean(means, axis=0, name=BaseModel.SIGNAL_MEAN_NAME)
+                signal_var = tf.reduce_mean(variances, axis=0, name=BaseModel.SIGNAL_VAR_NAME)
+                self._extra_outputs += [signal_mean, signal_var]
 
             for tower in self._towers:
                 tower.find_io_tensors()
@@ -247,6 +156,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
             logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
@@ -277,7 +187,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """TF session object."""
         return self._session
 
-    def run(self, batch: cx.Batch, train: bool, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
+    def run(self, batch: cx.Batch, train: bool=False, stream: cx.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
         Run the model with the given ``batch``. Update the trainable variables only if ``train`` is true.
 
@@ -296,6 +206,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         feed_dict = {self._is_training: train}
         fetches = [self._train_ops[nonempty_towers-1]] if train else []
+        fetches += self._extra_outputs
 
         for i, tower in enumerate(self._towers):
             if i*tower_batch_size < batch_size:
@@ -315,6 +226,9 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         if train:
             outputs = outputs[1:]
 
+        extra_outputs = outputs[:len(self._extra_outputs)]
+        outputs = outputs[len(self._extra_outputs):]
+
         for i, output in enumerate(outputs):
             if not isinstance(output, (list, tuple, np.ndarray)):
                 output_name = self.output_names[i % len(self.output_names)]
@@ -331,9 +245,10 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 raise ValueError('Input-output batch size mismatch. Input: {} Output: {} for `{}`'
                                  .format(batch_size, len(output), self.output_names[i]))
 
-        return dict(zip(self.output_names, stacked_outputs))
+        extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
+        return dict(zip(self.output_names+extra_outputs_names, stacked_outputs+extra_outputs))
 
-    def save(self, name_suffix: str) -> str:
+    def save(self, name_suffix: str='') -> str:
         """
         Save current tensorflow graph to a checkpoint named with the given name suffix.
 
@@ -341,9 +256,11 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param name_suffix: saved checkpoint name suffix
         :return: path to the saved checkpoint
         """
-        graph_path = path.join(self._log_dir, 'model_{}.graph'.format(name_suffix))
-        checkpoint_path = path.join(self._log_dir, 'model_{}.ckpt'.format(name_suffix))
-        frozen_graph_path = path.join(self._log_dir, 'model_{}.pb'.format(name_suffix))
+        if name_suffix != '':
+            name_suffix = '_'+name_suffix
+        graph_path = path.join(self._log_dir, 'model{}.graph'.format(name_suffix))
+        checkpoint_path = path.join(self._log_dir, 'model{}.ckpt'.format(name_suffix))
+        frozen_graph_path = path.join(self._log_dir, 'model{}.pb'.format(name_suffix))
 
         tf.train.write_graph(self._session.graph_def, '', graph_path, as_text=False)
 
@@ -369,17 +286,22 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         logging.debug('Restoring model')
         saver.restore(self._session, checkpoint_path)
 
-    def _restore_model(self, restore_from: str, restore_model_name: Optional[str]=None) -> None:
+    def _restore_model(self, restore_from: str) -> None:
         """
         Restore TF model from the given ``restore_from`` path and ``restore_model_name``.
 
-        The model name can be derived if the ``restore_from`` directory contains exactly one checkpoint.
+        The model name can be derived if the ``restore_from`` is a directory containing exactly one checkpoint or if
+        its base name specifies a checkpoint.
 
-        :param restore_from: path to directory from which the model is restored
-        :param restore_model_name: model name to be restored (e.g. ``model.ckpt``)
+        :param restore_from: path to directory from which the model is restored, optionally with model name as the last
+        part
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
+        restore_model_name = None
+        if not path.isdir(restore_from):
+            restore_model_name = path.basename(restore_from)
+            restore_from = path.dirname(restore_from)
         assert path.isdir(restore_from), '`BaseModel` expect `restore_from` to be an existing directory.'
         meta_files = glob('{}/*.ckpt.meta'.format(restore_from))
 
@@ -392,8 +314,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             logging.info('Multiple checkpoint metafiles found.')
 
             if restore_model_name is None:
-                raise ValueError('There are multiple checkpoint metafiles found in the directory {}. However, config '
-                                 'lacks `model.restore_model_name`. Please, specify it.'.format(restore_from))
+                raise ValueError('There are multiple checkpoint metafiles found in the directory {}. '
+                                 'Please specify the full checkpoint path.'.format(restore_from))
 
             logging.info('Restoring model from checkpoint `{}` located in directory `{}`'.format(restore_model_name,
                                                                                                  restore_from))

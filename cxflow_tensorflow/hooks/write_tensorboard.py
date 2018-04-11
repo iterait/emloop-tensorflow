@@ -85,10 +85,7 @@ class WriteTensorBoard(cx.AbstractHook):
         :param epoch_data: epoch data as created by other hooks
         """
         if self._image_variables:
-            try:
-                import cv2
-            except (ImportError, ModuleNotFoundError) as ex:
-                raise ImportError('OpenCV cv2 package is required for writing images to tensorboard.') from ex
+            import cv2
 
         logging.debug('TensorBoard logging after epoch %d', epoch_id)
         summaries = []
@@ -115,6 +112,7 @@ class WriteTensorBoard(cx.AbstractHook):
                                   '(or a `dict` with a key named `mean` or `nanmean` whose corresponding value ' \
                                   'is of type `int` or `float`), found `{}` instead.'.format(variable, stream_name,
                                                                                              type(result))
+
                     if self._on_unknown_type == 'warn':
                         logging.warning(err_message)
                     elif self._on_unknown_type == 'error':
@@ -132,7 +130,11 @@ class WriteTensorBoard(cx.AbstractHook):
                 assert isinstance(image, np.ndarray)
                 assert image.ndim == 3 and image.shape[2] == 3
                 if image.dtype in [np.float16, np.float32]:
-                    image = ((image - np.min(image))*(255./(np.max(image)-np.min(image)))).astype(np.uint8)
+                    min_value = np.min(image)
+                    max_value = np.max(image)
+                    if max_value > min_value:
+                        image = ((image-min_value)*(255./(max_value-min_value)))
+                    image = image.astype(np.uint8)
                 image = image.astype(np.uint8)
                 image_string = cv2.imencode('.png', image)[1].tostring()
 
