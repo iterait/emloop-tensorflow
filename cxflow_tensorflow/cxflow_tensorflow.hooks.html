@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -179,13 +179,13 @@ info.</p>
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS">
-<code class="descname">MISSING_VARIABLE_ACTIONS</code><em class="property"> = {'error', 'warn', 'ignore'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">MISSING_VARIABLE_ACTIONS</code><em class="property"> = {'ignore', 'error', 'warn'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Action executed on missing variable.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS">
-<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'error', 'warn', 'ignore'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">UNKNOWN_TYPE_ACTIONS</code><em class="property"> = {'ignore', 'error', 'warn'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible actions to take on unknown variable type.</p>
 </dd></dl>
 
@@ -270,7 +270,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 </div>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES">
-<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'add', 'multiply'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
+<code class="descname">LR_DECAY_TYPES</code><em class="property"> = {'multiply', 'add'}</em><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="Permalink to this definition">¶</a></dt>
 <dd><p>Possible LR decay types.</p>
 </dd></dl>
 
@@ -397,7 +397,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">DecayLROnPlateau</code><span class="sig-paren">(</span><em>decay_value=0.1</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr.html#DecayLROnPlateau"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLROnPlateau" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.on_plateau.OnPlateau</span></code>, <code class="xref py py-class docutils literal"><span class="pre">cxflow_tensorflow.hooks.decay_lr.DecayLR</span></code></p>
 <p>Decay learning rate on plateau.</p>
-<p>After decaying, LR may be decayed again only after additional <code class="docutils literal"><span class="pre">short_term</span></code> epochs.</p>
+<p>After decaying, LR may be decayed again only after additional <code class="docutils literal"><span class="pre">long_term</span></code> epochs.</p>
 <p>Shares args from both <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR" title="cxflow_tensorflow.hooks.DecayLR"><code class="xref py py-class docutils literal"><span class="pre">DecayLR</span></code></a> and <code class="xref py py-class docutils literal"><span class="pre">cx.hooks.OnPlateau</span></code>.</p>
 <div class="literal-block-wrapper docutils container" id="id8">
 <div class="code-block-caption"><span class="caption-text">multiply the learning rate by 0.1 when the mean of last 100 valid <code class="docutils literal"><span class="pre">accuracy</span></code> values is

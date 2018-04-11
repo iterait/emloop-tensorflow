@@ -1,0 +1,71 @@
+===================================
+``cxflow_tensorflow.models.blocks``
+===================================
+
+.. automodule:: cxflow_tensorflow.models.blocks
+
+
+.. currentmodule:: cxflow_tensorflow.models.blocks
+
+
+Functions
+=========
+
+- :py:func:`get_block_instance`:
+  Try to create a block instance from the given code and an iterable of block candidates.
+
+
+.. autofunction:: get_block_instance
+
+
+Classes
+=======
+
+- :py:class:`Block`:
+  Base **cxflow-tensorflow** block concept.
+
+- :py:class:`BaseBlock`:
+  Base **cxflow-tensorflow** block.
+
+
+
+.. autoclass:: Block
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: Block
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: BaseBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: BaseBlock
+      :parts: 1
+
+   |
+
+
+
+Exceptions
+==========
+
+- :py:exc:`UnrecognizedCodeError`:
+  Inappropriate argument value (of correct type).
+
+
+.. autoexception:: UnrecognizedCodeError
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: UnrecognizedCodeError
+      :parts: 1

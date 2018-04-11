@@ -14,6 +14,7 @@ Submodules
 
    cxflow_tensorflow.hooks
    cxflow_tensorflow.metrics
+   cxflow_tensorflow.models
    cxflow_tensorflow.ops
    cxflow_tensorflow.utils
 
@@ -26,6 +27,9 @@ Classes
 - :py:class:`BaseModel`:
   Cxflow :py:class:`AbstractModel <cxflow.models.AbstractModel>` implementation for TensorFlow models.
 
+- :py:class:`FrozenModel`:
+  :py:class:`FrozenModel` is **cxflow** compatible abstraction for loading and running frozen TensorFlow graphs
+
 
 
 .. autoclass:: BaseModel
@@ -36,6 +40,20 @@ Classes
    :exclude-members: __weakref__
 
    .. inheritance-diagram:: BaseModel
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: FrozenModel
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: FrozenModel
       :parts: 1
 
    |

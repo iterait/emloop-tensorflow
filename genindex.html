@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>Index &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -51,7 +51,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -122,6 +122,7 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -135,23 +136,45 @@
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.__init__">__init__() (cxflow_tensorflow.BaseModel method)</a>
 
       <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.__init__">(cxflow_tensorflow.FrozenModel method)</a>
+</li>
         <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.__init__">(cxflow_tensorflow.hooks.DecayLR method)</a>
 </li>
         <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.InitLR.__init__">(cxflow_tensorflow.hooks.InitLR method)</a>
 </li>
         <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.__init__">(cxflow_tensorflow.hooks.WriteTensorBoard method)</a>
 </li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.BaseBlock.__init__">(cxflow_tensorflow.models.blocks.BaseBlock method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.Block.__init__">(cxflow_tensorflow.models.blocks.Block method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ConvBaseBlock.__init__">(cxflow_tensorflow.models.conv_blocks.ConvBaseBlock method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ConvBlock.__init__">(cxflow_tensorflow.models.conv_blocks.ConvBlock method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.IncBlock.__init__">(cxflow_tensorflow.models.conv_blocks.IncBlock method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.PoolBaseBlock.__init__">(cxflow_tensorflow.models.conv_blocks.PoolBaseBlock method)</a>
+</li>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ResBlock.__init__">(cxflow_tensorflow.models.conv_blocks.ResBlock method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_model">_create_model() (cxflow_tensorflow.BaseModel method)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_session">_create_session() (cxflow_tensorflow.BaseModel method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._create_train_ops">_create_train_ops() (cxflow_tensorflow.BaseModel method)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR._decay_variable">_decay_variable() (cxflow_tensorflow.hooks.DecayLR method)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.BaseBlock._handle_parsed_args">_handle_parsed_args() (cxflow_tensorflow.models.blocks.BaseBlock method)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ConvBlock._handle_parsed_args">(cxflow_tensorflow.models.conv_blocks.ConvBlock method)</a>
+</li>
+      </ul></li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel._initialize_variables">_initialize_variables() (cxflow_tensorflow.BaseModel method)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLROnPlateau._on_plateau_action">_on_plateau_action() (cxflow_tensorflow.hooks.DecayLROnPlateau method)</a>
@@ -173,11 +196,19 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.Block.apply">apply() (cxflow_tensorflow.models.blocks.Block method)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.AveragePoolBlock">AveragePoolBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.BaseBlock">BaseBlock (class in cxflow_tensorflow.models.blocks)</a>
+</li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel">BaseModel (class in cxflow_tensorflow)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.InitLR.before_training">before_training() (cxflow_tensorflow.hooks.InitLR method)</a>
@@ -188,23 +219,55 @@
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.metrics.html#cxflow_tensorflow.metrics.bin_stats">bin_stats() (in module cxflow_tensorflow.metrics)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.Block">Block (class in cxflow_tensorflow.models.blocks)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.html#cxflow_tensorflow.models.cnn_autoencoder">cnn_autoencoder() (in module cxflow_tensorflow.models)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.cnn_autoencoder">(in module cxflow_tensorflow.models.conv)</a>
+</li>
+      </ul></li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.html#cxflow_tensorflow.models.cnn_encoder">cnn_encoder() (in module cxflow_tensorflow.models)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.cnn_encoder">(in module cxflow_tensorflow.models.conv)</a>
+</li>
+      </ul></li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.UnPoolBlock.CODE_PREFIX">CODE_PREFIX (cxflow_tensorflow.models.conv_blocks.UnPoolBlock attribute)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.compute_pool_amount">compute_pool_amount() (in module cxflow_tensorflow.models.conv)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.CONV_BLOCKS">CONV_BLOCKS (in module cxflow_tensorflow.models.conv)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ConvBaseBlock">ConvBaseBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ConvBlock">ConvBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.utils.html#cxflow_tensorflow.utils.create_activation">create_activation() (in module cxflow_tensorflow.utils)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.utils.html#cxflow_tensorflow.utils.create_optimizer">create_optimizer() (in module cxflow_tensorflow.utils)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#module-cxflow_tensorflow">cxflow_tensorflow (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#module-cxflow_tensorflow.hooks">cxflow_tensorflow.hooks (module)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.metrics.html#module-cxflow_tensorflow.metrics">cxflow_tensorflow.metrics (module)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.html#module-cxflow_tensorflow.models">cxflow_tensorflow.models (module)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#module-cxflow_tensorflow.models.blocks">cxflow_tensorflow.models.blocks (module)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#module-cxflow_tensorflow.models.conv">cxflow_tensorflow.models.conv (module)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#module-cxflow_tensorflow.models.conv_blocks">cxflow_tensorflow.models.conv_blocks (module)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#module-cxflow_tensorflow.ops">cxflow_tensorflow.ops (module)</a>
 </li>
@@ -233,10 +296,18 @@
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.flatten3D">flatten3D() (in module cxflow_tensorflow.ops)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel">FrozenModel (class in cxflow_tensorflow)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.get_block_instance">get_block_instance() (in module cxflow_tensorflow.models.blocks)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.graph">graph (cxflow_tensorflow.BaseModel attribute)</a>
 </li>
@@ -246,11 +317,19 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.IncBlock">IncBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.InitLR">InitLR (class in cxflow_tensorflow.hooks)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.input_names">input_names (cxflow_tensorflow.BaseModel attribute)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.input_names">(cxflow_tensorflow.FrozenModel attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.input_names">input_names (cxflow_tensorflow.BaseModel attribute)</a>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.Block.inverse_code">inverse_code() (cxflow_tensorflow.models.blocks.Block method)</a>
 </li>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.is_training">is_training (cxflow_tensorflow.BaseModel attribute)</a>
 </li>
@@ -268,6 +347,10 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.MaxPoolBlock">MaxPoolBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS">MISSING_VARIABLE_ACTIONS (cxflow_tensorflow.hooks.WriteTensorBoard attribute)</a>
 </li>
   </ul></td>
@@ -277,6 +360,22 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.output_names">output_names (cxflow_tensorflow.BaseModel attribute)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.output_names">(cxflow_tensorflow.FrozenModel attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.POOL_BLOCKS">POOL_BLOCKS (in module cxflow_tensorflow.models.conv)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.PoolBaseBlock">PoolBaseBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -286,10 +385,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.repeat">repeat() (in module cxflow_tensorflow.ops)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.ResBlock">ResBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">run() (cxflow_tensorflow.BaseModel method)</a>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.restore_frozen_model">restore_frozen_model() (cxflow_tensorflow.FrozenModel static method)</a>
 </li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.run">run() (cxflow_tensorflow.BaseModel method)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.run">(cxflow_tensorflow.FrozenModel method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -297,10 +404,20 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.save">save() (cxflow_tensorflow.BaseModel method)</a>
+
+      <ul>
+        <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.FrozenModel.save">(cxflow_tensorflow.FrozenModel method)</a>
+</li>
+      </ul></li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.session">session (cxflow_tensorflow.BaseModel attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.session">session (cxflow_tensorflow.BaseModel attribute)</a>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.SIGNAL_MEAN_NAME">SIGNAL_MEAN_NAME (cxflow_tensorflow.BaseModel attribute)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel.SIGNAL_VAR_NAME">SIGNAL_VAR_NAME (cxflow_tensorflow.BaseModel attribute)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.ops.html#cxflow_tensorflow.ops.smooth_l1_loss">smooth_l1_loss() (in module cxflow_tensorflow.ops)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -321,6 +438,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS">UNKNOWN_TYPE_ACTIONS (cxflow_tensorflow.hooks.WriteTensorBoard attribute)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv.html#cxflow_tensorflow.models.conv.UNPOOL_BLOCK">UNPOOL_BLOCK (in module cxflow_tensorflow.models.conv)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.UnPoolBlock">UnPoolBlock (class in cxflow_tensorflow.models.conv_blocks)</a>
+</li>
+      <li><a href="cxflow_tensorflow/cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.UnrecognizedCodeError">UnrecognizedCodeError</a>
 </li>
   </ul></td>
 </tr></table>

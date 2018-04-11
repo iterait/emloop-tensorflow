@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.ops &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>cxflow_tensorflow.ops &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -32,7 +32,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="cxflow_tensorflow.utils" href="cxflow_tensorflow.utils.html" />
-    <link rel="prev" title="cxflow_tensorflow.metrics" href="cxflow_tensorflow.metrics.html" />
+    <link rel="prev" title="cxflow_tensorflow.models.conv_blocks" href="cxflow_tensorflow.models.conv_blocks.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -91,7 +91,7 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary">
 <div class="side_nav">
-    <a href="cxflow_tensorflow.metrics.html" title="Previous Chapter: cxflow_tensorflow.metrics"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; cxflow_tensorflow.metrics</span>
+    <a href="cxflow_tensorflow.models.conv_blocks.html" title="Previous Chapter: cxflow_tensorflow.models.conv_blocks"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; cxflow_tensorflow.models.conv_blocks</span>
     </a>
     </div>
 <div class="side_nav">
@@ -134,6 +134,8 @@ Repeat elements of the input tensor in the specified axis <code class="docutils 
 Flatten the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to 3 dimensions.</li>
 <li><a class="reference internal" href="#cxflow_tensorflow.ops.dense_to_sparse" title="cxflow_tensorflow.ops.dense_to_sparse"><code class="xref py py-func docutils literal"><span class="pre">dense_to_sparse()</span></code></a>:
 Convert the given <code class="docutils literal"><span class="pre">inputs</span></code> tensor to a <code class="docutils literal"><span class="pre">SparseTensor</span></code> of its non-zero values.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.ops.smooth_l1_loss" title="cxflow_tensorflow.ops.smooth_l1_loss"><code class="xref py py-func docutils literal"><span class="pre">smooth_l1_loss()</span></code></a>:
+Calculate piece-wise smooth L1 loss on the given tensors.</li>
 </ul>
 <dl class="function">
 <dt id="cxflow_tensorflow.ops.repeat">
@@ -201,6 +203,31 @@ Convert the given <code class="docutils literal"><span class="pre">inputs</span>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">sparse tensor of non-zero (or masked) values</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cxflow_tensorflow.ops.smooth_l1_loss">
+<code class="descclassname">cxflow_tensorflow.ops.</code><code class="descname">smooth_l1_loss</code><span class="sig-paren">(</span><em>predicted</em>, <em>expected</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/ops/loss.html#smooth_l1_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.ops.smooth_l1_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate piece-wise smooth L1 loss on the given tensors.</p>
+<p>Reference: <a class="reference external" href="https://arxiv.org/pdf/1504.08083.pdf">Fast R-CNN</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>predicted</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; predicted values tensor</li>
+<li><strong>expected</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; expected values tensor with the same shape as the <code class="docutils literal"><span class="pre">predicted</span></code> tensor</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">piece-wise smooth L1 loss</p>
 </td>
 </tr>
 </tbody>

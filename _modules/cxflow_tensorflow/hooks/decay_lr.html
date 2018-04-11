@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -50,7 +50,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -198,7 +198,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Decay learning rate on plateau.</span>
 
-<span class="sd">    After decaying, LR may be decayed again only after additional ``short_term`` epochs.</span>
+<span class="sd">    After decaying, LR may be decayed again only after additional ``long_term`` epochs.</span>
 
 <span class="sd">    Shares args from both :py:class:`DecayLR` and :py:class:`cx.hooks.OnPlateau`.</span>
 
@@ -232,7 +232,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Plateau detected, decaying learning rate&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_decay_variable</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_short_term</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_long_term</span></div>
 
     <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_decay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

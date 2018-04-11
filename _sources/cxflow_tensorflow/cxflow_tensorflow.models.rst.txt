@@ -1,0 +1,34 @@
+============================
+``cxflow_tensorflow.models``
+============================
+
+.. automodule:: cxflow_tensorflow.models
+
+
+
+Submodules
+==========
+
+.. toctree::
+   :titlesonly:
+
+   cxflow_tensorflow.models.blocks
+   cxflow_tensorflow.models.conv
+   cxflow_tensorflow.models.conv_blocks
+
+.. currentmodule:: cxflow_tensorflow.models
+
+
+Functions
+=========
+
+- :py:func:`cnn_encoder`:
+  Build a convolutional neural network from the given ``encoder_config`` (sequence of block codes).
+
+- :py:func:`cnn_autoencoder`:
+  Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).
+
+
+.. autofunction:: cnn_encoder
+
+.. autofunction:: cnn_autoencoder

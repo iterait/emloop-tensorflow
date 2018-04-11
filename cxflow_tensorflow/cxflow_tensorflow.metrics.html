@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow.metrics &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>cxflow_tensorflow.metrics &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -31,7 +31,7 @@
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="cxflow_tensorflow.ops" href="cxflow_tensorflow.ops.html" />
+    <link rel="next" title="cxflow_tensorflow.models" href="cxflow_tensorflow.models.html" />
     <link rel="prev" title="cxflow_tensorflow.hooks" href="cxflow_tensorflow.hooks.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -95,7 +95,7 @@
     </a>
     </div>
 <div class="side_nav">
-    <a href="cxflow_tensorflow.ops.html" title="Next Chapter: cxflow_tensorflow.ops"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">cxflow_tensorflow.ops &raquo;</span>
+    <a href="cxflow_tensorflow.models.html" title="Next Chapter: cxflow_tensorflow.models"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">cxflow_tensorflow.models &raquo;</span>
     </a>
     </div><ul>
 <li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">cxflow_tensorflow.metrics</span></code></a><ul>
@@ -135,7 +135,7 @@ Calculate Sorensen–Dice coefficient from the given binary classification expec
 </ul>
 <dl class="function">
 <dt id="cxflow_tensorflow.metrics.bin_stats">
-<code class="descclassname">cxflow_tensorflow.metrics.</code><code class="descname">bin_stats</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/metrics/bin.html#bin_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.metrics.bin_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cxflow_tensorflow.metrics.</code><code class="descname">bin_stats</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em>, <em>prefix=None</em>, <em>suffix=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/metrics/bin.html#bin_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.metrics.bin_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate f1, precision and recall from binary classification expected and predicted values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -144,6 +144,8 @@ Calculate Sorensen–Dice coefficient from the given binary classification expec
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
 <li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 2-d tensor (batch, labels) of expected 0/1 classes</li>
+<li><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; prefix of the output tensor names</li>
+<li><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; suffix of the output tensor names</li>
 </ul>
 </td>
 </tr>

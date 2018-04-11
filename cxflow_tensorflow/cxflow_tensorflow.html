@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.3.4 documentation</title>
+    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.4.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.3.4',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.3</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -135,6 +135,12 @@ In fact, in most cases one will override only a single method <a class="referenc
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cxflow_tensorflow.hooks.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.hooks</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cxflow_tensorflow.metrics.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.metrics</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cxflow_tensorflow.models.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.models</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cxflow_tensorflow.models.blocks.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.models.blocks</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="cxflow_tensorflow.models.conv.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.models.conv</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="cxflow_tensorflow.models.conv_blocks.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.models.conv_blocks</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="cxflow_tensorflow.ops.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.ops</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cxflow_tensorflow.utils.html"><code class="docutils literal"><span class="pre">cxflow_tensorflow.utils</span></code></a></li>
 </ul>
@@ -145,10 +151,12 @@ In fact, in most cases one will override only a single method <a class="referenc
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
 Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
+<li><a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a>:
+<a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a> is <strong>cxflow</strong> compatible abstraction for loading and running frozen TensorFlow graphs</li>
 </ul>
 <dl class="class">
 <dt id="cxflow_tensorflow.BaseModel">
-<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>monitor=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
 <p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
@@ -161,6 +169,18 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
+<dl class="attribute">
+<dt id="cxflow_tensorflow.BaseModel.SIGNAL_MEAN_NAME">
+<code class="descname">SIGNAL_MEAN_NAME</code><em class="property"> = 'signal_mean'</em><a class="headerlink" href="#cxflow_tensorflow.BaseModel.SIGNAL_MEAN_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the monitored signal mean tensor/output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cxflow_tensorflow.BaseModel.SIGNAL_VAR_NAME">
+<code class="descname">SIGNAL_VAR_NAME</code><em class="property"> = 'signal_variance'</em><a class="headerlink" href="#cxflow_tensorflow.BaseModel.SIGNAL_VAR_NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the monitored signal variance tensor/output.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="cxflow_tensorflow.BaseModel.TRAINING_FLAG_NAME">
 <code class="descname">TRAINING_FLAG_NAME</code><em class="property"> = 'cxf_is_training'</em><a class="headerlink" href="#cxflow_tensorflow.BaseModel.TRAINING_FLAG_NAME" title="Permalink to this definition">¶</a></dt>
@@ -175,7 +195,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>restore_model_name=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>monitor=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new cxflow trainable TensorFlow model.</p>
 <p>TF Graph, train ops etc. are constructed with the following procedure:</p>
 <ol class="arabic simple">
@@ -190,22 +210,31 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <p class="first admonition-title">Note</p>
 <p class="last">In most cases, it is not required to re-define the <code class="docutils literal"><span class="pre">__init__</span></code> method for your models.</p>
 </div>
+<div class="admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">It is often useful to monitor signal/weights/gradients ranges, means and/or variances during the training.
+<strong>cxflow-tensorflow</strong> base model actually provides monitoring of the feed-forward signal through the net.
+Simply set up the <code class="docutils literal"><span class="pre">monitor</span></code> paramater to the name of the layers to be monitored (e.g. <cite>Conv2D</cite> or <cite>Relu</cite>).
+Layer activation means and variances (named <code class="docutils literal"><span class="pre">signal_mean</span></code> and <code class="docutils literal"><span class="pre">signal_variance</span></code>) will be include
+in the output.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>dataset</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">AbstractDataset</span></code>]) &#8211; dataset to be trained with</li>
-<li><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to the logging directory (wherein models should be saved)</li>
+<li><strong>log_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; path to the logging directory (wherein models should be saved)</li>
 <li><strong>inputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model input names</li>
 <li><strong>outputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model output names</li>
 <li><strong>session</strong> &#8211; TF session configuration dict, see <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_session" title="cxflow_tensorflow.BaseModel._create_session"><code class="xref py py-meth docutils literal"><span class="pre">_create_session()</span></code></a></li>
 <li><strong>n_gpus</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; number of GPUs to use</li>
 <li><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; path to directory from which the model is restored</li>
-<li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <code class="docutils literal"><span class="pre">model.ckpt</span></code>)</li>
+<li><strong>restore_model_name</strong> &#8211; model name to be restored (e.g. <code class="docutils literal"><span class="pre">model.ckpt</span></code>)</li>
 <li><strong>optimizer</strong> &#8211; TF optimizer configuration dict</li>
 <li><strong>freeze</strong> &#8211; freeze the graph after each save</li>
 <li><strong>loss_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; loss tensor name</li>
+<li><strong>monitor</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; monitor signal mean and variance of the tensors which names contain the specified value</li>
 <li><strong>kwargs</strong> &#8211; additional kwargs forwarded to <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a></li>
 </ul>
 </td>
@@ -351,21 +380,24 @@ wherein the suffixed number stands for the number of towers.</p>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel._restore_model">
-<code class="descname">_restore_model</code><span class="sig-paren">(</span><em>restore_from</em>, <em>restore_model_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._restore_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._restore_model" title="Permalink to this definition">¶</a></dt>
+<code class="descname">_restore_model</code><span class="sig-paren">(</span><em>restore_from</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel._restore_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel._restore_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore TF model from the given <code class="docutils literal"><span class="pre">restore_from</span></code> path and <code class="docutils literal"><span class="pre">restore_model_name</span></code>.</p>
-<p>The model name can be derived if the <code class="docutils literal"><span class="pre">restore_from</span></code> directory contains exactly one checkpoint.</p>
+<p>The model name can be derived if the <code class="docutils literal"><span class="pre">restore_from</span></code> is a directory containing exactly one checkpoint or if
+its base name specifies a checkpoint.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to directory from which the model is restored</li>
-<li><strong>restore_model_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model name to be restored (e.g. <code class="docutils literal"><span class="pre">model.ckpt</span></code>)</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to directory from which the model is restored, optionally with model name as the last</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="docutils literal"><span class="pre">None</span></code></p>
-</td>
+</tbody>
+</table>
+<p>part</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -430,7 +462,7 @@ wherein the suffixed number stands for the number of towers.</p>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train=False</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the model with the given <code class="docutils literal"><span class="pre">batch</span></code>. Update the trainable variables only if <code class="docutils literal"><span class="pre">train</span></code> is true.</p>
 <p>Fetch and return all the model outputs as a dict.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -459,7 +491,7 @@ wherein the suffixed number stands for the number of towers.</p>
 
 <dl class="method">
 <dt id="cxflow_tensorflow.BaseModel.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>name_suffix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>name_suffix=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save current tensorflow graph to a checkpoint named with the given name suffix.</p>
 <p>The checkpoint will be locaced in self.log_dir directory.
 :type name_suffix: <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>
@@ -477,6 +509,141 @@ wherein the suffixed number stands for the number of towers.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Session</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cxflow_tensorflow.FrozenModel">
+<em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">FrozenModel</code><span class="sig-paren">(</span><em>inputs</em>, <em>outputs</em>, <em>restore_from</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>**_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/frozen_model.html#FrozenModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.FrozenModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
+<p><a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a> is <strong>cxflow</strong> compatible abstraction for loading and running frozen TensorFlow graphs
+(.pb files).</p>
+<p>In order to use it, just change the <code class="docutils literal"><span class="pre">model.class</span></code> configuration and invoke any <strong>cxflow</strong> command such as
+<code class="docutils literal"><span class="pre">cxflow</span> <span class="pre">eval</span> <span class="pre">...</span></code>.</p>
+<img src="../_images/inheritance-5fb10ff35b6ef0f9a42670b3ae3a9ddb23d40c5d.png" alt="Inheritance diagram of FrozenModel" usemap="#inheritance8f138c1f04" class="inheritance"/>
+<map id="inheritance8f138c1f04" name="inheritance8f138c1f04">
+<area shape="rect" id="node2" title=":py:class:`FrozenModel` is **cxflow** compatible abstraction for loading and running frozen TensorFlow graphs" alt="" coords="168,5,271,31"/>
+</map>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="method">
+<dt id="cxflow_tensorflow.FrozenModel.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>inputs</em>, <em>outputs</em>, <em>restore_from</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>**_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/frozen_model.html#FrozenModel.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize new <a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model input names</li>
+<li><strong>outputs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; model output names</li>
+<li><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; restore model path (either a dir or a .pb file)</li>
+<li><strong>session_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; TF session configuration dict</li>
+<li><strong>n_gpus</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; number of GPUs to use (either 0 or 1)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cxflow_tensorflow.FrozenModel.input_names">
+<code class="descname">input_names</code><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.input_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of TF input tensor (placeholder) names.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cxflow_tensorflow.FrozenModel.output_names">
+<code class="descname">output_names</code><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.output_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of TF output tensor names.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="cxflow_tensorflow.FrozenModel.restore_frozen_model">
+<em class="property">static </em><code class="descname">restore_frozen_model</code><span class="sig-paren">(</span><em>restore_from</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/frozen_model.html#FrozenModel.restore_frozen_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.restore_frozen_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore frozen TF model from the given <code class="docutils literal"><span class="pre">restore_from</span></code> path.</p>
+<p>The model name can be derived if the <code class="docutils literal"><span class="pre">restore_from</span></code> is a directory containing exactly one checkpoint or if
+its base name specifies a checkpoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>restore_from</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; path to directory from which the model is restored, optionally with model name as the last</td>
+</tr>
+</tbody>
+</table>
+<p>part</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cxflow_tensorflow.FrozenModel.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>batch</em>, <em>train=False</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/frozen_model.html#FrozenModel.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the model with the given <code class="docutils literal"><span class="pre">batch</span></code>.</p>
+<p>Fetch and return all the model outputs as a dict.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a> can not be trained.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>batch</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]) &#8211; batch dict <code class="docutils literal"><span class="pre">{source_name:</span> <span class="pre">values}</span></code></li>
+<li><strong>train</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; flag whether parameters update (<code class="docutils literal"><span class="pre">train_op</span></code>) should be included in fetches</li>
+<li><strong>stream</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">StreamWrapper</span></code>]) &#8211; stream wrapper (useful for precise buffer management)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">outputs dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cxflow_tensorflow.FrozenModel.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>name_suffix=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/frozen_model.html#FrozenModel.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.FrozenModel.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the model (not implemented).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a></td>
 </tr>
 </tbody>
 </table>
