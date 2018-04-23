@@ -19,4 +19,4 @@ from . import models
 
 __all__ = ['BaseModel', 'FrozenModel']
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
