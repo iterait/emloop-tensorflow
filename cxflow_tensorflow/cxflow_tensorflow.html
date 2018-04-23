@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.4.0 documentation</title>
+    <title>cxflow_tensorflow &#8212; cxflow-tensorflow 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -150,7 +150,7 @@ In fact, in most cases one will override only a single method <a class="referenc
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a>:
-Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
+Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.12)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</li>
 <li><a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a>:
 <a class="reference internal" href="#cxflow_tensorflow.FrozenModel" title="cxflow_tensorflow.FrozenModel"><code class="xref py py-class docutils literal"><span class="pre">FrozenModel</span></code></a> is <strong>cxflow</strong> compatible abstraction for loading and running frozen TensorFlow graphs</li>
 </ul>
@@ -158,7 +158,7 @@ Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.mode
 <dt id="cxflow_tensorflow.BaseModel">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.</code><code class="descname">BaseModel</code><span class="sig-paren">(</span><em>dataset</em>, <em>log_dir</em>, <em>inputs</em>, <em>outputs</em>, <em>session_config=None</em>, <em>n_gpus=0</em>, <em>restore_from=None</em>, <em>optimizer=None</em>, <em>freeze=False</em>, <em>loss_name='loss'</em>, <em>monitor=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/model.html#BaseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.BaseModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">models.AbstractModel</span></code></p>
-<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.11)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
+<p>Cxflow <a class="reference external" href="https://cxflow.org/cxflow/cxflow.models.html#cxflow.models.AbstractModel" title="(in cxflow v0.12)"><code class="xref py py-class docutils literal"><span class="pre">AbstractModel</span></code></a> implementation for TensorFlow models.</p>
 <p>To define a <strong>cxflow</strong> trainable model in TensorFlow, derive your class from <a class="reference internal" href="#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code></a> and override
 <a class="reference internal" href="#cxflow_tensorflow.BaseModel._create_model" title="cxflow_tensorflow.BaseModel._create_model"><code class="xref py py-meth docutils literal"><span class="pre">_create_model()</span></code></a> method.</p>
 <p>See the method references for additional customization options.</p>
