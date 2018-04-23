@@ -2,7 +2,7 @@ from pip.req import parse_requirements
 from setuptools import setup
 
 setup(name='cxflow-tensorflow',
-      version='0.4.0',
+      version='0.4.1',
       description='TensorFlow extension for cxflow.',
       long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
@@ -36,5 +36,5 @@ setup(name='cxflow-tensorflow',
       include_package_data=True,
       zip_safe=False,
       test_suite='cxflow_tensorflow.tests',
-      install_requires=[str(ir.req) for ir in parse_requirements('requirements.txt', session='hack')],
+      install_requires=[line for line in open('requirements.txt', 'r').readlines() if not line.startswith('#')],
      )
