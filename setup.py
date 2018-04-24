@@ -35,6 +35,6 @@ setup(name='cxflow-tensorflow',
       include_package_data=True,
       zip_safe=False,
       test_suite='cxflow_tensorflow.tests',
-      tests_require=['testfixtures>=5.1.1']
+      tests_require=['testfixtures>=5.1.1'],
       install_requires=['numpy', 'tensorflow>=1.5', 'cxflow>=0.12', 'tensorflow-tensorboard>=0.1.4'],
      )
