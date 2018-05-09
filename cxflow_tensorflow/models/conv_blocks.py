@@ -6,7 +6,7 @@ from ..ops import repeat
 from .blocks import BaseBlock
 
 __all__ = ['ConvBaseBlock', 'ConvBlock', 'ResBlock', 'IncBlock', 'PoolBaseBlock', 'MaxPoolBlock', 'AveragePoolBlock',
-           'UnPoolBlock']
+           'UnPoolBlock', 'GlobalAveragePoolBlock']
 
 
 class ConvBaseBlock(BaseBlock):
@@ -213,6 +213,30 @@ class AveragePoolBlock(PoolBaseBlock):
         if 'pool_fn' in kwargs:
             kwargs.pop('pool_fn')
         super().__init__(prefix='a', pool_fn=ap_fn, **kwargs)
+
+
+class GlobalAveragePoolBlock(BaseBlock):
+    """
+    Global average pooling block effectively flattening spatial dimensions of the input feature maps.
+
+    .. warning::
+        Expects ?HWC data format (e.g. BHWC or BTHWC).
+
+    """
+
+    def __init__(self, **kwargs):
+        """Try to parse and create new :py:class:`GlobalAveragePoolBlock`."""
+        super().__init__(regexp='gap', **kwargs)
+
+    def _handle_parsed_args(self) -> None:
+        pass
+
+    def inverse_code(self) -> str:
+        raise ValueError('Inverse code for global average pool block is not defined.')
+
+    def apply(self, x: tf.Tensor) -> tf.Tensor:
+        ndim = len(x.shape)
+        return tf.reduce_mean(x, axis=[ndim-3, ndim-2])  # ndim-1 is the channel dimension
 
 
 class UnPoolBlock(BaseBlock):
