@@ -155,7 +155,8 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
             train_vars = self._graph.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
-            logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars]))
+            logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars
+                                                          if var.shape.is_fully_defined()]))
 
 
     @property
