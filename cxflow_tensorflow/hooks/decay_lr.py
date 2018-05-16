@@ -5,17 +5,18 @@ import logging
 
 import tensorflow as tf
 import cxflow as cx
+from cxflow.hooks import EveryNEpoch
 
 from ..model import BaseModel
 
 
-class DecayLR(cx.AbstractHook):
+class DecayLR(EveryNEpoch):
     """
     Hook for modifying (decaying) the learning rate (or any other variable) during the training.
 
     It expects a variable with the specified name to be present in the TF model being trained.
 
-    After every epoch, the variable is either multiplied or summed with the specified ``decay_value``.
+    Each `n_epochs`, the variable is either multiplied or summed with the specified ``decay_value``.
 
 
     .. code-block:: yaml
@@ -23,6 +24,14 @@ class DecayLR(cx.AbstractHook):
 
         hooks:
           - cxflow_tensorflow.hooks.DecayLR
+
+    .. code-block:: yaml
+        :caption: multiply ``learning_rate`` variable by 0.999 each 5th epoch
+
+        hooks:
+          - cxflow_tensorflow.hooks.DecayLR
+              decay_value: 0.999
+              n_epochs: 5
 
     .. code-block:: yaml
         :caption: linear decay of ``my_learning_rate`` variable
@@ -80,7 +89,7 @@ class DecayLR(cx.AbstractHook):
         tf.assign(self._lr,  new_value).eval(session=self._model.session)
         logging.info('LR updated to `%s`', self._lr.eval(session=self._model.session))
 
-    def after_epoch(self, **_) -> None:
+    def _after_n_epoch(self, epoch_id: int, **_) -> None:
         """Call :py:meth:`_decay_variable`."""
         self._decay_variable()
 
