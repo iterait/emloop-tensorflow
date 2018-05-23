@@ -47,31 +47,62 @@ class DecayLRTest(TestCase):
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = DecayLR(model, decay_value=decay_value)
 
-        hook.after_epoch()
+        hook.after_epoch(1)
         self.assertAlmostEqual(
             model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session), 2*decay_value)
 
-        for _ in range(repeats):
-            hook.after_epoch()
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2*(decay_value**(1+repeats)))
 
+    def test_multiply_n_epoch(self):
+        """ Test if ``DecayLR`` works properly in multiply mode for every n epoch."""    
+
+        decay_value = 0.9
+        repeats = 13
+        n = 2
+
+        model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+        hook = DecayLR(model, decay_value=decay_value, n_epochs=n)
+
+        for i in range(repeats):
+            hook.after_epoch(i)
+        self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
+                               2*(decay_value**(1+(repeats//n))))
+
     def test_add(self):
         """ Test if ``DecayLR`` works properly in addition mode."""
+
         decay_value = 0.01
         repeats = 17
 
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = DecayLR(model, decay_value=decay_value, decay_type='add')
 
-        hook.after_epoch()
+        hook.after_epoch(1)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+decay_value, places=3)
 
-        for _ in range(repeats):
-            hook.after_epoch()
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+(decay_value*(1+repeats)), places=3)
+
+    def test_add_n_epoch(self):
+        """ Test if ``DecayLR`` works properly in addition mode for every n epoch."""
+
+        decay_value = 0.01
+        repeats = 17
+        n = 2
+
+        model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+        hook = DecayLR(model, decay_value=decay_value, decay_type='add', n_epochs=n)
+
+        for i in range(repeats):
+            hook.after_epoch(i)
+        self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
+                               2+(decay_value*(1+(repeats//n))), places=3)
 
 
 class DecayLROnPlateauTest(TestCase):
