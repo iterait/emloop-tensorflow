@@ -47,12 +47,12 @@ class DecayLRTest(TestCase):
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = DecayLR(model, decay_value=decay_value)
 
-        hook._after_n_epoch(1)
+        hook.after_epoch(1)
         self.assertAlmostEqual(
             model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session), 2*decay_value)
 
-        for _ in range(repeats):
-            hook._after_n_epoch(1)
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2*(decay_value**(1+repeats)))
 
@@ -63,8 +63,11 @@ class DecayLRTest(TestCase):
         repeats = 13
         n = 2
 
-        for _ in range(repeats):
-            hook._after_n_epoch(n)
+        model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+        hook = DecayLR(model, decay_value=decay_value, n_epochs=n)
+
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2*(decay_value**(1+(repeats//n))))
 
@@ -77,12 +80,12 @@ class DecayLRTest(TestCase):
         model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
         hook = DecayLR(model, decay_value=decay_value, decay_type='add')
 
-        hook._after_n_epoch(1)
+        hook.after_epoch(1)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+decay_value, places=3)
 
-        for _ in range(repeats):
-            hook._after_n_epoch(1)
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+(decay_value*(1+repeats)), places=3)
 
@@ -93,8 +96,11 @@ class DecayLRTest(TestCase):
         repeats = 17
         n = 2
 
-        for _ in range(repeats):
-            hook._after_n_epoch(n)
+        model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+        hook = DecayLR(model, decay_value=decay_value, decay_type='add', n_epochs=n)
+
+        for i in range(repeats):
+            hook.after_epoch(i)
         self.assertAlmostEqual(model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session),
                                2+(decay_value*(1+(repeats//n))), places=3)
 
