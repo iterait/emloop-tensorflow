@@ -44,6 +44,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  dataset: Optional[cx.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
+                 restore_fallback: Optional[str]=None,
                  **kwargs):
         """
         Create new cxflow trainable TensorFlow model.
@@ -79,6 +80,7 @@ class BaseModel(cx.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param freeze: freeze the graph after each save
         :param loss_name: loss tensor name
         :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
+        :param restore_fallback: ignored arg. (allows training from configs saved by cxflow where it is added)
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
