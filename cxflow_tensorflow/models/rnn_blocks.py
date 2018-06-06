@@ -40,14 +40,14 @@ class RNNBlock(BaseBlock):
         if self._bidirectional:
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw=cell_fn(num_units=self._num_units),
                                                          cell_bw=cell_fn(num_units=self._num_units),
-                                                         inputs=x, parallel_iterations=64,
+                                                         inputs=x,
                                                          sequence_length=self._sequence_length,
                                                          time_major=True,
                                                          dtype=tf.float32)
             outputs = tf.concat(outputs, axis=2)
         else:
             outputs, _ = tf.nn.dynamic_rnn(cell=cell_fn(num_units=self._num_units),
-                                           inputs=x, parallel_iterations=64,
+                                           inputs=x,
                                            sequence_length=self._sequence_length,
                                            time_major=True,
                                            dtype=tf.float32)
