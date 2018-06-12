@@ -10,7 +10,7 @@ __all__ = ['RNNBlock']
 class RNNBlock(BaseBlock):
     """Base block for convolution-like blocks."""
 
-    def __init__(self, sequence_length: Optional[tf.Tensor], **kwargs):
+    def __init__(self, sequence_length: Optional[tf.Tensor]=None, **kwargs):
         """
         Try to parse and create new :py:class:`RNNBlock`.
         """
