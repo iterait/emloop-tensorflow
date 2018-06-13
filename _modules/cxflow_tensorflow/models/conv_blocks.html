@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cxflow_tensorflow.models.conv_blocks &#8212; cxflow-tensorflow 0.4.3 documentation</title>
-    
+    <title>cxflow_tensorflow.models.conv_blocks &#8212; cxflow-tensorflow 0.5.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/highlight.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +20,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -37,7 +33,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -50,7 +46,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -115,7 +111,7 @@
 <span class="kn">from</span> <span class="nn">.blocks</span> <span class="k">import</span> <span class="n">BaseBlock</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ConvBaseBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;ConvBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;ResBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;IncBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;PoolBaseBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;MaxPoolBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;AveragePoolBlock&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;UnPoolBlock&#39;</span><span class="p">]</span>
+           <span class="s1">&#39;UnPoolBlock&#39;</span><span class="p">,</span> <span class="s1">&#39;GlobalAveragePoolBlock&#39;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="ConvBaseBlock"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv.ConvBaseBlock">[docs]</a><span class="k">class</span> <span class="nc">ConvBaseBlock</span><span class="p">(</span><span class="n">BaseBlock</span><span class="p">):</span>
@@ -324,6 +320,30 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">pool_fn</span><span class="o">=</span><span class="n">ap_fn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="GlobalAveragePoolBlock"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv.GlobalAveragePoolBlock">[docs]</a><span class="k">class</span> <span class="nc">GlobalAveragePoolBlock</span><span class="p">(</span><span class="n">BaseBlock</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Global average pooling block effectively flattening spatial dimensions of the input feature maps.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        Expects ?HWC data format (e.g. BHWC or BTHWC).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GlobalAveragePoolBlock.__init__"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv.GlobalAveragePoolBlock.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to parse and create new :py:class:`GlobalAveragePoolBlock`.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">regexp</span><span class="o">=</span><span class="s1">&#39;gap&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_handle_parsed_args</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">inverse_code</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Inverse code for global average pool block is not defined.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="n">ndim</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">ndim</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>  <span class="c1"># ndim-1 is the channel dimension</span></div>
+
+
 <div class="viewcode-block" id="UnPoolBlock"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv.UnPoolBlock">[docs]</a><span class="k">class</span> <span class="nc">UnPoolBlock</span><span class="p">(</span><span class="n">BaseBlock</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Un pooling block.&quot;&quot;&quot;</span>
 
@@ -355,7 +375,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>
 </footer>

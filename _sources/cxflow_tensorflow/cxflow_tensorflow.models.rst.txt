@@ -15,6 +15,8 @@ Submodules
    cxflow_tensorflow.models.blocks
    cxflow_tensorflow.models.conv
    cxflow_tensorflow.models.conv_blocks
+   cxflow_tensorflow.models.rnn
+   cxflow_tensorflow.models.rnn_blocks
 
 .. currentmodule:: cxflow_tensorflow.models
 
@@ -28,7 +30,12 @@ Functions
 - :py:func:`cnn_autoencoder`:
   Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).
 
+- :py:func:`rnn_stack`:
+  Build a recurrent neural network stack from the given ``stack_config`` (sequence of block codes).
+
 
 .. autofunction:: cnn_encoder
 
 .. autofunction:: cnn_autoencoder
+
+.. autofunction:: rnn_stack

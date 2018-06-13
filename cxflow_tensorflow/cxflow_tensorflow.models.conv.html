@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cxflow_tensorflow.models.conv &#8212; cxflow-tensorflow 0.4.3 documentation</title>
-    
+    <title>cxflow_tensorflow.models.conv &#8212; cxflow-tensorflow 0.5.0 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/highlight.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -39,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -52,7 +48,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -198,16 +194,16 @@ connections are popped and added to the <em>post-unpooling</em> tensors if they 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 4 or 5 dim input tensor</li>
-<li><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; sequence of layer/block codes defining the CNN architecture</li>
-<li><strong>is_training</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) &#8211; training/eval phase indicator</li>
-<li><strong>activation</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) &#8211; activation function</li>
-<li><strong>conv_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; convolutional layers kwargs</li>
-<li><strong>bn_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; batch normalization layers kwargs</li>
-<li><strong>ln_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; layer normalization layers kwargs</li>
-<li><strong>skip_connections</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]]) &#8211; mutable sequence of skip connection tensors around pooling operations</li>
-<li><strong>use_bn</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; add batch normalization layers after each convolution (including res and inception modules)</li>
-<li><strong>use_ln</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; add layer normalization layers after each convolution/module</li>
+<li><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 4 or 5 dim input tensor</li>
+<li><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – sequence of layer/block codes defining the CNN architecture</li>
+<li><strong>is_training</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) – training/eval phase indicator</li>
+<li><strong>activation</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) – activation function</li>
+<li><strong>conv_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – convolutional layers kwargs</li>
+<li><strong>bn_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – batch normalization layers kwargs</li>
+<li><strong>ln_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – layer normalization layers kwargs</li>
+<li><strong>skip_connections</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.List" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]]) – mutable sequence of skip connection tensors around pooling operations</li>
+<li><strong>use_bn</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – add batch normalization layers after each convolution (including res and inception modules)</li>
+<li><strong>use_ln</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – add layer normalization layers after each convolution/module</li>
 </ul>
 </td>
 </tr>
@@ -218,8 +214,8 @@ connections are popped and added to the <em>post-unpooling</em> tensors if they 
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> &#8211; if some of the layer configs cannot be correctly parsed</li>
-<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#AssertionError" title="(in Python v3.6)"><strong>AssertionError</strong></a> &#8211; if the input tensor is not 4 nor 5 dim</li>
+<li><a class="reference internal" href="cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> – if some of the layer configs cannot be correctly parsed</li>
+<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#AssertionError" title="(in Python v3.6)"><strong>AssertionError</strong></a> – if the input tensor is not 4 nor 5 dim</li>
 </ul>
 </td>
 </tr>
@@ -246,16 +242,16 @@ connections are popped and added to the <em>post-unpooling</em> tensors if they 
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; 4 dim input tensor</li>
-<li><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; sequence of layer/block codes defining the CNN architecture</li>
-<li><strong>is_training</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) &#8211; training/eval phase indicator</li>
-<li><strong>activation</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) &#8211; activation function</li>
-<li><strong>conv_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; convolutional layers kwargs</li>
-<li><strong>bn_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; batch normalization layers kwargs</li>
-<li><strong>ln_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) &#8211; layer normalization layers kwargs</li>
-<li><strong>skip_connections</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; include encoder-decoder skip connections around pooling operations</li>
-<li><strong>use_bn</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; add batch normalization layers after each convolution (including res and inception modules)</li>
-<li><strong>use_ln</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; add layer normalization layers after each convolution/module</li>
+<li><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 4 dim input tensor</li>
+<li><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – sequence of layer/block codes defining the CNN architecture</li>
+<li><strong>is_training</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) – training/eval phase indicator</li>
+<li><strong>activation</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Callable" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]) – activation function</li>
+<li><strong>conv_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – convolutional layers kwargs</li>
+<li><strong>bn_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – batch normalization layers kwargs</li>
+<li><strong>ln_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a>]) – layer normalization layers kwargs</li>
+<li><strong>skip_connections</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – include encoder-decoder skip connections around pooling operations</li>
+<li><strong>use_bn</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – add batch normalization layers after each convolution (including res and inception modules)</li>
+<li><strong>use_ln</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – add layer normalization layers after each convolution/module</li>
 </ul>
 </td>
 </tr>
@@ -266,8 +262,8 @@ connections are popped and added to the <em>post-unpooling</em> tensors if they 
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><strong>ValueError</strong></a> &#8211; if some of the layer configs cannot be correctly parsed</li>
-<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#AssertionError" title="(in Python v3.6)"><strong>AssertionError</strong></a> &#8211; if the configuration does not meet the requirements</li>
+<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#ValueError" title="(in Python v3.6)"><strong>ValueError</strong></a> – if some of the layer configs cannot be correctly parsed</li>
+<li><a class="reference external" href="https://docs.python.org/3.6/library/exceptions.html#AssertionError" title="(in Python v3.6)"><strong>AssertionError</strong></a> – if the configuration does not meet the requirements</li>
 </ul>
 </td>
 </tr>
@@ -284,7 +280,7 @@ E.g.: with two max pool layers with kernel size 2, the outputs would be 4.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) &#8211; a sequence of CNN encoder config codes</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>encoder_config</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Sequence" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – a sequence of CNN encoder config codes</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the amount of pooling in the given <code class="docutils literal"><span class="pre">encoder_config</span></code></td>
 </tr>
@@ -302,7 +298,7 @@ Un pooling block.</li>
 <dl class="attribute">
 <dt id="cxflow_tensorflow.models.conv.UNPOOL_BLOCK">
 <code class="descclassname">cxflow_tensorflow.models.conv.</code><code class="descname">UNPOOL_BLOCK</code><a class="headerlink" href="#cxflow_tensorflow.models.conv.UNPOOL_BLOCK" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">UnPoolBlock</span></code></p>
+<dd><p>alias of <a class="reference internal" href="cxflow_tensorflow.models.conv_blocks.html#cxflow_tensorflow.models.conv_blocks.UnPoolBlock" title="cxflow_tensorflow.models.conv_blocks.UnPoolBlock"><code class="xref py py-class docutils literal"><span class="pre">cxflow_tensorflow.models.conv_blocks.UnPoolBlock</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -321,7 +317,8 @@ Un pooling block.</li>
  &lt;class &#39;cxflow_tensorflow.models.conv_blocks.ResBlock&#39;&gt;,
  &lt;class &#39;cxflow_tensorflow.models.conv_blocks.MaxPoolBlock&#39;&gt;,
  &lt;class &#39;cxflow_tensorflow.models.conv_blocks.AveragePoolBlock&#39;&gt;,
- &lt;class &#39;cxflow_tensorflow.models.conv_blocks.UnPoolBlock&#39;&gt;]
+ &lt;class &#39;cxflow_tensorflow.models.conv_blocks.UnPoolBlock&#39;&gt;,
+ &lt;class &#39;cxflow_tensorflow.models.conv_blocks.GlobalAveragePoolBlock&#39;&gt;]
 </pre></div>
 </div>
 </dd></dl>
@@ -353,7 +350,7 @@ Un pooling block.</li>
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>
 </footer>

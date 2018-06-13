@@ -35,6 +35,9 @@ Classes
 - :py:class:`UnPoolBlock`:
   Un pooling block.
 
+- :py:class:`GlobalAveragePoolBlock`:
+  Global average pooling block effectively flattening spatial dimensions of the input feature maps.
+
 
 
 .. autoclass:: ConvBaseBlock
@@ -143,6 +146,20 @@ Classes
    :exclude-members: __weakref__
 
    .. inheritance-diagram:: UnPoolBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: GlobalAveragePoolBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: GlobalAveragePoolBlock
       :parts: 1
 
    |

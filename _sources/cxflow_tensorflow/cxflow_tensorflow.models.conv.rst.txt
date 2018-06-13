@@ -66,7 +66,8 @@ Variables
        <class 'cxflow_tensorflow.models.conv_blocks.ResBlock'>,
        <class 'cxflow_tensorflow.models.conv_blocks.MaxPoolBlock'>,
        <class 'cxflow_tensorflow.models.conv_blocks.AveragePoolBlock'>,
-       <class 'cxflow_tensorflow.models.conv_blocks.UnPoolBlock'>]
+       <class 'cxflow_tensorflow.models.conv_blocks.UnPoolBlock'>,
+       <class 'cxflow_tensorflow.models.conv_blocks.GlobalAveragePoolBlock'>]
 
 .. autodata:: POOL_BLOCKS
    :annotation:

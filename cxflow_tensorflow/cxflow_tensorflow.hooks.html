@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.4.3 documentation</title>
-    
+    <title>cxflow_tensorflow.hooks &#8212; cxflow-tensorflow 0.5.0 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/highlight.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -39,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -52,7 +48,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -170,10 +166,7 @@ info.</p>
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-64853e5bb7478b8a84427a3c25d0f5bd8e10d84e.png" alt="Inheritance diagram of WriteTensorBoard" usemap="#inheritance97ace323b0" class="inheritance"/>
-<map id="inheritance97ace323b0" name="inheritance97ace323b0">
-<area shape="rect" id="node2" title="Write scalar epoch variables to TensorBoard summaries." alt="" coords="164,5,300,31"/>
-</map>
+<img src="../_images/inheritance-64853e5bb7478b8a84427a3c25d0f5bd8e10d84e.png" alt="Inheritance diagram of WriteTensorBoard" class="inheritance"/>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -198,14 +191,14 @@ info.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) &#8211; a BaseModel being trained</li>
-<li><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; output dir to save the tensorboard logs</li>
-<li><strong>image_variables</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]]) &#8211; list of image variable names</li>
-<li><strong>flush_secs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; flush interval in seconds</li>
-<li><strong>visualize_graph</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) &#8211; include visualization of the computational graph (may be resource-extensive)</li>
-<li><strong>on_unknown_type</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; an action to be taken if the variable value type is not supported (e.g. a list),
+<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) – a BaseModel being trained</li>
+<li><strong>output_dir</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – output dir to save the tensorboard logs</li>
+<li><strong>image_variables</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]]) – list of image variable names</li>
+<li><strong>flush_secs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) – flush interval in seconds</li>
+<li><strong>visualize_graph</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bool</span></code></a>) – include visualization of the computational graph (may be resource-extensive)</li>
+<li><strong>on_unknown_type</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – an action to be taken if the variable value type is not supported (e.g. a list),
 one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS" title="cxflow_tensorflow.hooks.WriteTensorBoard.UNKNOWN_TYPE_ACTIONS"><code class="xref py py-attr docutils literal"><span class="pre">UNKNOWN_TYPE_ACTIONS</span></code></a></li>
-<li><strong>on_missing_variable</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; an action to be taken if the specified variable is not present,
+<li><strong>on_missing_variable</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – an action to be taken if the specified variable is not present,
 one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS" title="cxflow_tensorflow.hooks.WriteTensorBoard.MISSING_VARIABLE_ACTIONS"><code class="xref py py-attr docutils literal"><span class="pre">MISSING_VARIABLE_ACTIONS</span></code></a></li>
 </ul>
 </td>
@@ -223,8 +216,8 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>epoch_id</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; epoch ID</li>
-<li><strong>epoch_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]) &#8211; epoch data as created by other hooks</li>
+<li><strong>epoch_id</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) – epoch ID</li>
+<li><strong>epoch_data</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a>]) – epoch data as created by other hooks</li>
 </ul>
 </td>
 </tr>
@@ -240,10 +233,10 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <dl class="class">
 <dt id="cxflow_tensorflow.hooks.DecayLR">
 <em class="property">class </em><code class="descclassname">cxflow_tensorflow.hooks.</code><code class="descname">DecayLR</code><span class="sig-paren">(</span><em>model</em>, <em>decay_value=0.98</em>, <em>variable_name='learning_rate'</em>, <em>decay_type='multiply'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr.html#DecayLR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hooks.AbstractHook</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cxflow.hooks.every_n_epoch.EveryNEpoch</span></code></p>
 <p>Hook for modifying (decaying) the learning rate (or any other variable) during the training.</p>
 <p>It expects a variable with the specified name to be present in the TF model being trained.</p>
-<p>After every epoch, the variable is either multiplied or summed with the specified <code class="docutils literal"><span class="pre">decay_value</span></code>.</p>
+<p>Each <cite>n_epochs</cite>, the variable is either multiplied or summed with the specified <code class="docutils literal"><span class="pre">decay_value</span></code>.</p>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">multiply <code class="docutils literal"><span class="pre">learning_rate</span></code> variable by 0.98 after every epoch</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
@@ -252,7 +245,16 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 </div>
 </div>
 <div class="literal-block-wrapper docutils container" id="id5">
-<div class="code-block-caption"><span class="caption-text">linear decay of <code class="docutils literal"><span class="pre">my_learning_rate</span></code> variable</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="code-block-caption"><span class="caption-text">multiply <code class="docutils literal"><span class="pre">learning_rate</span></code> variable by 0.999 each 5th epoch</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.DecayLR</span>
+      <span class="l l-Scalar l-Scalar-Plain">decay_value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.999</span>
+      <span class="l l-Scalar l-Scalar-Plain">n_epochs</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">linear decay of <code class="docutils literal"><span class="pre">my_learning_rate</span></code> variable</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.DecayLR</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">decay_value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">-0.00001</span>
@@ -261,10 +263,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-6520996eb35ecf9c7fcefdc8510da0604d43b52c.png" alt="Inheritance diagram of DecayLR" usemap="#inheritance4c00d285d1" class="inheritance"/>
-<map id="inheritance4c00d285d1" name="inheritance4c00d285d1">
-<area shape="rect" id="node2" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="164,5,243,31"/>
-</map>
+<img src="../_images/inheritance-4d0e55cfc45569d62bb0d35a1091d4b5ba89aaa3.png" alt="Inheritance diagram of DecayLR" class="inheritance"/>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -283,12 +282,26 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) &#8211; TF model being trained</li>
-<li><strong>decay_value</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) &#8211; the value to modify the learning rate with</li>
-<li><strong>variable_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; variable name to be modified</li>
-<li><strong>decay_type</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; decay type, one of <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES"><code class="xref py py-attr docutils literal"><span class="pre">LR_DECAY_TYPES</span></code></a></li>
+<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) – TF model being trained</li>
+<li><strong>decay_value</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>) – the value to modify the learning rate with</li>
+<li><strong>variable_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – variable name to be modified</li>
+<li><strong>decay_type</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – decay type, one of <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES" title="cxflow_tensorflow.hooks.DecayLR.LR_DECAY_TYPES"><code class="xref py py-attr docutils literal"><span class="pre">LR_DECAY_TYPES</span></code></a></li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cxflow_tensorflow.hooks.DecayLR._after_n_epoch">
+<code class="descname">_after_n_epoch</code><span class="sig-paren">(</span><em>epoch_id</em>, <em>**_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr.html#DecayLR._after_n_epoch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR._after_n_epoch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR._decay_variable" title="cxflow_tensorflow.hooks.DecayLR._decay_variable"><code class="xref py py-meth docutils literal"><span class="pre">_decay_variable()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -302,23 +315,9 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>_</strong> &#8211; ignore all the parameters</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>_</strong> – ignore all the parameters</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="cxflow_tensorflow.hooks.DecayLR.after_epoch">
-<code class="descname">after_epoch</code><span class="sig-paren">(</span><em>**_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cxflow_tensorflow/hooks/decay_lr.html#DecayLR.after_epoch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cxflow_tensorflow.hooks.DecayLR.after_epoch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Call <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR._decay_variable" title="cxflow_tensorflow.hooks.DecayLR._decay_variable"><code class="xref py py-meth docutils literal"><span class="pre">_decay_variable()</span></code></a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -333,16 +332,16 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <p>Hook for initializing the learning rate (or any other variable) before the training.</p>
 <p>This is useful for setting up a resumed training.</p>
 <p>It expects a variable with the specified name to be present in the TF model being trained.</p>
-<div class="literal-block-wrapper docutils container" id="id6">
-<div class="code-block-caption"><span class="caption-text">initialize <code class="docutils literal"><span class="pre">learning_rate</span></code> variable to 0.001</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">initialize <code class="docutils literal"><span class="pre">learning_rate</span></code> variable to 0.001</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.InitLR</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id7">
-<div class="code-block-caption"><span class="caption-text">initialize <code class="docutils literal"><span class="pre">my_variable</span></code> variable to 42</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">initialize <code class="docutils literal"><span class="pre">my_variable</span></code> variable to 42</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.InitLR</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">variable_name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">my_variable</span>
@@ -350,10 +349,7 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-8e7c348243c57ccf1aa286eeb900166501b296ac.png" alt="Inheritance diagram of InitLR" usemap="#inheritance5203418f13" class="inheritance"/>
-<map id="inheritance5203418f13" name="inheritance5203418f13">
-<area shape="rect" id="node2" title="Hook for initializing the learning rate (or any other variable) before the training." alt="" coords="164,5,236,31"/>
-</map>
+<img src="../_images/inheritance-8e7c348243c57ccf1aa286eeb900166501b296ac.png" alt="Inheritance diagram of InitLR" class="inheritance"/>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -366,9 +362,9 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) &#8211; TF model being trained</li>
-<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">float</span></code></a>) &#8211; desired variable value</li>
-<li><strong>variable_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; variable name to be initialize</li>
+<li><strong>model</strong> (<code class="xref py py-class docutils literal"><span class="pre">BaseModel</span></code>) – TF model being trained</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">float</span></code></a>) – desired variable value</li>
+<li><strong>variable_name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – variable name to be initialize</li>
 </ul>
 </td>
 </tr>
@@ -399,9 +395,9 @@ one of <a class="reference internal" href="#cxflow_tensorflow.hooks.WriteTensorB
 <p>Decay learning rate on plateau.</p>
 <p>After decaying, LR may be decayed again only after additional <code class="docutils literal"><span class="pre">long_term</span></code> epochs.</p>
 <p>Shares args from both <a class="reference internal" href="#cxflow_tensorflow.hooks.DecayLR" title="cxflow_tensorflow.hooks.DecayLR"><code class="xref py py-class docutils literal"><span class="pre">DecayLR</span></code></a> and <code class="xref py py-class docutils literal"><span class="pre">cx.hooks.OnPlateau</span></code>.</p>
-<div class="literal-block-wrapper docutils container" id="id8">
+<div class="literal-block-wrapper docutils container" id="id9">
 <div class="code-block-caption"><span class="caption-text">multiply the learning rate by 0.1 when the mean of last 100 valid <code class="docutils literal"><span class="pre">accuracy</span></code> values is
-greater than the mean of last 30 <code class="docutils literal"><span class="pre">accuracy</span></code> values.</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+greater than the mean of last 30 <code class="docutils literal"><span class="pre">accuracy</span></code> values.</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.DecayLROnPlateau</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">long_term</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">100</span>
@@ -411,22 +407,15 @@ greater than the mean of last 30 <code class="docutils literal"><span class="pre
 </pre></div>
 </div>
 </div>
-<div class="literal-block-wrapper docutils container" id="id9">
-<div class="code-block-caption"><span class="caption-text">decay LR by 0.01 when valid <code class="docutils literal"><span class="pre">loss</span></code> plateau is detected</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">decay LR by 0.01 when valid <code class="docutils literal"><span class="pre">loss</span></code> plateau is detected</span><a class="headerlink" href="#id10" title="Permalink to this code">¶</a></div>
 <div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">hooks</span><span class="p p-Indicator">:</span>
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">cxflow_tensorflow.hooks.DecayLROnPlateau</span><span class="p p-Indicator">:</span>
       <span class="l l-Scalar l-Scalar-Plain">decay_value</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.01</span>
 </pre></div>
 </div>
 </div>
-<img src="../_images/inheritance-fe16796704d29c424ba3da17651da818c27feedb.png" alt="Inheritance diagram of DecayLROnPlateau" usemap="#inheritance75658c5b94" class="inheritance"/>
-<map id="inheritance75658c5b94" name="inheritance75658c5b94">
-<area shape="rect" id="node2" title="Accumulate the specified variables allowing their aggregation after each epoch." alt="" coords="153,5,301,29"/>
-<area shape="rect" id="node4" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="363,52,436,76"/>
-<area shape="rect" id="node3" title="Accumulate the specified variables, compute the specified aggregation values and save them to the epoch data." alt="" coords="346,5,453,29"/>
-<area shape="rect" id="node6" title="Base hook for hooks taking actions when certain variable reaches its plateau." alt="" coords="498,5,581,29"/>
-<area shape="rect" id="node5" title="Decay learning rate on plateau." alt="" coords="626,29,763,52"/>
-</map>
+<img src="../_images/inheritance-4b17e328437d2421aecec7367d46173f46334134.png" alt="Inheritance diagram of DecayLROnPlateau" class="inheritance"/>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -463,7 +452,7 @@ greater than the mean of last 30 <code class="docutils literal"><span class="pre
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>
 </footer>

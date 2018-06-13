@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.4.3 documentation</title>
-    
+    <title>cxflow_tensorflow.hooks.decay_lr &#8212; cxflow-tensorflow 0.5.0 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/highlight.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +20,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -37,7 +33,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -50,7 +46,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -114,17 +110,18 @@
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">cxflow</span> <span class="k">as</span> <span class="nn">cx</span>
+<span class="kn">from</span> <span class="nn">cxflow.hooks</span> <span class="k">import</span> <span class="n">EveryNEpoch</span>
 
 <span class="kn">from</span> <span class="nn">..model</span> <span class="k">import</span> <span class="n">BaseModel</span>
 
 
-<div class="viewcode-block" id="DecayLR"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR">[docs]</a><span class="k">class</span> <span class="nc">DecayLR</span><span class="p">(</span><span class="n">cx</span><span class="o">.</span><span class="n">AbstractHook</span><span class="p">):</span>
+<div class="viewcode-block" id="DecayLR"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR">[docs]</a><span class="k">class</span> <span class="nc">DecayLR</span><span class="p">(</span><span class="n">EveryNEpoch</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hook for modifying (decaying) the learning rate (or any other variable) during the training.</span>
 
 <span class="sd">    It expects a variable with the specified name to be present in the TF model being trained.</span>
 
-<span class="sd">    After every epoch, the variable is either multiplied or summed with the specified ``decay_value``.</span>
+<span class="sd">    Each `n_epochs`, the variable is either multiplied or summed with the specified ``decay_value``.</span>
 
 
 <span class="sd">    .. code-block:: yaml</span>
@@ -132,6 +129,14 @@
 
 <span class="sd">        hooks:</span>
 <span class="sd">          - cxflow_tensorflow.hooks.DecayLR</span>
+
+<span class="sd">    .. code-block:: yaml</span>
+<span class="sd">        :caption: multiply ``learning_rate`` variable by 0.999 each 5th epoch</span>
+
+<span class="sd">        hooks:</span>
+<span class="sd">          - cxflow_tensorflow.hooks.DecayLR</span>
+<span class="sd">              decay_value: 0.999</span>
+<span class="sd">              n_epochs: 5</span>
 
 <span class="sd">    .. code-block:: yaml</span>
 <span class="sd">        :caption: linear decay of ``my_learning_rate`` variable</span>
@@ -189,7 +194,7 @@
         <span class="n">tf</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="p">,</span>  <span class="n">new_value</span><span class="p">)</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LR updated to `</span><span class="si">%s</span><span class="s1">`&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lr</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">session</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="DecayLR.after_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR.after_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">after_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DecayLR._after_n_epoch"><a class="viewcode-back" href="../../../cxflow_tensorflow/cxflow_tensorflow.hooks.html#cxflow_tensorflow.hooks.DecayLR._after_n_epoch">[docs]</a>    <span class="k">def</span> <span class="nf">_after_n_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Call :py:meth:`_decay_variable`.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_decay_variable</span><span class="p">()</span></div></div>
 
@@ -253,7 +258,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>
 </footer>

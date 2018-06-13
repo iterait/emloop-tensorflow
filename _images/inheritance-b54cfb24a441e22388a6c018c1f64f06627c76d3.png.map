@@ -1,0 +1,5 @@
+<map id="inheritance23a0183f43" name="inheritance23a0183f43">
+<area shape="rect" id="node1" href="cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.BaseBlock" target="_top" title="Base **cxflow&#45;tensorflow** block." alt="" coords="125,5,216,31"/>
+<area shape="rect" id="node3" href="#cxflow_tensorflow.models.rnn_blocks.RNNBlock" target="_top" title="Base block for convolution&#45;like blocks." alt="" coords="264,5,351,31"/>
+<area shape="rect" id="node2" href="cxflow_tensorflow.models.blocks.html#cxflow_tensorflow.models.blocks.Block" target="_top" title="Base **cxflow&#45;tensorflow** block concept." alt="" coords="5,5,77,31"/>
+</map>

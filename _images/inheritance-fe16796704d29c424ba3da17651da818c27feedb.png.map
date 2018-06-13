@@ -1,7 +1,0 @@
-<map id="inheritance75658c5b94" name="inheritance75658c5b94">
-<area shape="rect" id="node2" title="Accumulate the specified variables allowing their aggregation after each epoch." alt="" coords="153,5,301,29"/>
-<area shape="rect" id="node4" title="Hook for modifying (decaying) the learning rate (or any other variable) during the training." alt="" coords="363,52,436,76"/>
-<area shape="rect" id="node3" title="Accumulate the specified variables, compute the specified aggregation values and save them to the epoch data." alt="" coords="346,5,453,29"/>
-<area shape="rect" id="node6" title="Base hook for hooks taking actions when certain variable reaches its plateau." alt="" coords="498,5,581,29"/>
-<area shape="rect" id="node5" title="Decay learning rate on plateau." alt="" coords="626,29,763,52"/>
-</map>

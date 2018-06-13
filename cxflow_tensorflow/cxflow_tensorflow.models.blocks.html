@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>cxflow_tensorflow.models.blocks &#8212; cxflow-tensorflow 0.4.3 documentation</title>
-    
+    <title>cxflow_tensorflow.models.blocks &#8212; cxflow-tensorflow 0.5.0 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/highlight.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.3',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +20,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -39,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -52,7 +48,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -141,13 +137,13 @@ Try to create a block instance from the given code and an iterable of block cand
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; block code</li>
-<li><strong>blocks</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Type" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#cxflow_tensorflow.models.blocks.Block" title="cxflow_tensorflow.models.blocks.Block"><code class="xref py py-class docutils literal"><span class="pre">Block</span></code></a>]]) &#8211; iterable of block candidates</li>
-<li><strong>block_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[~KT, +VT_co]]) &#8211; additional block kwargs</li>
+<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – block code</li>
+<li><strong>blocks</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Iterable" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Type" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#cxflow_tensorflow.models.blocks.Block" title="cxflow_tensorflow.models.blocks.Block"><code class="xref py py-class docutils literal"><span class="pre">Block</span></code></a>]]) – iterable of block candidates</li>
+<li><strong>block_kwargs</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Mapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Mapping</span></code></a>[~KT, +VT_co]]) – additional block kwargs</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><a class="reference internal" href="#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> &#8211; if none of the block candidates can parse the given code</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><a class="reference internal" href="#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> – if none of the block candidates can parse the given code</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<a class="reference internal" href="#cxflow_tensorflow.models.blocks.Block" title="cxflow_tensorflow.models.blocks.Block"><code class="xref py py-class docutils literal"><span class="pre">Block</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Type" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#cxflow_tensorflow.models.blocks.Block" title="cxflow_tensorflow.models.blocks.Block"><code class="xref py py-class docutils literal"><span class="pre">Block</span></code></a>]]</p>
@@ -179,8 +175,7 @@ which takes and returns a single tensor.</p>
 <img src="../_images/inheritance-0b89cfb0c321863387bd51e200aa0c0c5e30ac62.png" alt="Inheritance diagram of Block" usemap="#inheritance3f0f4ac6ac" class="inheritance"/>
 <map id="inheritance3f0f4ac6ac" name="inheritance3f0f4ac6ac">
 <area shape="rect" id="node1" href="#cxflow_tensorflow.models.blocks.Block" target="_top" title="Base **cxflow&#45;tensorflow** block concept." alt="" coords="5,5,77,31"/>
-</map>
-<div class="line-block">
+</map><div class="line-block">
 <div class="line"><br /></div>
 </div>
 <dl class="method">
@@ -191,7 +186,7 @@ which takes and returns a single tensor.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; short human-readable code for block parametrization</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – short human-readable code for block parametrization</td>
 </tr>
 </tbody>
 </table>
@@ -205,7 +200,7 @@ which takes and returns a single tensor.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) &#8211; Input tensor</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – Input tensor</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></td>
 </tr>
@@ -240,8 +235,7 @@ which takes and returns a single tensor.</p>
 <map id="inheritanced94a973366" name="inheritanced94a973366">
 <area shape="rect" id="node1" href="#cxflow_tensorflow.models.blocks.BaseBlock" target="_top" title="Base **cxflow&#45;tensorflow** block." alt="" coords="125,5,216,31"/>
 <area shape="rect" id="node2" href="#cxflow_tensorflow.models.blocks.Block" target="_top" title="Base **cxflow&#45;tensorflow** block concept." alt="" coords="5,5,77,31"/>
-</map>
-<div class="line-block">
+</map><div class="line-block">
 <div class="line"><br /></div>
 </div>
 <dl class="method">
@@ -257,13 +251,13 @@ which takes and returns a single tensor.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; block configuration code</li>
-<li><strong>regexp</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) &#8211; regular expression to be matched to the code</li>
-<li><strong>defaults</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]]) &#8211; (in-order) default arguments for each of the <code class="docutils literal"><span class="pre">regexp</span></code> groups (optional)</li>
+<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – block configuration code</li>
+<li><strong>regexp</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>) – regular expression to be matched to the code</li>
+<li><strong>defaults</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Any" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Any</span></code></a>]]]) – (in-order) default arguments for each of the <code class="docutils literal"><span class="pre">regexp</span></code> groups (optional)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> &#8211; if the given <code class="docutils literal"><span class="pre">regexp</span></code> can not be matched to the given <code class="docutils literal"><span class="pre">code</span></code></p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" title="cxflow_tensorflow.models.blocks.UnrecognizedCodeError"><strong>UnrecognizedCodeError</strong></a> – if the given <code class="docutils literal"><span class="pre">regexp</span></code> can not be matched to the given <code class="docutils literal"><span class="pre">code</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -278,7 +272,7 @@ which takes and returns a single tensor.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; parsed arguments</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> – parsed arguments</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">None</span></code></td>
 </tr>
@@ -302,8 +296,7 @@ Inappropriate argument value (of correct type).</li>
 <img src="../_images/inheritance-978d0292ff2032d7f8e482dce4a747d2a5f4b1d4.png" alt="Inheritance diagram of UnrecognizedCodeError" usemap="#inheritance1df52854d3" class="inheritance"/>
 <map id="inheritance1df52854d3" name="inheritance1df52854d3">
 <area shape="rect" id="node1" href="#cxflow_tensorflow.models.blocks.UnrecognizedCodeError" target="_top" title="UnrecognizedCodeError" alt="" coords="5,5,180,31"/>
-</map>
-</dd></dl>
+</map></dd></dl>
 
 </div>
 </div>
@@ -322,7 +315,7 @@ Inappropriate argument value (of correct type).</li>
     </p>
     <p>
         &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.6.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>
 </footer>
