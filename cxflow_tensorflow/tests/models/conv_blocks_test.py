@@ -8,10 +8,11 @@ import tensorflow.contrib.slim as slim
 from unittest import TestCase
 from cxflow_tensorflow.models.blocks import UnrecognizedCodeError, BaseBlock, Block
 from cxflow_tensorflow.models.conv_blocks import ConvBlock, ResBlock, IncBlock, AveragePoolBlock, \
-    MaxPoolBlock, UnPoolBlock
+    MaxPoolBlock, UnPoolBlock, GlobalAveragePoolBlock
 
 _VALID_CODES = {ResBlock: ['32res', '32ress2', '64ress3'],
                 AveragePoolBlock: ['ap2', 'ap3s2'],
+                GlobalAveragePoolBlock: ['gap'],
                 MaxPoolBlock: ['mp2', 'mp3s2'],
                 UnPoolBlock: ['up2', 'up3'],
                 IncBlock: ['32inc', '64inc'],
@@ -19,6 +20,8 @@ _VALID_CODES = {ResBlock: ['32res', '32ress2', '64ress3'],
 
 _INVALID_CODES = {ResBlock: ['32ress', 'res', '32res2', '32residual', 'res32', '32res 32res 32res', 'res32s0', '12inc'],
                   AveragePoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'mp2', 'up3'],
+                  GlobalAveragePoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0',
+                                           '3c', '24ress2', 'mp2', 'up3', 'ap', 'ga'],
                   MaxPoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'ap2', 'up3'],
                   UnPoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'mp2', 'ap3'],
                   IncBlock: ['32incs2', 'inc12', 'inception32', '64i', '54inc 54inc', '0inc', '32c'],
@@ -72,8 +75,17 @@ class BlocksTest(TestCase):
                                 ses.run(tf.global_variables_initializer())
                                 value = x.eval(session=ses)
                                 self.assertIsInstance(value, np.ndarray)
-                                self.assertEqual(value.ndim, len(shape))
+                                if block_type == GlobalAveragePoolBlock:
+                                    self.assertEqual(value.ndim, len(shape)-2)
+                                else:
+                                    self.assertEqual(value.ndim, len(shape))
                                 block_ix += 1
                             else:
                                 with self.assertRaises(ValueError):
                                     block.apply(x)
+
+    def test_gap(self):
+        """Test gap has no inverse code."""
+        gap = GlobalAveragePoolBlock(code='gap')
+        with self.assertRaises(ValueError):
+            _ = gap.inverse_code()

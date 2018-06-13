@@ -8,6 +8,7 @@ import tensorflow as tf
 from unittest import TestCase
 from cxflow_tensorflow.ops import flatten3D
 
+
 class Flatten3DTest(TestCase):
     """Test case for the flatten3D op."""
 
@@ -18,6 +19,9 @@ class Flatten3DTest(TestCase):
             tensor2d = tf.constant([[1, 2, 3]], dtype=tf.float32)
             with self.assertRaises(AssertionError):
                 output = flatten3D(tensor2d)
+
+            tensor3d = tf.constant([[[1, 2, 3]]], dtype=tf.float32)
+            self.assertEqual(tensor3d, flatten3D(tensor3d))
 
             init_shape = (3, 17, 23, 3, 5)
             expected_shape = (3, 17, 23*3*5)

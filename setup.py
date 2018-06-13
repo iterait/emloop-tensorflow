@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='cxflow-tensorflow',
-      version='0.4.3',
+      version='0.5.0',
       description='TensorFlow extension for cxflow.',
       long_description='Plugin that enables cxflow to work with TensorFlow.',
       classifiers=[
@@ -36,5 +36,5 @@ setup(name='cxflow-tensorflow',
       zip_safe=False,
       test_suite='cxflow_tensorflow.tests',
       tests_require=['testfixtures>=5.1.1'],
-      install_requires=['numpy', 'tensorflow>=1.5', 'cxflow>=0.12', 'tensorflow-tensorboard>=0.1.4'],
+      install_requires=[line for line in open('requirements.txt', 'r').readlines() if not line.startswith('#')],
      )
