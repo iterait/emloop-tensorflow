@@ -1,5 +1,5 @@
 """
-Test module for the conv models.
+Test module for the rnn models.
 """
 import numpy as np
 import tensorflow as tf
@@ -65,7 +65,7 @@ class RNNSTackTest(TestCase):
                     self.assertEqual(value.ndim, 3)
 
     def test_model_integration(self):
-        """Test if cnn (auto)encoder is well integrated with cxtf BaseModel."""
+        """Test if SimpleRNN is well integrated with cxtf BaseModel."""
         model = SimpleRNN(inputs=['sequences', 'sequence_lengths'], outputs=['loss'],
                           dataset=None, optimizer=_OPTIMIZER, log_dir=None, use_sl=True)
 
