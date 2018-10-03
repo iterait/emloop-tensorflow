@@ -19,7 +19,7 @@ setup(name='emloop-tensorflow',
       ],
       keywords='tensorflow wrapper',
       url='https://github.com/iterait/emloop-tensorflow',
-      author=['Iterait a.s.', 'Cognexa Solutions s.r.o.'],
+      author='Iterait a.s.',
       author_email='hello@iterait.com',
       license='MIT',
       packages=[
