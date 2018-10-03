@@ -21,8 +21,8 @@ references:
     run:
       name: Install.
       command: |
-        source <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/git-utils.sh)
-        fallback_pip_install_branch https://github.com/Cognexa/cxflow.git "$CIRCLE_BRANCH"
+        source <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/git-utils.sh)
+        fallback_pip_install_branch https://github.com/iterait/emloop.git "$CIRCLE_BRANCH"
         pip3 install .
         pip3 install tensorflow
 
@@ -37,7 +37,7 @@ references:
       name: PyPI deploy
       command: |
         pip3 install wheel setuptools --upgrade
-        bash <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/pypi_deploy.sh)
+        bash <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/pypi_deploy.sh)
 
   add_rw_key: &add_rw_key
     add_ssh_keys:
@@ -48,13 +48,13 @@ references:
     run:
       name: Generate documentation
       command: |
-        bash <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/doc_deploy.sh)
+        bash <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/doc_deploy.sh)
 
   coverage: &coverage
     run:
       name: Report test coverage
       command: |
-        coverage run --source=cxflow_tensorflow setup.py test
+        coverage run --source=emloop_tensorflow setup.py test
         coverage report
         coveralls
 
@@ -63,7 +63,7 @@ jobs:
   test_ubuntu_latest:
     docker:
       - image: ubuntu:latest
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -73,7 +73,7 @@ jobs:
   test_ubuntu_rolling:
     docker:
       - image: ubuntu:rolling
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -83,7 +83,7 @@ jobs:
   test_archlinux:
     docker:
       - image: pritunl/archlinux:2017-07-08
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
       - checkout
@@ -94,7 +94,7 @@ jobs:
   generate_documentation:
     docker:
       - image: ubuntu:rolling
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -105,7 +105,7 @@ jobs:
   deploy:
     docker:
       - image: pritunl/archlinux:2017-07-08
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
       - checkout

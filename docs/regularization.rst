@@ -3,9 +3,9 @@ Model regularization
 
 Model over-fitting is the most common cause of sub-optimal model performance.
 For this reason, various model regularization techniques have emerged in the past years.
-All of them, naturally, can be used in **cxflow-tensorflow**.
+All of them, naturally, can be used in **emloop-tensorflow**.
 
-In this brief tutorial we show how to incorporate the most common ones to **cxflow-tensorflow** models.
+In this brief tutorial we show how to incorporate the most common ones to **emloop-tensorflow** models.
 
 Dropout
 -------
@@ -15,8 +15,8 @@ Dropout is well known technique preventing over-fitting introduced by
 Simply said, dropout layer randomly selects certain portion of units and sets them to zero.
 In fact, this is done only in the training phase.
 For this reason, we need to distinguish training and evaluation phases.
-In **cxflow-tensorflow**, this information is fed to the model via special scalar tensor defined in
-:py:class:`cxflow_tensorflow.BaseModel` and accessible through ``self.is_training`` property.
+In **emloop-tensorflow**, this information is fed to the model via special scalar tensor defined in
+:py:class:`emloop_tensorflow.BaseModel` and accessible through ``self.is_training`` property.
 
 E.g. we can add dropout layer during the model creation as follows:
 
@@ -42,7 +42,7 @@ Weight decay
 ------------
 
 Weight decay, also known as L2 regularization is yet another common way to regularize deep learning models.
-To apply weight decay in **cxflow-tensorflow**, add the regularization cost the ``REGULARIZATION_LOSSES``
+To apply weight decay in **emloop-tensorflow**, add the regularization cost the ``REGULARIZATION_LOSSES``
 TensorFlow graph collection.
 
 E.g.:
@@ -64,7 +64,7 @@ Luckily, most of the common layer APIs will do that for you.
         output = K.layers.Conv2D(64, (3, 3), kernel_regularizer=K.regularizers.l2(0.0001))(net)
 
 .. tip::
-    To see the list of utilized regularization loss names, run **cxflow** with ``--verbose`` argument.
+    To see the list of utilized regularization loss names, run **emloop** with ``--verbose`` argument.
 
 Batch normalization
 -------------------
