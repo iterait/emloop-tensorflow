@@ -1,11 +1,11 @@
 # How to Contribute
 
-There are two ways of contributing to **cxflow-tensorflow**.
-One can either report a bug (or feature request) to the official [issue tracker](https://github.com/Cognexa/cxflow-tensorflow/issues) or implement a tested piece of code.
-Do not hesitate to get in touch with us at cxflow@cognexa.com.
+There are two ways of contributing to **emloop-tensorflow**.
+One can either report a bug (or feature request) to the official [issue tracker](https://github.com/iterait/emloop-tensorflow/issues) or implement a tested piece of code.
+Do not hesitate to get in touch with us at hello@iterait.com.
 
 ## Creating an Issue
-When you find a bug or feel like there is a feature you miss, please do not hesitate to report it to the [issue tracker](https://github.com/Cognexa/cxflow-tensorflow/issues).
+When you find a bug or feel like there is a feature you miss, please do not hesitate to report it to the [issue tracker](https://github.com/iterait/emloop-tensorflow/issues).
 
 A great issue should contain the following:
 
