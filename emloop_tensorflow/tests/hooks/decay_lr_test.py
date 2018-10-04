@@ -21,23 +21,27 @@ class LRModel(TrainableModel):
         tf.no_op(name='train_op_1')
 
 
-class TestDecayLRTest:
-    """Test case for DecayLR."""
+############
+# Decay LR #
+############
+"""Test case for DecayLR."""
 
-    def test_invalid_config(self):
-        """ Test ``DecayLR`` invalid configurations."""
-        model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
-        with pytest.raises(TypeError):
-            DecayLR(model=42)
-        with pytest.raises(ValueError):
-            DecayLR(model, decay_value=-1)
-        with pytest.raises(ValueError):
-            DecayLR(model, decay_type='unrecognized')
-        with pytest.raises(KeyError):
-            DecayLR(model, variable_name='missing_variable')
 
-    def test_multiply(self):
-        """ Test if ``DecayLR`` works properly in multiply mode."""
+def test_invalid_config():
+    """ Test ``DecayLR`` invalid configurations."""
+    model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+    with pytest.raises(TypeError):
+        DecayLR(model=42)
+    with pytest.raises(ValueError):
+        DecayLR(model, decay_value=-1)
+    with pytest.raises(ValueError):
+        DecayLR(model, decay_type='unrecognized')
+    with pytest.raises(KeyError):
+        DecayLR(model, variable_name='missing_variable')
+
+
+def test_multiply():
+    """ Test if ``DecayLR`` works properly in multiply mode."""
     decay_value = 0.9
     repeats = 13
     model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
@@ -49,8 +53,9 @@ class TestDecayLRTest:
     assert model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session) == \
         pytest.approx(2 * (decay_value ** (1 + repeats)))
 
-    def test_multiply_n_epoch(self):
-        """ Test if ``DecayLR`` works properly in multiply mode for every n epoch."""
+
+def test_multiply_n_epoch():
+    """ Test if ``DecayLR`` works properly in multiply mode for every n epoch."""
     decay_value = 0.9
     repeats = 13
     n = 2
@@ -61,8 +66,9 @@ class TestDecayLRTest:
     assert model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session) == \
         pytest.approx(2*(decay_value**(1+(repeats//n))))
 
-    def test_add(self):
-        """ Test if ``DecayLR`` works properly in addition mode."""
+
+def test_add():
+    """ Test if ``DecayLR`` works properly in addition mode."""
     decay_value = 0.01
     repeats = 17
     model = LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
@@ -74,8 +80,9 @@ class TestDecayLRTest:
     assert model.graph.get_tensor_by_name('learning_rate:0').eval(session=model.session) == \
         pytest.approx(2+(decay_value*(1+repeats)))
 
-    def test_add_n_epoch(self):
-        """ Test if ``DecayLR`` works properly in addition mode for every n epoch."""
+
+def test_add_n_epoch():
+    """ Test if ``DecayLR`` works properly in addition mode for every n epoch."""
     decay_value = 0.01
     repeats = 17
     n = 2
@@ -87,37 +94,45 @@ class TestDecayLRTest:
         pytest.approx(2+(decay_value*(1+(repeats//n))))
 
 
-class TestDecayLROnPlateau:
-    """
-    Test case for DecayLROnPlateau.
+#######################
+# Decay LR On Plateau #
+#######################
+"""
+Test case for DecayLROnPlateau.
 
-    Both OnPlateau and DecayLR are already tested, we only need to check if they are properly integrated.
-    """
-    def get_model(self):
-        return LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
+Both OnPlateau and DecayLR are already tested, we only need to check if they are properly integrated.
+"""
 
-    def get_epoch_data(self):
-        return {'valid': {'loss': [0]}}
 
-    def test_arg_forward(self):
-        """ Test if ``DecayLROnPlateau`` forwards args properly."""
-        hook = DecayLROnPlateau(model=self.get_model(), short_term=5, variable='my_lr')
-        assert hook._variable == 'my_lr'
-        assert hook._short_term == 5
+def get_model():
+    return LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
-    def test_call_forward(self, mock_object_decaylr, mock_object_onplateau):
-        """ Test if ``DecayLROnPlateau`` forwards event calls properly."""
-        hook = DecayLROnPlateau(model=self.get_model())
-        hook.after_epoch(epoch_id=0, epoch_data=self.get_epoch_data())
-        assert mock_object_decaylr.call_count == 0
-        assert mock_object_onplateau.call_count == 1
 
-    def test_wait(self, mock_object_decaylr_var):
-        """ Test if ``DecayLROnPlateau`` waits short_term epochs between decays."""
-        hook = DecayLROnPlateau(model=self.get_model(), long_term=4, short_term=3)
+def get_epoch_data():
+    return {'valid': {'loss': [0]}}
+
+
+def test_arg_forward():
+    """ Test if ``DecayLROnPlateau`` forwards args properly."""
+    hook = DecayLROnPlateau(model=get_model(), short_term=5, variable='my_lr')
+    assert hook._variable == 'my_lr'
+    assert hook._short_term == 5
+
+
+def test_call_forward(mock_object_decaylr, mock_object_onplateau):
+    """ Test if ``DecayLROnPlateau`` forwards event calls properly."""
+    hook = DecayLROnPlateau(model=get_model())
+    hook.after_epoch(epoch_id=0, epoch_data=get_epoch_data())
+    assert mock_object_decaylr.call_count == 0
+    assert mock_object_onplateau.call_count == 1
+
+
+def test_wait(mock_object_decaylr_wait):
+    """ Test if ``DecayLROnPlateau`` waits short_term epochs between decays."""
+    hook = DecayLROnPlateau(model=get_model(), long_term=4, short_term=3)
+    hook._on_plateau_action()
+    for i in range(hook._long_term):
+        assert mock_object_decaylr_wait.call_count == 1
+        hook.after_epoch(epoch_id=i, epoch_data=get_epoch_data())
         hook._on_plateau_action()
-        for i in range(hook._long_term):
-            assert mock_object_decaylr_var.call_count == 1
-            hook.after_epoch(epoch_id=i, epoch_data=self.get_epoch_data())
-            hook._on_plateau_action()
-        assert mock_object_decaylr_var.call_count == 2
+    assert mock_object_decaylr_wait.call_count == 2

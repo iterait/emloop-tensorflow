@@ -27,7 +27,7 @@ def mock_dict_writer(mocker):
 
 
 @pytest.fixture()
-def mock_object_decaylr_var(mocker):
+def mock_object_decaylr_wait(mocker):
     yield mocker.patch.object(DecayLROnPlateau, '_decay_variable')
 
 
