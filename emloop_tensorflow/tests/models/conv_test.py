@@ -4,17 +4,15 @@ Test module for the conv models.
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+import pytest
 
-from unittest import TestCase
 import emloop_tensorflow as eltf
 
 from ..model_test import _OPTIMIZER
 
 
 class SimpleAutoencoder(eltf.BaseModel):
-    """
-    Simple auto-encoder model.
-    """
+    """Simple auto-encoder model."""
 
     def _create_model(self, use_bn=False) -> None:
         images = tf.placeholder(dtype=tf.float32, shape=(None, 100, 100, 3), name='images')
@@ -28,7 +26,7 @@ class SimpleAutoencoder(eltf.BaseModel):
         tf.reduce_mean(pixel_loss, axis=(1, 2), name='loss')
 
 
-class CNNEncoderTest(TestCase):
+class TestCNNEncoder:
     """Test case for the cnn encoder."""
 
     def test_sanity(self):
@@ -39,16 +37,16 @@ class CNNEncoderTest(TestCase):
             x3 = tf.ones((10, 100, 100))
             x4 = tf.ones((10, 100, 100, 3))
             x6 = tf.ones((10, 2, 15, 100, 100, 3))
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_encoder(x3, simple_encoder, use_bn=False)  # 3-dim input is not supported
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_encoder(x6, simple_encoder, use_bn=False)  # 6-dim input is not supported
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_encoder(x4, simple_encoder, use_bn=True)  # missing is_training
-            with self.assertRaises(AssertionError):  # both ln and bn at once
+            with pytest.raises(AssertionError):  # both ln and bn at once
                 eltf.models.cnn_encoder(x4, simple_encoder, is_training, use_bn=True, use_ln=True)
 
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 eltf.models.cnn_encoder(x4, ['12c3', '12c3', 'dunno'], use_bn=False)
 
     def test_dims(self):
@@ -66,12 +64,12 @@ class CNNEncoderTest(TestCase):
                     ses.run(tf.global_variables_initializer())
                     value = out.eval(session=ses)
                     same_dim_value = same_dim_out.eval(session=ses)
-                    self.assertIsInstance(value, np.ndarray)
-                    self.assertEqual(value.ndim, len(x.get_shape().as_list()))
-                    self.assertEqual(same_dim_value.shape, tuple(x.get_shape().as_list()))
+                    assert isinstance(value, np.ndarray)
+                    assert value.ndim == len(x.get_shape().as_list())
+                    assert same_dim_value.shape == tuple(x.get_shape().as_list())
 
 
-class CNNAutoEncoderTest(TestCase):
+class TestCNNAutoEncoder:
     """Test case for the cnn auto-encoder."""
 
     def test_sanity(self):
@@ -81,20 +79,20 @@ class CNNAutoEncoderTest(TestCase):
             x3 = tf.ones((10, 100, 100))
             x4 = tf.ones((10, 100, 100, 3))
             x5 = tf.ones((10, 15, 100, 100, 3))
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_autoencoder(x3, simple_encoder)  # 3-dim input is not supported
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_autoencoder(x5, simple_encoder)  # 5-dim input is not supported
-            with self.assertRaises(AssertionError):
+            with pytest.raises(AssertionError):
                 eltf.models.cnn_autoencoder(x4, ['mp2', '32c3'])  # first operation is pooling
             with tf.variable_scope('stride1'):
-                with self.assertRaises(ValueError):
+                with pytest.raises(ValueError):
                     eltf.models.cnn_autoencoder(x4, ['32c3', '32c3s2'])  # strided block does not have inversion
             with tf.variable_scope('stride2'):
-                with self.assertRaises(ValueError):
+                with pytest.raises(ValueError):
                     eltf.models.cnn_autoencoder(x4, ['32c3', '32ress2'])
             with tf.variable_scope('stride3'):
-                with self.assertRaises(ValueError):
+                with pytest.raises(ValueError):
                     eltf.models.cnn_autoencoder(x4, ['32c3', 'ap3s2'])
 
     def test_padding(self):
@@ -110,9 +108,9 @@ class CNNAutoEncoderTest(TestCase):
             ses.run(tf.local_variables_initializer())
             ses.run(tf.global_variables_initializer())
             encoded_value = encoded.eval(session=ses)
-            self.assertEqual(encoded_value.shape, (10, 25, 25, 48))
+            assert encoded_value.shape == (10, 25, 25, 48)
             decoded_value = decoded.eval(session=ses)
-            self.assertEqual(decoded_value.shape, tuple(x4.get_shape().as_list()))
+            assert decoded_value.shape == tuple(x4.get_shape().as_list())
 
     def test_model_integration(self):
         """Test if cnn (auto)encoder is well integrated with eltf BaseModel."""
@@ -120,7 +118,7 @@ class CNNAutoEncoderTest(TestCase):
                                   dataset=None, optimizer=_OPTIMIZER, log_dir=None)
         outputs = model.run({'images': np.ones((3, 100, 100, 3)), 'masks': np.zeros((3, 100, 100), dtype=np.uint8)},
                             train=False)
-        self.assertEqual(outputs['probabilities'].shape, (3, 100, 100))
+        assert outputs['probabilities'].shape == (3, 100, 100)
 
         # test spanning across multiple GPUs
         multi_gpu_model = SimpleAutoencoder(inputs=['images', 'masks'], outputs=['loss', 'probabilities'],
@@ -128,4 +126,4 @@ class CNNAutoEncoderTest(TestCase):
                                             session_config={'allow_soft_placement': True})
         outputs2 = multi_gpu_model.run({'images': np.ones((3, 100, 100, 3)),
                                         'masks': np.zeros((3, 100, 100), dtype=np.uint8)}, train=True)
-        self.assertEqual(outputs2['probabilities'].shape, (3, 100, 100))
+        assert outputs2['probabilities'].shape == (3, 100, 100)

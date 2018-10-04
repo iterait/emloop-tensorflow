@@ -2,3 +2,7 @@
 # tensorflow-tensorboard>=0.1.5 to be installed manually
 emloop>=0.8.1
 numpy>=1.13.1
+
+# testing
+pytest
+pytest-mock

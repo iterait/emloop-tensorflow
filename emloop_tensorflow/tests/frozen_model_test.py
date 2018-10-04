@@ -1,80 +1,72 @@
 """
 Test module for base TensorFlow models (:py:class:`emloop_tensorflow.BaseModel`).
 """
+
 from os import path
 
 import numpy as np
+import pytest
 
 from emloop import MainLoop
 from emloop.tests.main_loop_test import SimpleDataset
-from emloop.tests.test_core import CXTestCaseWithDir
 from emloop.hooks import StopAfter
 from emloop_tensorflow import FrozenModel
 
 from .model_test import TrainableModel, _OPTIMIZER, _IO
 
 
-class FrozenModelTest(CXTestCaseWithDir):
-    """
-    Test case for ``FrozenModel``.
-    """
+def test_frozen_model_restore(tmpdir):
+    """Test frozen model restoration."""
+    with pytest.raises(ValueError):
+        FrozenModel(inputs=[], outputs=[], restore_from=tmpdir)  # there is no .pb file yet
 
-    def test_frozen_model_restore(self):
-        """
-        Test frozen model restoration.
-        """
-        with self.assertRaises(ValueError):
-            FrozenModel(inputs=[], outputs=[], restore_from=self.tmpdir)  # there is no .pb file yet
+    dummy_model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
+    dummy_model.save('')
 
-        dummy_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
-        dummy_model.save('')
+    # restore from directory
+    FrozenModel(**_IO, restore_from=tmpdir)
 
-        # restore from directory
-        FrozenModel(**_IO, restore_from=self.tmpdir)
+    # restore from file
+    FrozenModel(**_IO, restore_from=path.join(tmpdir, 'model.pb'))
 
-        # restore from file
-        FrozenModel(**_IO, restore_from=path.join(self.tmpdir, 'model.pb'))
+    # wrong configurations
+    dummy_model.save('another')
+    with pytest.raises(ValueError):
+        FrozenModel(**_IO, restore_from=tmpdir)  # multiple .pb files
 
-        # wrong configurations
-        dummy_model.save('another')
-        with self.assertRaises(ValueError):
-            FrozenModel(**_IO, restore_from=self.tmpdir)  # multiple .pb files
+    with pytest.raises(ValueError):
+        FrozenModel(**_IO, restore_from='/something/that/does/not/exist')
 
-        with self.assertRaises(ValueError):
-            FrozenModel(**_IO, restore_from='/something/that/does/not/exist')
 
-    def test_frozen_model_misc(self):
-        """
-        Test various frozen model attributes.
-        """
-        dummy_model = TrainableModel(dataset=None, log_dir=self.tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
-        dummy_model.save('')
+def test_frozen_model_misc(tmpdir):
+    """Test various frozen model attributes."""
+    dummy_model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
+    dummy_model.save('')
 
-        # restore from directory
-        frozen_model = FrozenModel(**_IO, restore_from=self.tmpdir, session_config={'allow_soft_placement': True})
+    # restore from directory
+    frozen_model = FrozenModel(**_IO, restore_from=tmpdir, session_config={'allow_soft_placement': True})
 
-        self.assertEqual(frozen_model.restore_fallback, 'emloop_tensorflow.FrozenModel')
-        self.assertListEqual(frozen_model.input_names, _IO['inputs'])
-        self.assertListEqual(frozen_model.output_names, _IO['outputs'])
+    assert frozen_model.restore_fallback == 'emloop_tensorflow.FrozenModel'
+    assert frozen_model.input_names == _IO['inputs']
+    assert frozen_model.output_names == _IO['outputs']
 
-        with self.assertRaises(NotImplementedError):
-            frozen_model.save('fail')
+    with pytest.raises(NotImplementedError):
+        frozen_model.save('fail')
 
-    def test_frozen_model_run(self):
-        """
-        Test frozen model run after restoration.
-        """
-        # train and freeze a model
-        dataset = SimpleDataset()
-        model = TrainableModel(dataset=dataset, log_dir=self.tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
-        mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=1000)], skip_zeroth_epoch=False)
-        mainloop.run_training(None)
-        model.save('')
 
-        frozen_model = FrozenModel(inputs=['input'], outputs=['output'], restore_from=self.tmpdir)
+def test_frozen_model_run(tmpdir):
+    """Test frozen model run after restoration."""
+    # train and freeze a model
+    dataset = SimpleDataset()
+    model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
+    mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=1000)], skip_zeroth_epoch=False)
+    mainloop.run_training(None)
+    model.save('')
 
-        with self.assertRaises(AssertionError):
-            frozen_model.run({}, True, None)
+    frozen_model = FrozenModel(inputs=['input'], outputs=['output'], restore_from=tmpdir)
 
-        outputs = frozen_model.run({'input': [[1]*10]})
-        self.assertTrue(np.allclose(outputs['output'][0], [0]*10, atol=0.001))
+    with pytest.raises(AssertionError):
+        frozen_model.run({}, True, None)
+
+    outputs = frozen_model.run({'input': [[1]*10]})
+    assert np.allclose(outputs['output'][0], [0]*10, atol=0.001)
