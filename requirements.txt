@@ -1,7 +1,13 @@
 # tensorflow>=1.3.0 to be installed manually
 # tensorflow-tensorboard>=0.1.5 to be installed manually
-emloop>=0.8.1
+emloop>=0.1.0
 numpy>=1.13.1
+
+# TF 1.11
+gast
+astor
+grpcio
+termcolor
 
 # testing
 pytest
