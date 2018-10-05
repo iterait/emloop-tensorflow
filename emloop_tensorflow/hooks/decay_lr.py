@@ -47,7 +47,7 @@ class DecayLR(EveryNEpoch):
     LR_DECAY_TYPES = {'multiply', 'add'}
     """Possible LR decay types."""
 
-    def __init__(self, model: BaseModel, decay_value: int=0.98, variable_name: str='learning_rate',
+    def __init__(self, model: BaseModel, decay_value: float=0.98, variable_name: str='learning_rate',
                  decay_type: str='multiply', **kwargs):
         """
         Create new DecayLR hook.

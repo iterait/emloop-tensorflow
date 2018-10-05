@@ -104,35 +104,37 @@ Both OnPlateau and DecayLR are already tested, we only need to check if they are
 """
 
 
-def get_model():
+@pytest.fixture(scope='function')
+def model():
     return LRModel(dataset=None, log_dir='', inputs=['input', 'target'], outputs=['output'])
 
 
-def get_epoch_data():
+@pytest.fixture(scope='function')
+def epoch_data():
     return {'valid': {'loss': [0]}}
 
 
-def test_arg_forward():
+def test_arg_forward(model):
     """ Test if ``DecayLROnPlateau`` forwards args properly."""
-    hook = DecayLROnPlateau(model=get_model(), short_term=5, variable='my_lr')
+    hook = DecayLROnPlateau(model=model, short_term=5, variable='my_lr')
     assert hook._variable == 'my_lr'
     assert hook._short_term == 5
 
 
-def test_call_forward(mock_object_decaylr, mock_object_onplateau):
+def test_call_forward(mock_object_decaylr, mock_object_onplateau, model, epoch_data):
     """ Test if ``DecayLROnPlateau`` forwards event calls properly."""
-    hook = DecayLROnPlateau(model=get_model())
-    hook.after_epoch(epoch_id=0, epoch_data=get_epoch_data())
+    hook = DecayLROnPlateau(model=model)
+    hook.after_epoch(epoch_id=0, epoch_data=epoch_data)
     assert mock_object_decaylr.call_count == 0
     assert mock_object_onplateau.call_count == 1
 
 
-def test_wait(mock_object_decaylr_wait):
+def test_wait(mock_object_decaylr_wait, model, epoch_data):
     """ Test if ``DecayLROnPlateau`` waits short_term epochs between decays."""
-    hook = DecayLROnPlateau(model=get_model(), long_term=4, short_term=3)
+    hook = DecayLROnPlateau(model=model, long_term=4, short_term=3)
     hook._on_plateau_action()
     for i in range(hook._long_term):
         assert mock_object_decaylr_wait.call_count == 1
-        hook.after_epoch(epoch_id=i, epoch_data=get_epoch_data())
+        hook.after_epoch(epoch_id=i, epoch_data=epoch_data)
         hook._on_plateau_action()
     assert mock_object_decaylr_wait.call_count == 2
