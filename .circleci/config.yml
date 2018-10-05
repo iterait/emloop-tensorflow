@@ -14,7 +14,7 @@ references:
     run:
       name: Install dependencies on Arch Linux.
       command: |
-        pacman -S --noconfirm python python-pip git base-devel curl
+        pacman -Syu --noconfirm python python-pip git base-devel curl
         pip install coveralls coverage
 
   install: &install
@@ -56,10 +56,9 @@ references:
       command: |
         coverage run --source=emloop_tensorflow setup.py test
         coverage report
-        coveralls
+        COVERALLS_REPO_TOKEN=0Bg6s4iCqgXmP9sqH45UAoasZtB9jfhO9 coveralls
 
 jobs:
-
   test_ubuntu_latest:
     docker:
       - image: ubuntu:latest
@@ -82,13 +81,22 @@ jobs:
 
   test_archlinux:
     docker:
-      - image: pritunl/archlinux:2017-07-08
+      - image: archimg/base-devel
     working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
       - checkout
       - *install
       - *test
+
+  coverage:
+    docker:
+      - image: archimg/base-devel
+    working_directory: ~/emloop
+    steps:
+      - *arch_deps
+      - checkout
+      - *install
       - *coverage
 
   generate_documentation:
@@ -104,7 +112,7 @@ jobs:
 
   deploy:
     docker:
-      - image: pritunl/archlinux:2017-07-08
+      - image: archimg/base-devel
     working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
@@ -120,6 +128,11 @@ workflows:
       - test_ubuntu_latest
       - test_ubuntu_rolling
       - test_archlinux
+      - coverage:
+          requires:
+            - test_ubuntu_latest
+            - test_ubuntu_rolling
+            - test_archlinux
       - generate_documentation:
           filters:
             branches:
