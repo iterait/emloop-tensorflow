@@ -8,7 +8,3 @@ gast
 astor
 grpcio
 termcolor
-
-# testing
-pytest
-pytest-mock
