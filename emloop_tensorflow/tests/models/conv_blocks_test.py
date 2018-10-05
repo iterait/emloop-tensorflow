@@ -4,8 +4,8 @@ Test module for the conv models implementation.
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+import pytest
 
-from unittest import TestCase
 from emloop_tensorflow.models.blocks import UnrecognizedCodeError, BaseBlock, Block
 from emloop_tensorflow.models.conv_blocks import ConvBlock, ResBlock, IncBlock, AveragePoolBlock, \
     MaxPoolBlock, UnPoolBlock, GlobalAveragePoolBlock
@@ -28,64 +28,65 @@ _INVALID_CODES = {ResBlock: ['32ress', 'res', '32res2', '32residual', 'res32', '
                   ConvBlock: ['32c', '32cs2', 'c3', '64cs', '32c3 32c3', '0c3', '3c0', 'mp2', '32c3-3-3']}
 
 
-class BlocksTest(TestCase):
-    """Test conv blocks parsing and applying."""
+def test_sanity():
+    """Test block concepts sanity."""
+    with pytest.raises(NotImplementedError):
+        Block('').apply(None)
 
-    def test_sanity(self):
-        """Test block concepts sanity."""
-        with self.assertRaises(NotImplementedError):
-            Block('').apply(None)
+    with pytest.raises(NotImplementedError):
+        BaseBlock(code='a', regexp='.*')
 
-        with self.assertRaises(NotImplementedError):
-            BaseBlock(code='a', regexp='.*')
 
-    def test_valid(self):
-        """Test if valid codes are parsed."""
-        for block_type, codes in _VALID_CODES.items():
-            for code in codes:
+def test_valid():
+    """Test if valid codes are parsed."""
+    for block_type, codes in _VALID_CODES.items():
+        for code in codes:
+            block_type(code=code)
+
+
+def test_invalid():
+    """Test if invalid codes raise exceptions."""
+    for block_type, codes in _INVALID_CODES.items():
+        for code in codes:
+            with pytest.raises(UnrecognizedCodeError):
                 block_type(code=code)
 
-    def test_invalid(self):
-        """Test if invalid codes raise exceptions."""
-        for block_type, codes in _INVALID_CODES.items():
-            for code in codes:
-                with self.assertRaises(UnrecognizedCodeError):
-                    block_type(code=code)
 
-    def test_apply(self):
-        """Test if the valid blocks can be applied."""
-        dim4_kwargs = {'extra_dim': (), 'ap_fn': slim.avg_pool2d, 'mp_fn': slim.max_pool2d, 'bn_fn': slim.batch_norm,
-                       'ln_fn': tf.contrib.layers.layer_norm, 'conv_fn': slim.conv2d, 'pool_fn': slim.max_pool2d}
-        dim5_kwargs = {'extra_dim': (1,), 'ap_fn': slim.avg_pool3d, 'mp_fn': slim.max_pool3d, 'bn_fn': slim.batch_norm,
-                       'ln_fn': tf.contrib.layers.layer_norm, 'conv_fn': slim.conv3d, 'pool_fn': slim.max_pool3d}
+def test_apply():
+    """Test if the valid blocks can be applied."""
+    dim4_kwargs = {'extra_dim': (), 'ap_fn': slim.avg_pool2d, 'mp_fn': slim.max_pool2d, 'bn_fn': slim.batch_norm,
+                   'ln_fn': tf.contrib.layers.layer_norm, 'conv_fn': slim.conv2d, 'pool_fn': slim.max_pool2d}
+    dim5_kwargs = {'extra_dim': (1,), 'ap_fn': slim.avg_pool3d, 'mp_fn': slim.max_pool3d, 'bn_fn': slim.batch_norm,
+                   'ln_fn': tf.contrib.layers.layer_norm, 'conv_fn': slim.conv3d, 'pool_fn': slim.max_pool3d}
 
-        only5dim = ['64c3-5s2', '63c3-3']
+    only5dim = ['64c3-5s2', '63c3-3']
 
-        block_ix = 0
-        for shape, kwargs in (((3, 100, 100, 3), dim4_kwargs), ((3, 13, 100, 100, 3), dim5_kwargs)):
-            with tf.Session() as ses:
-                for block_type, codes in _VALID_CODES.items():
-                    for code in codes:
-                        block = block_type(code=code, **kwargs)
-                        with tf.variable_scope('block_{}'.format(block_ix)):
-                            x = tf.ones(shape)
-                            if len(shape) == 5 or code not in only5dim:
-                                x = block.apply(x)
-                                ses.run(tf.local_variables_initializer())
-                                ses.run(tf.global_variables_initializer())
-                                value = x.eval(session=ses)
-                                self.assertIsInstance(value, np.ndarray)
-                                if block_type == GlobalAveragePoolBlock:
-                                    self.assertEqual(value.ndim, len(shape)-2)
-                                else:
-                                    self.assertEqual(value.ndim, len(shape))
-                                block_ix += 1
+    block_ix = 0
+    for shape, kwargs in (((3, 100, 100, 3), dim4_kwargs), ((3, 13, 100, 100, 3), dim5_kwargs)):
+        with tf.Session() as ses:
+            for block_type, codes in _VALID_CODES.items():
+                for code in codes:
+                    block = block_type(code=code, **kwargs)
+                    with tf.variable_scope('block_{}'.format(block_ix)):
+                        x = tf.ones(shape)
+                        if len(shape) == 5 or code not in only5dim:
+                            x = block.apply(x)
+                            ses.run(tf.local_variables_initializer())
+                            ses.run(tf.global_variables_initializer())
+                            value = x.eval(session=ses)
+                            assert isinstance(value, np.ndarray)
+                            if block_type == GlobalAveragePoolBlock:
+                                assert value.ndim == len(shape)-2
                             else:
-                                with self.assertRaises(ValueError):
-                                    block.apply(x)
+                                assert value.ndim == len(shape)
+                            block_ix += 1
+                        else:
+                            with pytest.raises(ValueError):
+                                block.apply(x)
 
-    def test_gap(self):
-        """Test gap has no inverse code."""
-        gap = GlobalAveragePoolBlock(code='gap')
-        with self.assertRaises(ValueError):
-            _ = gap.inverse_code()
+
+def test_gap():
+    """Test gap has no inverse code."""
+    gap = GlobalAveragePoolBlock(code='gap')
+    with pytest.raises(ValueError):
+        _ = gap.inverse_code()
