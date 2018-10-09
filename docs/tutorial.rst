@@ -1,12 +1,12 @@
 Tutorial
 ########
 
-Let’s imagine that one of your colleagues prepared a **cxflow** compatible dataset for the common task
+Let’s imagine that one of your colleagues prepared a **emloop** compatible dataset for the common task
 of recognizing images of hand-written digits, and you are responsible for the implementation of a
-baseline neural network for said dataset. That’s where **cxflow-tensorflow** comes in: it’s simple, it’s
+baseline neural network for said dataset. That’s where **emloop-tensorflow** comes in: it’s simple, it’s
 fast and it pretty much does all the work for you. Here is how you set it up:
 
-First cxflow-tensorflow model
+First emloop-tensorflow model
 -----------------------------
 Create a simple convolutional network by writing only a couple of lines.
 
@@ -15,10 +15,10 @@ Create a simple convolutional network by writing only a couple of lines.
 
    import tensorflow as tf
    import tensorflow.contrib.keras as K
-   import cxflow_tensorflow as cxtf
+   import emloop_tensorflow as eltf
 
 
-   class SimpleConvNet(cxtf.BaseModel):
+   class SimpleConvNet(eltf.BaseModel):
 
        def _create_model(self):
            images = tf.placeholder(tf.float32, shape=[None, 28, 28], name='images')
@@ -83,15 +83,15 @@ Finally run the training with:
 
 .. code-block:: bash
 
-   cxflow train <path to config.yaml>
+   emloop train <path to config.yaml>
 
 .. tip::
    Full example may be found in our
-   `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet>`_.
+   `emloop examples repository @GitHub <https://github.com/iterait/emloop-examples/tree/master/mnist_convnet>`_.
 
 Basic configuration
 -------------------
-Most of the heavy lifting was done by the **cxflow** and **cxflow-tensorflow** – just as it should be!
+Most of the heavy lifting was done by the **emloop** and **emloop-tensorflow** – just as it should be!
 Only the model itself and a few unavoidable configuration options had to be specified. In this
 section, we will go through the basic configuration options in greater detail.
 
@@ -115,7 +115,7 @@ The respective tensors are expected to be found in the created TF graph.
 
 Optimizer
 ~~~~~~~~~
-By default, **cxflow-tensorflow** creates a TF optimizer specified in the configuration and attempts to
+By default, **emloop-tensorflow** creates a TF optimizer specified in the configuration and attempts to
 minimize the model ``loss``.
 Therefore, we need to both, specify the optimizer and include a tensor named ``loss`` in the graph.
 Arbitrary `TF Optimizer <https://www.tensorflow.org/api_guides/python/train>`_ may be referenced by its name.
@@ -135,7 +135,7 @@ Model parameters
 Note that the model (hyper-)parameters such as the number of layers were all hard-coded in our example.
 Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.
 
-In **cxflow**, model parameters may be defined and configured quite easily.
+In **emloop**, model parameters may be defined and configured quite easily.
 For example, to introduce new ``dense_size`` parameter controlling the number of neurons in the fully connected layer,
 one would update the code as follows:
 
@@ -169,10 +169,10 @@ This way, the whole model can be easily parametrized.
 
 Next steps
 ----------
-See our `cxflow examples repository @GitHub <https://github.com/Cognexa/cxflow-examples>`_.
-for additional examples or read the :py:class:`cxflow_tensorflow.BaseModel` for a full list of customization options.
+See our `emloop examples repository @GitHub <https://github.com/iterait/emloop-examples>`_.
+for additional examples or read the :py:class:`emloop_tensorflow.BaseModel` for a full list of customization options.
 
-This project contains additional utility functions and **cxflow** hooks documented in the
-:doc:`cxflow_tensorflow/index`.
-Make sure you don`t miss the :py:class:`cxflow_tensorflow.hooks.WriteTensorboard` hook providing seamless integration
+This project contains additional utility functions and **emloop** hooks documented in the
+:doc:`emloop_tensorflow/index`.
+Make sure you don`t miss the :py:class:`emloop_tensorflow.hooks.WriteTensorboard` hook providing seamless integration
 with `TensorBoard <https://www.tensorflow.org/get_started/summaries_and_tensorboard>`_.

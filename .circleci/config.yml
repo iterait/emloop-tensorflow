@@ -8,23 +8,24 @@ references:
       command: |
         apt-get update -qy
         apt-get install -y git python3-dev python3-pip curl
-        pip3 install coveralls coverage
+        pip3 install coveralls coverage tensorflow
 
   arch_deps: &arch_deps
     run:
       name: Install dependencies on Arch Linux.
       command: |
-        pacman -S --noconfirm python python-pip git base-devel curl
+        pacman -Syu --noconfirm python python-pip git base-devel curl python-tensorflow
         pip install coveralls coverage
 
   install: &install
     run:
       name: Install.
       command: |
-        source <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/git-utils.sh)
-        fallback_pip_install_branch https://github.com/Cognexa/cxflow.git "$CIRCLE_BRANCH"
+        source <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/git-utils.sh)
+        fallback_pip_install_branch https://github.com/iterait/emloop.git "$CIRCLE_BRANCH"
+        # Note that TensorFlow is already installed
         pip3 install .
-        pip3 install tensorflow
+        pip3 install -r requirements-tests.txt
 
   test: &test
     run:
@@ -37,33 +38,32 @@ references:
       name: PyPI deploy
       command: |
         pip3 install wheel setuptools --upgrade
-        bash <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/pypi_deploy.sh)
+        bash <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/pypi_deploy.sh)
 
   add_rw_key: &add_rw_key
     add_ssh_keys:
       fingerprints:
-        - "04:f1:4a:89:30:eb:e6:d0:d7:e5:0b:fc:f4:72:12:d8"
+        - "3f:be:5a:c5:e5:95:14:a4:c1:e4:e2:34:5a:3c:b0:0d"
 
   doc: &doc
     run:
       name: Generate documentation
       command: |
-        bash <(curl -fsSL https://raw.githubusercontent.com/Cognexa/ci-utils/master/doc_deploy.sh)
+        bash <(curl -fsSL https://raw.githubusercontent.com/iterait/ci-utils/master/doc_deploy.sh)
 
   coverage: &coverage
     run:
       name: Report test coverage
       command: |
-        coverage run --source=cxflow_tensorflow setup.py test
+        coverage run --source=emloop_tensorflow setup.py test
         coverage report
-        coveralls
+        COVERALLS_REPO_TOKEN=0Bg6s4iCqgXmP9sqH45UAoasZtB9jfhO9 coveralls
 
 jobs:
-
   test_ubuntu_latest:
     docker:
       - image: ubuntu:latest
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -73,7 +73,7 @@ jobs:
   test_ubuntu_rolling:
     docker:
       - image: ubuntu:rolling
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -82,19 +82,28 @@ jobs:
 
   test_archlinux:
     docker:
-      - image: pritunl/archlinux:2017-07-08
-    working_directory: ~/cxflow-tensorflow
+      - image: archimg/base-devel
+    working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
       - checkout
       - *install
       - *test
+
+  coverage:
+    docker:
+      - image: archimg/base-devel
+    working_directory: ~/emloop
+    steps:
+      - *arch_deps
+      - checkout
+      - *install
       - *coverage
 
   generate_documentation:
     docker:
       - image: ubuntu:rolling
-    working_directory: ~/cxflow-tensorflow
+    working_directory: ~/emloop-tensorflow
     steps:
       - *ubuntu_deps
       - checkout
@@ -104,8 +113,8 @@ jobs:
 
   deploy:
     docker:
-      - image: pritunl/archlinux:2017-07-08
-    working_directory: ~/cxflow-tensorflow
+      - image: archimg/base-devel
+    working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
       - checkout
@@ -120,6 +129,11 @@ workflows:
       - test_ubuntu_latest
       - test_ubuntu_rolling
       - test_archlinux
+      - coverage:
+          requires:
+            - test_ubuntu_latest
+            - test_ubuntu_rolling
+            - test_archlinux
       - generate_documentation:
           filters:
             branches:
@@ -136,6 +150,7 @@ workflows:
             - test_ubuntu_latest
             - test_ubuntu_rolling
             - test_archlinux
+            - coverage
             - generate_documentation
 
   nightly-build:

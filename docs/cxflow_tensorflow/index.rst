@@ -1,16 +1,16 @@
 API Reference
 =============
 
-**cxflow-tensorflow** API is available in the following modules:
+**emloop-tensorflow** API is available in the following modules:
 
 .. toctree::
    :maxdepth: 1
    :includehidden:
    :glob:
 
-   cxflow_tensorflow
-   cxflow_tensorflow.hooks
-   cxflow_tensorflow.metrics
-   cxflow_tensorflow.models
-   cxflow_tensorflow.ops
-   cxflow_tensorflow.utils
+   emloop_tensorflow
+   emloop_tensorflow.hooks
+   emloop_tensorflow.metrics
+   emloop_tensorflow.models
+   emloop_tensorflow.ops
+   emloop_tensorflow.utils
