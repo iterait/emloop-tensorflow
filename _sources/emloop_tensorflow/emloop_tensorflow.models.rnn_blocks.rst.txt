@@ -1,0 +1,30 @@
+=======================================
+``emloop_tensorflow.models.rnn_blocks``
+=======================================
+
+.. automodule:: emloop_tensorflow.models.rnn_blocks
+
+
+.. currentmodule:: emloop_tensorflow.models.rnn_blocks
+
+
+Classes
+=======
+
+- :py:class:`RNNBlock`:
+  Base block for convolution-like blocks.
+
+
+
+.. autoclass:: RNNBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: RNNBlock
+      :parts: 1
+
+   |
+

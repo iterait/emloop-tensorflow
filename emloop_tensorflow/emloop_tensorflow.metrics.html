@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>emloop_tensorflow.metrics &#8212; emloop-tensorflow 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/highlight.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          emloop-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../getting_started.html">Getting Started</a></li>
+                <li><a href="../tutorial.html">Tutorial</a></li>
+                <li><a href="../regularization.html">Model Regularization</a></li>
+                <li><a href="../multi_gpu.html">Multi GPU models</a></li>
+                <li><a href="index.html">API Reference</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Pages <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">emloop_tensorflow.metrics</span></code></a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+<form action="../search.html" method="get" class="searchbox">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form><div class="side_nav">
+	<h4>Related projects</h4>
+</div>
+<ul class="nav nav-list">
+	<li><a href="https://emloop.org">emloop</a></li>
+	<li><a href="https://tensorflow.emloop.org">emloop-tensorflow</a></li>
+	<li><a href="https://hipipe.org">hipipe (c++)</a></li>
+</ul>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="module-emloop_tensorflow.metrics">
+<span id="emloop-tensorflow-metrics"></span><h1><code class="docutils literal"><span class="pre">emloop_tensorflow.metrics</span></code><a class="headerlink" href="#module-emloop_tensorflow.metrics" title="Permalink to this headline">¶</a></h1>
+<p>Module with TF util functions computing various ml metrics.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_stats" title="emloop_tensorflow.metrics.bin_stats"><code class="xref py py-func docutils literal"><span class="pre">bin_stats()</span></code></a>:
+Calculate f1, precision and recall from binary classification expected and predicted values.</li>
+<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_dice" title="emloop_tensorflow.metrics.bin_dice"><code class="xref py py-func docutils literal"><span class="pre">bin_dice()</span></code></a>:
+Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</li>
+</ul>
+<dl class="function">
+<dt id="emloop_tensorflow.metrics.bin_stats">
+<code class="descclassname">emloop_tensorflow.metrics.</code><code class="descname">bin_stats</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em>, <em>prefix=None</em>, <em>suffix=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/emloop_tensorflow/metrics/bin.html#bin_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#emloop_tensorflow.metrics.bin_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate f1, precision and recall from binary classification expected and predicted values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
+<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
+<li><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – prefix of the output tensor names</li>
+<li><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – suffix of the output tensor names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple of batched (f1, precision and recall) values</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="emloop_tensorflow.metrics.bin_dice">
+<code class="descclassname">emloop_tensorflow.metrics.</code><code class="descname">bin_dice</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/emloop_tensorflow/metrics/bin.html#bin_dice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#emloop_tensorflow.metrics.bin_dice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</p>
+<p>The coefficient is defined as <span class="math">\(2*|X \cup Y| / (|X| + |Y|)\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
+<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">batched Sørensen–Dice coefficients</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Iterait a.s..<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
+    </p>
+  </div>
+</footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
+
+
+
+  </body>
+</html>

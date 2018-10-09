@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Multi-GPU models &#8212; cxflow-tensorflow 0.5.0 documentation</title>
+    <title>Multi-GPU models &#8212; emloop-tensorflow 0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.0',
+        VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -27,7 +27,6 @@
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API Reference" href="cxflow_tensorflow/index.html" />
     <link rel="prev" title="Model regularization" href="regularization.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -47,8 +46,8 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="index.html">
-          cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
+          emloop-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,7 +57,7 @@
                 <li><a href="tutorial.html">Tutorial</a></li>
                 <li><a href="regularization.html">Model Regularization</a></li>
                 <li><a href="#">Multi GPU models</a></li>
-                <li><a href="cxflow_tensorflow/index.html">API Reference</a></li>
+                <li><a href="emloop_tensorflow/index.html">API Reference</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -89,10 +88,6 @@
 <div class="side_nav">
     <a href="regularization.html" title="Previous Chapter: Model regularization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Model regularization</span>
     </a>
-    </div>
-<div class="side_nav">
-    <a href="cxflow_tensorflow/index.html" title="Next Chapter: API Reference"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">API Reference &raquo;</span>
-    </a>
     </div><ul>
 <li><a class="reference internal" href="#">Multi-GPU models</a><ul>
 <li><a class="reference internal" href="#compatible-models">Compatible models</a></li>
@@ -112,9 +107,9 @@
 	<h4>Related projects</h4>
 </div>
 <ul class="nav nav-list">
-	<li><a href="https://cxflow.org">cxflow</a></li>
-	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
-	<li><a href="https://cxtream.org">cxtream (c++)</a></li>
+	<li><a href="https://emloop.org">emloop</a></li>
+	<li><a href="https://tensorflow.emloop.org">emloop-tensorflow</a></li>
+	<li><a href="https://hipipe.org">hipipe (c++)</a></li>
 </ul>
         </div>
       </div>
@@ -127,7 +122,7 @@ rendering the process quite time-expensive.
 Models are trained for hours and/or days, which makes experimenting with different configurations cumbersome and slow.</p>
 <div class="figure align-right" id="id1">
 <a class="reference internal image-reference" href="_images/multi-gpu-speed.png"><img alt="_images/multi-gpu-speed.png" src="_images/multi-gpu-speed.png" style="width: 491.20000000000005px; height: 222.4px;" /></a>
-<p class="caption"><span class="caption-text">Performance gain with multiple GPUs in <strong>cxflow-tensorflow</strong> framework.</span></p>
+<p class="caption"><span class="caption-text">Performance gain with multiple GPUs in <strong>emloop-tensorflow</strong> framework.</span></p>
 </div>
 <p>One way to speed up the process is utilizing multiple GPUs for model training. This may significantly lower the
 required time, but the implementation is not always straightforward.
@@ -135,7 +130,7 @@ Luckily enough, we implemented the necessary routines to make arbitrary TensorFl
 eligible for multi-GPU training.</p>
 <div class="section" id="compatible-models">
 <h2>Compatible models<a class="headerlink" href="#compatible-models" title="Permalink to this headline">¶</a></h2>
-<p>Chances are, your TensorFlow model is already ready for multi-GPU training in <strong>cxflow-tensorflow</strong>.
+<p>Chances are, your TensorFlow model is already ready for multi-GPU training in <strong>emloop-tensorflow</strong>.
 In fact, the only requirement is to use <code class="docutils literal"><span class="pre">tf.get_variable</span></code> instead of <code class="docutils literal"><span class="pre">tf.Variable</span></code>, so that variables can be
 reused and shared over multiple GPUs.</p>
 </div>
@@ -151,11 +146,11 @@ reused and shared over multiple GPUs.</p>
 </pre></div>
 </div>
 </div>
-<p>That’s it! Now run the <strong>cxflow</strong> training and check if all your GPUs are in fact utilized.</p>
+<p>That’s it! Now run the <strong>emloop</strong> training and check if all your GPUs are in fact utilized.</p>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">Full example may be found in our
-<a class="reference external" href="https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet">cxflow examples repository &#64;GitHub</a>.</p>
+<a class="reference external" href="https://github.com/iterait/emloop-examples/tree/master/mnist_convnet">emloop examples repository &#64;GitHub</a>.</p>
 </div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
@@ -169,17 +164,17 @@ Each batch is distributed evenly between the GPUs alowing for much greater batch
 <img alt="_images/multi-gpu-graph.png" src="_images/multi-gpu-graph.png" />
 <p class="caption"><span class="caption-text">Tower architecture for multi GPU training.</span></p>
 </div>
-<p>In order to leverage the true potential of multiple GPUs, <strong>cxflow-tensorflow</strong> creates a bit more complicated
+<p>In order to leverage the true potential of multiple GPUs, <strong>emloop-tensorflow</strong> creates a bit more complicated
 computational graph than usual.
 In fact, the whole model is multiplicated so that each GPU has its own <em>tower</em>.
 The variables to be trained are, naturally, shared between the <em>towers</em>. Each GPU computes its own feed-forward
 pass and the respective variable gradients.
 Consequently, the gradients are averaged and used for update.</p>
-<p>During the training <strong>cxflow-tensorflow</strong> distributes each batch equally among the <em>towers</em>.
+<p>During the training <strong>emloop-tensorflow</strong> distributes each batch equally among the <em>towers</em>.
 The fetched outputs are concatenated preserving their orders which ensures perfect abstraction
-for the remaining <strong>cxflow</strong> components.
+for the remaining <strong>emloop</strong> components.
 From the perspective of hooks and datasets, nothing has changed.
-Additionally, <strong>cxflow-tensorflow</strong> handles incomplete batches automatically.</p>
+Additionally, <strong>emloop-tensorflow</strong> handles incomplete batches automatically.</p>
 <p>A model trained on multiple GPUs may be restored and used for inference with equal or less amount of GPUs or even
 on CPU without any trouble.</p>
 </div>
@@ -198,7 +193,7 @@ on CPU without any trouble.</p>
       
     </p>
     <p>
-        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
+        &copy; Copyright 2018, Iterait a.s..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>

@@ -1,4 +1,4 @@
-.. cxflow-tensorflow documentation master file, created by
+.. emloop-tensorflow documentation master file, created by
    sphinx-quickstart on Mon Aug 21 13:06:39 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -12,19 +12,19 @@
    tutorial
    regularization
    multi_gpu
-   cxflow_tensorflow/index
+   emloop_tensorflow/index
 
-Welcome to cxflow-tensorflow docs
+Welcome to emloop-tensorflow docs
 =================================
 
-**cxflow-tensorflow** is a **cxflow** plugin that allows you to train TensorFlow models effortlessly.
+**emloop-tensorflow** is a **emloop** plugin that allows you to train TensorFlow models effortlessly.
 Instead of having to write tens or hundreds of lines of code,
-**cxflow-tensorflow** lets you focus on the model architecture.
+**emloop-tensorflow** lets you focus on the model architecture.
 
-However, before you start working with cxflow-tensorflow, make sure you have read
+However, before you start working with emloop-tensorflow, make sure you have read
 
 - `TensorFlow essentials <https://www.tensorflow.org/get_started/>`_
-- :doc:`cxflow basics <cxflow:index>`
+- :doc:`emloop basics <emloop:index>`
 
 Once you’ve gone through that, you can proceed :doc:`proceed with installation <getting_started>`
 and go through our 5-minutes :doc:`tutorial <tutorial>`.
@@ -35,14 +35,14 @@ Leveraging the speed and potential of multi-GPU models was never easier with our
 Contribute
 ----------
 
-- `Source Code @GitHub <https://github.com/Cognexa/cxflow-tensorflow>`_
-- `Issue Tracker @GitHub <https://github.com/Cognexa/cxflow-tensorflow/issues>`_
+- `Source Code @GitHub <https://github.com/iterait/emloop-tensorflow>`_
+- `Issue Tracker @GitHub <https://github.com/iterait/emloop-tensorflow/issues>`_
 
 Support
 -------
 
 If you are having issues, please let us know either via the official
-`issue tracker <https://github.com/Cognexa/cxflow-tensorflow/issues>`_ or via e-mail cxflow@cognexa.com.
+`issue tracker <https://github.com/iterait/emloop-tensorflow/issues>`_ or via e-mail emloop@iterait.com.
 
 License
 -------

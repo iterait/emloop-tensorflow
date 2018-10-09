@@ -1,0 +1,60 @@
+=====================
+``emloop_tensorflow``
+=====================
+
+.. automodule:: emloop_tensorflow
+
+
+
+Submodules
+==========
+
+.. toctree::
+   :titlesonly:
+
+   emloop_tensorflow.hooks
+   emloop_tensorflow.metrics
+   emloop_tensorflow.models
+   emloop_tensorflow.ops
+   emloop_tensorflow.utils
+
+.. currentmodule:: emloop_tensorflow
+
+
+Classes
+=======
+
+- :py:class:`BaseModel`:
+  Emloop :py:class:`AbstractModel <emloop.models.AbstractModel>` implementation for TensorFlow models.
+
+- :py:class:`FrozenModel`:
+  :py:class:`FrozenModel` is **emloop** compatible abstraction for loading and running frozen TensorFlow graphs
+
+
+
+.. autoclass:: BaseModel
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: BaseModel
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: FrozenModel
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: FrozenModel
+      :parts: 1
+
+   |
+

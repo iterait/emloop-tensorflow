@@ -1,0 +1,31 @@
+================================
+``emloop_tensorflow.models.rnn``
+================================
+
+.. automodule:: emloop_tensorflow.models.rnn
+
+
+.. currentmodule:: emloop_tensorflow.models.rnn
+
+
+Functions
+=========
+
+- :py:func:`rnn_stack`:
+  Build a recurrent neural network stack from the given ``stack_config`` (sequence of block codes).
+
+
+.. autofunction:: rnn_stack
+
+
+Variables
+=========
+
+- :py:data:`RNN_BLOCKS`
+
+.. autodata:: RNN_BLOCKS
+   :annotation:
+
+   .. code-block:: guess
+
+      [<class 'emloop_tensorflow.models.rnn_blocks.RNNBlock'>]

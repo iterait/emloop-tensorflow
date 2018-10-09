@@ -1,0 +1,166 @@
+========================================
+``emloop_tensorflow.models.conv_blocks``
+========================================
+
+.. automodule:: emloop_tensorflow.models.conv_blocks
+
+
+.. currentmodule:: emloop_tensorflow.models.conv_blocks
+
+
+Classes
+=======
+
+- :py:class:`ConvBaseBlock`:
+  Base block for convolution-like blocks.
+
+- :py:class:`ConvBlock`:
+  2D/3D convolutional layer.
+
+- :py:class:`ResBlock`:
+  Original residual block.
+
+- :py:class:`IncBlock`:
+  Inception-v3 block.
+
+- :py:class:`PoolBaseBlock`:
+  Base block for pooling blocks.
+
+- :py:class:`MaxPoolBlock`:
+  Max pooling block.
+
+- :py:class:`AveragePoolBlock`:
+  Average pooling block.
+
+- :py:class:`UnPoolBlock`:
+  Un pooling block.
+
+- :py:class:`GlobalAveragePoolBlock`:
+  Global average pooling block effectively flattening spatial dimensions of the input feature maps.
+
+
+
+.. autoclass:: ConvBaseBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: ConvBaseBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: ConvBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: ConvBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: ResBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: ResBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: IncBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: IncBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: PoolBaseBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: PoolBaseBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: MaxPoolBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: MaxPoolBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: AveragePoolBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: AveragePoolBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: UnPoolBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: UnPoolBlock
+      :parts: 1
+
+   |
+
+
+
+.. autoclass:: GlobalAveragePoolBlock
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: GlobalAveragePoolBlock
+      :parts: 1
+
+   |
+

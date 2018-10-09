@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Model regularization &#8212; cxflow-tensorflow 0.5.0 documentation</title>
+    <title>Model regularization &#8212; emloop-tensorflow 0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.0',
+        VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,8 +47,8 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="index.html">
-          cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
+          emloop-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,7 +58,7 @@
                 <li><a href="tutorial.html">Tutorial</a></li>
                 <li><a href="#">Model Regularization</a></li>
                 <li><a href="multi_gpu.html">Multi GPU models</a></li>
-                <li><a href="cxflow_tensorflow/index.html">API Reference</a></li>
+                <li><a href="emloop_tensorflow/index.html">API Reference</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -112,9 +112,9 @@
 	<h4>Related projects</h4>
 </div>
 <ul class="nav nav-list">
-	<li><a href="https://cxflow.org">cxflow</a></li>
-	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
-	<li><a href="https://cxtream.org">cxtream (c++)</a></li>
+	<li><a href="https://emloop.org">emloop</a></li>
+	<li><a href="https://tensorflow.emloop.org">emloop-tensorflow</a></li>
+	<li><a href="https://hipipe.org">hipipe (c++)</a></li>
 </ul>
         </div>
       </div>
@@ -124,8 +124,8 @@
 <h1>Model regularization<a class="headerlink" href="#model-regularization" title="Permalink to this headline">¶</a></h1>
 <p>Model over-fitting is the most common cause of sub-optimal model performance.
 For this reason, various model regularization techniques have emerged in the past years.
-All of them, naturally, can be used in <strong>cxflow-tensorflow</strong>.</p>
-<p>In this brief tutorial we show how to incorporate the most common ones to <strong>cxflow-tensorflow</strong> models.</p>
+All of them, naturally, can be used in <strong>emloop-tensorflow</strong>.</p>
+<p>In this brief tutorial we show how to incorporate the most common ones to <strong>emloop-tensorflow</strong> models.</p>
 <div class="section" id="dropout">
 <h2>Dropout<a class="headerlink" href="#dropout" title="Permalink to this headline">¶</a></h2>
 <p>Dropout is well known technique preventing over-fitting introduced by
@@ -133,8 +133,8 @@ All of them, naturally, can be used in <strong>cxflow-tensorflow</strong>.</p>
 Simply said, dropout layer randomly selects certain portion of units and sets them to zero.
 In fact, this is done only in the training phase.
 For this reason, we need to distinguish training and evaluation phases.
-In <strong>cxflow-tensorflow</strong>, this information is fed to the model via special scalar tensor defined in
-<a class="reference internal" href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">cxflow_tensorflow.BaseModel</span></code></a> and accessible through <code class="docutils literal"><span class="pre">self.is_training</span></code> property.</p>
+In <strong>emloop-tensorflow</strong>, this information is fed to the model via special scalar tensor defined in
+<a class="reference internal" href="emloop_tensorflow/emloop_tensorflow.html#emloop_tensorflow.BaseModel" title="emloop_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">emloop_tensorflow.BaseModel</span></code></a> and accessible through <code class="docutils literal"><span class="pre">self.is_training</span></code> property.</p>
 <p>E.g. we can add dropout layer during the model creation as follows:</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">tensorflow layers</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
@@ -159,7 +159,7 @@ In <strong>cxflow-tensorflow</strong>, this information is fed to the model via 
 <div class="section" id="weight-decay">
 <h2>Weight decay<a class="headerlink" href="#weight-decay" title="Permalink to this headline">¶</a></h2>
 <p>Weight decay, also known as L2 regularization is yet another common way to regularize deep learning models.
-To apply weight decay in <strong>cxflow-tensorflow</strong>, add the regularization cost the <code class="docutils literal"><span class="pre">REGULARIZATION_LOSSES</span></code>
+To apply weight decay in <strong>emloop-tensorflow</strong>, add the regularization cost the <code class="docutils literal"><span class="pre">REGULARIZATION_LOSSES</span></code>
 TensorFlow graph collection.</p>
 <p>E.g.:</p>
 <div class="literal-block-wrapper docutils container" id="id4">
@@ -181,7 +181,7 @@ TensorFlow graph collection.</p>
 </div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
-<p class="last">To see the list of utilized regularization loss names, run <strong>cxflow</strong> with <code class="docutils literal"><span class="pre">--verbose</span></code> argument.</p>
+<p class="last">To see the list of utilized regularization loss names, run <strong>emloop</strong> with <code class="docutils literal"><span class="pre">--verbose</span></code> argument.</p>
 </div>
 </div>
 <div class="section" id="batch-normalization">
@@ -219,7 +219,7 @@ simple and lucid.</p>
       
     </p>
     <p>
-        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
+        &copy; Copyright 2018, Iterait a.s..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>

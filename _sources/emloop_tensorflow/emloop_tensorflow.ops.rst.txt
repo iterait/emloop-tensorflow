@@ -1,0 +1,38 @@
+=========================
+``emloop_tensorflow.ops``
+=========================
+
+.. automodule:: emloop_tensorflow.ops
+
+
+.. currentmodule:: emloop_tensorflow.ops
+
+
+Functions
+=========
+
+- :py:func:`repeat`:
+  Repeat elements of the input tensor in the specified axis ``repeats``-times.
+
+- :py:func:`flatten3D`:
+  Flatten the given ``inputs`` tensor to 3 dimensions.
+
+- :py:func:`dense_to_sparse`:
+  Convert the given ``inputs`` tensor to a ``SparseTensor`` of its non-zero values.
+
+- :py:func:`smooth_l1_loss`:
+  Calculate piece-wise smooth L1 loss on the given tensors.
+
+- :py:func:`get_last_valid_features`:
+  Get the last valid values from the given feature sequences.
+
+
+.. autofunction:: repeat
+
+.. autofunction:: flatten3D
+
+.. autofunction:: dense_to_sparse
+
+.. autofunction:: smooth_l1_loss
+
+.. autofunction:: get_last_valid_features

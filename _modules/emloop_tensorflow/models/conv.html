@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>emloop_tensorflow.models.conv &#8212; emloop-tensorflow 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/highlight.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          emloop-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../getting_started.html">Getting Started</a></li>
+                <li><a href="../../../tutorial.html">Tutorial</a></li>
+                <li><a href="../../../regularization.html">Model Regularization</a></li>
+                <li><a href="../../../multi_gpu.html">Multi GPU models</a></li>
+                <li><a href="../../../emloop_tensorflow/index.html">API Reference</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Pages <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get" class="searchbox">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form><div class="side_nav">
+	<h4>Related projects</h4>
+</div>
+<ul class="nav nav-list">
+	<li><a href="https://emloop.org">emloop</a></li>
+	<li><a href="https://tensorflow.emloop.org">emloop-tensorflow</a></li>
+	<li><a href="https://hipipe.org">hipipe (c++)</a></li>
+</ul>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <h1>Source code for emloop_tensorflow.models.conv</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow.contrib.slim</span> <span class="k">as</span> <span class="nn">slim</span>
+
+<span class="kn">from</span> <span class="nn">.blocks</span> <span class="k">import</span> <span class="n">get_block_instance</span>
+<span class="kn">from</span> <span class="nn">.conv_blocks</span> <span class="k">import</span> <span class="n">ConvBlock</span><span class="p">,</span> <span class="n">IncBlock</span><span class="p">,</span> <span class="n">ResBlock</span><span class="p">,</span> <span class="n">MaxPoolBlock</span><span class="p">,</span> <span class="n">AveragePoolBlock</span><span class="p">,</span> <span class="n">UnPoolBlock</span><span class="p">,</span> \
+    <span class="n">GlobalAveragePoolBlock</span>
+
+<span class="n">CONV_BLOCKS</span> <span class="o">=</span> <span class="p">[</span><span class="n">ConvBlock</span><span class="p">,</span> <span class="n">IncBlock</span><span class="p">,</span> <span class="n">ResBlock</span><span class="p">,</span> <span class="n">MaxPoolBlock</span><span class="p">,</span> <span class="n">AveragePoolBlock</span><span class="p">,</span> <span class="n">UnPoolBlock</span><span class="p">,</span> <span class="n">GlobalAveragePoolBlock</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;CNN blocks recognized by the functions in the ``conv`` module.&quot;&quot;&quot;</span>
+
+<span class="n">POOL_BLOCKS</span> <span class="o">=</span> <span class="p">[</span><span class="n">MaxPoolBlock</span><span class="p">,</span> <span class="n">AveragePoolBlock</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Pooling blocks to be reversed in the ``cnn_autoencoder`` function.&quot;&quot;&quot;</span>
+<span class="c1"># GlobalAveragePoolBlock is not included as it has no kernel size nor can be reversed</span>
+
+<span class="n">UNPOOL_BLOCK</span> <span class="o">=</span> <span class="n">UnPoolBlock</span>
+<span class="sd">&quot;&quot;&quot;Unpooling block (inverse to the pooling blocks).&quot;&quot;&quot;</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cnn_encoder&#39;</span><span class="p">,</span> <span class="s1">&#39;cnn_autoencoder&#39;</span><span class="p">,</span> <span class="s1">&#39;compute_pool_amount&#39;</span><span class="p">,</span> <span class="s1">&#39;CONV_BLOCKS&#39;</span><span class="p">,</span> <span class="s1">&#39;POOL_BLOCKS&#39;</span><span class="p">,</span> <span class="s1">&#39;UNPOOL_BLOCK&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="compute_pool_amount"><a class="viewcode-back" href="../../../emloop_tensorflow/emloop_tensorflow.models.conv.html#emloop_tensorflow.models.compute_pool_amount">[docs]</a><span class="k">def</span> <span class="nf">compute_pool_amount</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the amount of pooling in the given ``encoder_config``.</span>
+<span class="sd">    E.g.: with two max pool layers with kernel size 2, the outputs would be 4.</span>
+
+<span class="sd">    :param encoder_config: a sequence of CNN encoder config codes</span>
+<span class="sd">    :return: the amount of pooling in the given ``encoder_config``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blocks_and_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_block_instance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">CONV_BLOCKS</span><span class="p">)</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">encoder_config</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="n">block</span><span class="o">.</span><span class="n">kernel_size</span> <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">block_type</span> <span class="ow">in</span> <span class="n">blocks_and_types</span> <span class="k">if</span> <span class="n">block_type</span> <span class="ow">in</span> <span class="n">POOL_BLOCKS</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="cnn_encoder"><a class="viewcode-back" href="../../../emloop_tensorflow/emloop_tensorflow.models.conv.html#emloop_tensorflow.models.cnn_encoder">[docs]</a><span class="k">def</span> <span class="nf">cnn_encoder</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                <span class="n">encoder_config</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                <span class="n">is_training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+                <span class="n">conv_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">bn_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">ln_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">skip_connections</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">use_bn</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">use_ln</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a convolutional neural network from the given ``encoder_config`` (sequence of block codes).</span>
+
+<span class="sd">    At the moment, the following blocks are recognized:</span>
+
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+<span class="sd">    |                           | code                                                        | example                |</span>
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+<span class="sd">    | Convolutional layer       | (num_filters)c[(time_kernel_size)-](kernel_size)[s(stride)] | 64c3, 64c3s2, 64c3-3s2 |</span>
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+<span class="sd">    | Average/Max pooling layer | (ap|mp)(kernel_size)[s(stride)]                             | mp2, ap3s2             |</span>
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+<span class="sd">    | Inception block           | (num_filters)inc                                            | 128inc                 |</span>
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+<span class="sd">    | Residual block            | (num_filters)res[s(stride)]                                 | 512ress2               |</span>
+<span class="sd">    +---------------------------+-------------------------------------------------------------+------------------------+</span>
+
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">        :caption: Usage</span>
+
+<span class="sd">        images = tf.placeholder(dtype=tf.float32, shape=(None, height, width, channels), name=&#39;images&#39;)</span>
+<span class="sd">        net = cnn_encoder(images, [&#39;64c7s2&#39;, &#39;128inc&#39;, &#39;128inc&#39;, &#39;ap3s2&#39;, &#39;256inc&#39;, &#39;256inc&#39;],</span>
+<span class="sd">                          self.is_training, tf.nn.elu)</span>
+<span class="sd">        # use encoded features here</span>
+
+<span class="sd">    .. tip::</span>
+<span class="sd">        CNN encoder can be applied to both 4D and 5D tensors.</span>
+
+<span class="sd">    **Skip connections:**</span>
+
+<span class="sd">    When provided, this function appends the *pre-pooling* tensors to the ``skip_connections`` sequence. Inversely, skip</span>
+<span class="sd">    connections are popped and added to the *post-unpooling* tensors if they are available.</span>
+
+<span class="sd">    References:</span>
+
+<span class="sd">    - `ResNet &lt;https://arxiv.org/pdf/1512.03385.pdf&gt;`_</span>
+<span class="sd">    - `InceptionNet &lt;https://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf&gt;`_</span>
+<span class="sd">    - `Batch normalization &lt;http://proceedings.mlr.press/v37/ioffe15.pdf&gt;`_</span>
+<span class="sd">    - `Layer normalization &lt;https://arxiv.org/pdf/1607.06450.pdf&gt;`_</span>
+
+<span class="sd">    :param x: 4 or 5 dim input tensor</span>
+<span class="sd">    :param encoder_config: sequence of layer/block codes defining the CNN architecture</span>
+<span class="sd">    :param is_training: training/eval phase indicator</span>
+<span class="sd">    :param activation: activation function</span>
+<span class="sd">    :param conv_kwargs: convolutional layers kwargs</span>
+<span class="sd">    :param bn_kwargs: batch normalization layers kwargs</span>
+<span class="sd">    :param ln_kwargs: layer normalization layers kwargs</span>
+<span class="sd">    :param skip_connections: mutable sequence of skip connection tensors around pooling operations</span>
+<span class="sd">    :param use_bn: add batch normalization layers after each convolution (including res and inception modules)</span>
+<span class="sd">    :param use_ln: add layer normalization layers after each convolution/module</span>
+<span class="sd">    :return: output tensor of the specified CNN when applied to the given input tensor</span>
+<span class="sd">    :raise UnrecognizedCodeError: if some of the layer configs cannot be correctly parsed</span>
+<span class="sd">    :raise AssertionError: if the input tensor is not 4 nor 5 dim</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="s1">&#39;CNN encoder supports only 4 or 5 dim tensors&#39;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">use_bn</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">use_ln</span>
+    <span class="k">if</span> <span class="n">use_bn</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">is_training</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;`is_training` flag must be provided when `use_bn` is true&#39;</span>
+
+    <span class="c1"># apply default arguments</span>
+    <span class="n">conv_kwargs</span> <span class="o">=</span> <span class="n">conv_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">bn_kwargs</span> <span class="o">=</span> <span class="n">bn_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">ln_kwargs</span> <span class="o">=</span> <span class="n">ln_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="n">merged_conv_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;activation_fn&#39;</span><span class="p">:</span> <span class="n">activation</span><span class="p">,</span>
+        <span class="s1">&#39;padding&#39;</span><span class="p">:</span> <span class="s1">&#39;SAME&#39;</span>
+    <span class="p">}</span>
+    <span class="n">merged_bn_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;decay&#39;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+        <span class="s1">&#39;is_training&#39;</span><span class="p">:</span> <span class="n">is_training</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">user_kwargs</span> <span class="ow">in</span> <span class="p">((</span><span class="n">merged_conv_kwargs</span><span class="p">,</span> <span class="n">conv_kwargs</span><span class="p">),</span> <span class="p">(</span><span class="n">merged_bn_kwargs</span><span class="p">,</span> <span class="n">bn_kwargs</span><span class="p">)):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">user_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># include dev name in the BN and LN variable names in order to avoid inter-device dependencies</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">bn_fn</span><span class="p">(</span><span class="n">x_in</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_</span><span class="p">):</span>
+        <span class="n">kwargs_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">&#39;bn-&#39;</span><span class="o">+</span><span class="n">dev</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">slim</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_</span><span class="p">)</span> <span class="k">if</span> <span class="n">use_bn</span> <span class="k">else</span> <span class="n">x_in</span>
+
+    <span class="k">def</span> <span class="nf">ln_fn</span><span class="p">(</span><span class="n">x_in</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_</span><span class="p">):</span>
+        <span class="n">final_kwargs</span> <span class="o">=</span> <span class="n">ln_kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs_</span><span class="p">)</span>
+        <span class="n">final_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s1">&#39;ln-&#39;</span><span class="o">+</span><span class="n">dev</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">layer_norm</span><span class="p">(</span><span class="n">x_in</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">final_kwargs</span><span class="p">)</span> <span class="k">if</span> <span class="n">use_ln</span> <span class="k">else</span> <span class="n">x_in</span>
+
+    <span class="n">extra_dim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span> <span class="k">else</span> <span class="p">()</span>
+    <span class="n">conv_fn</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">conv3d</span> <span class="k">if</span> <span class="n">extra_dim</span> <span class="k">else</span> <span class="n">slim</span><span class="o">.</span><span class="n">conv2d</span>
+    <span class="n">mp_fn</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">max_pool3d</span> <span class="k">if</span> <span class="n">extra_dim</span> <span class="k">else</span> <span class="n">slim</span><span class="o">.</span><span class="n">max_pool2d</span>
+    <span class="n">ap_fn</span> <span class="o">=</span> <span class="n">slim</span><span class="o">.</span><span class="n">avg_pool3d</span> <span class="k">if</span> <span class="n">extra_dim</span> <span class="k">else</span> <span class="n">slim</span><span class="o">.</span><span class="n">avg_pool2d</span>
+
+    <span class="n">block_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;extra_dim&#39;</span><span class="p">:</span> <span class="n">extra_dim</span><span class="p">,</span> <span class="s1">&#39;ap_fn&#39;</span><span class="p">:</span> <span class="n">ap_fn</span><span class="p">,</span> <span class="s1">&#39;mp_fn&#39;</span><span class="p">:</span> <span class="n">mp_fn</span><span class="p">,</span> <span class="s1">&#39;bn_fn&#39;</span><span class="p">:</span> <span class="n">bn_fn</span><span class="p">,</span> <span class="s1">&#39;ln_fn&#39;</span><span class="p">:</span> <span class="n">ln_fn</span><span class="p">,</span>
+                    <span class="s1">&#39;conv_fn&#39;</span><span class="p">:</span> <span class="n">conv_fn</span><span class="p">,</span> <span class="s1">&#39;pool_fn&#39;</span><span class="p">:</span> <span class="n">mp_fn</span><span class="p">}</span>
+
+    <span class="k">with</span> <span class="n">slim</span><span class="o">.</span><span class="n">arg_scope</span><span class="p">([</span><span class="n">conv_fn</span><span class="p">],</span> <span class="o">**</span><span class="n">merged_conv_kwargs</span><span class="p">),</span> <span class="n">slim</span><span class="o">.</span><span class="n">arg_scope</span><span class="p">([</span><span class="n">slim</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">],</span> <span class="o">**</span><span class="n">merged_bn_kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">):</span>
+            <span class="n">block</span><span class="p">,</span> <span class="n">block_type</span> <span class="o">=</span> <span class="n">get_block_instance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">CONV_BLOCKS</span><span class="p">,</span> <span class="n">block_kwargs</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">Applying `</span><span class="si">%s</span><span class="s1">` block&#39;</span><span class="p">,</span> <span class="n">block_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">skip_connections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">block_type</span> <span class="ow">in</span> <span class="n">POOL_BLOCKS</span><span class="p">):</span>
+                <span class="n">skip_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">i</span><span class="p">)):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">skip_connections</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">block_type</span> <span class="ow">is</span> <span class="n">UNPOOL_BLOCK</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">+=</span> <span class="n">skip_connections</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="cnn_autoencoder"><a class="viewcode-back" href="../../../emloop_tensorflow/emloop_tensorflow.models.conv.html#emloop_tensorflow.models.cnn_autoencoder">[docs]</a><span class="k">def</span> <span class="nf">cnn_autoencoder</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                    <span class="n">encoder_config</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                    <span class="n">is_training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">,</span>
+                    <span class="n">conv_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">bn_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">ln_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">skip_connections</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">use_bn</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">use_ln</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).</span>
+
+<span class="sd">    For the list of supported layers, modules etc. see :py:func:`cnn_encoder` function.</span>
+
+<span class="sd">    The process of auto-encoder construction is as follows.</span>
+
+<span class="sd">    1. Create a CNN encoder based on the encoder config.</span>
+<span class="sd">    2. Create a CNN decoder based on the reversed encoder config (reversed order, un-pooling instead of pooling)</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">        Does not support strided layers/modules and 5 dim tensors.</span>
+
+<span class="sd">    :param x: 4 dim input tensor</span>
+<span class="sd">    :param encoder_config: sequence of layer/block codes defining the CNN architecture</span>
+<span class="sd">    :param is_training: training/eval phase indicator</span>
+<span class="sd">    :param activation: activation function</span>
+<span class="sd">    :param conv_kwargs: convolutional layers kwargs</span>
+<span class="sd">    :param bn_kwargs: batch normalization layers kwargs</span>
+<span class="sd">    :param ln_kwargs: layer normalization layers kwargs</span>
+<span class="sd">    :param skip_connections: include encoder-decoder skip connections around pooling operations</span>
+<span class="sd">    :param use_bn: add batch normalization layers after each convolution (including res and inception modules)</span>
+<span class="sd">    :param use_ln: add layer normalization layers after each convolution/module</span>
+<span class="sd">    :return: a tuple of encoded tensor and output (decoded) tensor</span>
+<span class="sd">    :raise ValueError: if some of the layer configs cannot be correctly parsed</span>
+<span class="sd">    :raise AssertionError: if the configuration does not meet the requirements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;CNN auto-encoder supports only 4 dim tensors&#39;</span>
+    <span class="k">assert</span> <span class="n">get_block_instance</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">CONV_BLOCKS</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">POOL_BLOCKS</span><span class="p">,</span> \
+        <span class="s1">&#39;You choose pooling as the first action in the auto-encoder. Resize your image &#39;</span> \
+        <span class="s1">&#39;and delete first pooling layer - you will save memory and gain the same result.&#39;</span>
+
+    <span class="c1"># save the original shape for further checks</span>
+    <span class="n">original_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Constructing an auto-encoder for tensor of shape: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">original_shape</span><span class="p">)</span>
+
+    <span class="c1"># compute</span>
+    <span class="n">blocks_and_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_block_instance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">CONV_BLOCKS</span><span class="p">)</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">encoder_config</span><span class="p">]</span>
+    <span class="n">pool_product</span> <span class="o">=</span> <span class="n">compute_pool_amount</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">)</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">pool_product</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">target_rows</span> <span class="o">=</span> <span class="n">rows</span> <span class="o">+</span> <span class="n">pool_product</span> <span class="o">-</span> <span class="n">rows</span> <span class="o">%</span> <span class="n">pool_product</span> <span class="k">if</span> <span class="n">rows</span> <span class="o">%</span> <span class="n">pool_product</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">rows</span>
+        <span class="n">target_cols</span> <span class="o">=</span> <span class="n">cols</span> <span class="o">+</span> <span class="n">pool_product</span> <span class="o">-</span> <span class="n">cols</span> <span class="o">%</span> <span class="n">pool_product</span> <span class="k">if</span> <span class="n">cols</span> <span class="o">%</span> <span class="n">pool_product</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">cols</span>
+        <span class="k">if</span> <span class="n">rows</span> <span class="o">!=</span> <span class="n">target_rows</span> <span class="ow">or</span> <span class="n">cols</span> <span class="o">!=</span> <span class="n">target_cols</span><span class="p">:</span>
+            <span class="n">padded</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Padding from: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+
+            <span class="n">pad_top</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_rows</span> <span class="o">-</span> <span class="n">rows</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">pad_bot</span> <span class="o">=</span> <span class="n">target_rows</span> <span class="o">-</span> <span class="n">pad_top</span> <span class="o">-</span> <span class="n">rows</span>
+            <span class="n">pad_left</span> <span class="o">=</span> <span class="p">(</span><span class="n">target_cols</span> <span class="o">-</span> <span class="n">cols</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">pad_right</span> <span class="o">=</span> <span class="n">target_cols</span> <span class="o">-</span> <span class="n">pad_left</span> <span class="o">-</span> <span class="n">cols</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Paddings: left=</span><span class="si">%d</span><span class="s1">, right=</span><span class="si">%d</span><span class="s1">, top=</span><span class="si">%d</span><span class="s1">, bottom=</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">pad_top</span><span class="p">,</span> <span class="n">pad_bot</span><span class="p">,</span> <span class="n">pad_left</span><span class="p">,</span> <span class="n">pad_right</span><span class="p">)</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="n">pad_top</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span>
+                           <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="n">pad_bot</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">pad_left</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span>
+                           <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">pad_right</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+
+    <span class="n">skip_connections</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">skip_connections</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># build an encoder</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;encoder&#39;</span><span class="p">):</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="n">cnn_encoder</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">encoder_config</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">activation</span><span class="p">,</span> <span class="n">conv_kwargs</span><span class="p">,</span> <span class="n">bn_kwargs</span><span class="p">,</span> <span class="n">ln_kwargs</span><span class="p">,</span>
+                              <span class="n">skip_connections</span><span class="p">,</span> <span class="n">use_bn</span><span class="p">,</span> <span class="n">use_ln</span><span class="p">)</span>
+    <span class="c1"># re-arrange the pooling layers so that the decoder is symmetrical</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">block_type</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">blocks_and_types</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">block_type</span> <span class="ow">in</span> <span class="n">POOL_BLOCKS</span><span class="p">:</span>
+                <span class="n">encoder_config</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">encoder_config</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_config</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">encoder_config</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">decoder_config</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_block_instance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">CONV_BLOCKS</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_code</span><span class="p">()</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">encoder_config</span><span class="p">)]</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;decoder&#39;</span><span class="p">):</span>
+        <span class="n">decoded_raw</span> <span class="o">=</span> <span class="n">cnn_encoder</span><span class="p">(</span><span class="n">encoded</span><span class="p">,</span> <span class="n">decoder_config</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">activation</span><span class="p">,</span> <span class="n">conv_kwargs</span><span class="p">,</span> <span class="n">bn_kwargs</span><span class="p">,</span> <span class="n">ln_kwargs</span><span class="p">,</span>
+                                  <span class="n">skip_connections</span><span class="p">,</span> <span class="n">use_bn</span><span class="p">,</span> <span class="n">use_ln</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Shape of the padded auto-encoder: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decoded_raw</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+    <span class="n">decoded</span> <span class="o">=</span> <span class="n">decoded_raw</span><span class="p">[:,</span> <span class="n">pad_top</span><span class="p">:</span><span class="o">-</span><span class="n">pad_bot</span><span class="p">,</span> <span class="n">pad_left</span><span class="p">:</span><span class="o">-</span><span class="n">pad_right</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">padded</span> <span class="k">else</span> <span class="n">decoded_raw</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Shape of the final slice: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">decoded</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">encoded</span><span class="p">,</span> <span class="n">decoded</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Iterait a.s..<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
+    </p>
+  </div>
+</footer>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-108931454-1');
+</script>
+
+
+
+  </body>
+</html>

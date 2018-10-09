@@ -1,32 +1,32 @@
 Getting Started
 ###############
 
-Before we can dive in, make sure **cxflow-tensorflow** is installed properly.
+Before we can dive in, make sure **emloop-tensorflow** is installed properly.
 
 
 Installation
 ************
 
-The simplest way of installing **cxflow-tensorflow** – and our recommendation for most of cxflow’s
+The simplest way of installing **emloop-tensorflow** – and our recommendation for most of emloop’s
 users - is using ``pip``.
 
 .. code-block:: bash
 
-    pip install cxflow-tensorflow
+    pip install emloop-tensorflow
 
-Alternatively, **cxflow-tensorflow** can be installed directly from the sources.
+Alternatively, **emloop-tensorflow** can be installed directly from the sources.
 
 .. code-block:: bash
 
-    pip install git+https://github.com/Cognexa/cxflow-tensorflow.git
+    pip install git+https://github.com/iterait/emloop-tensorflow.git
 
 Developer Installation
 **********************
 
-Finally, cxflow might be installed directly for development purposes.
+Finally, emloop might be installed directly for development purposes.
 
 .. code-block:: bash
 
-    git clone git@github.com:Cognexa/cxflow-tensorflow.git
-    cd cxflow-tensorflow
+    git clone git@github.com:iterait/emloop-tensorflow.git
+    cd emloop-tensorflow
     pip install -e .

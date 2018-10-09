@@ -3,14 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Tutorial &#8212; cxflow-tensorflow 0.5.0 documentation</title>
+    <title>Tutorial &#8212; emloop-tensorflow 0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.5.0',
+        VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -47,8 +47,8 @@
           <span class="icon-bar"></span>
         </button>
         <a class="navbar-brand" href="index.html">
-          cxflow-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
+          emloop-tensorflow</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,7 +58,7 @@
                 <li><a href="#">Tutorial</a></li>
                 <li><a href="regularization.html">Model Regularization</a></li>
                 <li><a href="multi_gpu.html">Multi GPU models</a></li>
-                <li><a href="cxflow_tensorflow/index.html">API Reference</a></li>
+                <li><a href="emloop_tensorflow/index.html">API Reference</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -95,7 +95,7 @@
     </a>
     </div><ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
-<li><a class="reference internal" href="#first-cxflow-tensorflow-model">First cxflow-tensorflow model</a></li>
+<li><a class="reference internal" href="#first-emloop-tensorflow-model">First emloop-tensorflow model</a></li>
 <li><a class="reference internal" href="#basic-configuration">Basic configuration</a><ul>
 <li><a class="reference internal" href="#inputs-outputs">Inputs &amp; Outputs</a></li>
 <li><a class="reference internal" href="#optimizer">Optimizer</a></li>
@@ -117,9 +117,9 @@
 	<h4>Related projects</h4>
 </div>
 <ul class="nav nav-list">
-	<li><a href="https://cxflow.org">cxflow</a></li>
-	<li><a href="https://tensorflow.cxflow.org">cxflow-tensorflow</a></li>
-	<li><a href="https://cxtream.org">cxtream (c++)</a></li>
+	<li><a href="https://emloop.org">emloop</a></li>
+	<li><a href="https://tensorflow.emloop.org">emloop-tensorflow</a></li>
+	<li><a href="https://hipipe.org">hipipe (c++)</a></li>
 </ul>
         </div>
       </div>
@@ -127,21 +127,21 @@
       
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<p>Let’s imagine that one of your colleagues prepared a <strong>cxflow</strong> compatible dataset for the common task
+<p>Let’s imagine that one of your colleagues prepared a <strong>emloop</strong> compatible dataset for the common task
 of recognizing images of hand-written digits, and you are responsible for the implementation of a
-baseline neural network for said dataset. That’s where <strong>cxflow-tensorflow</strong> comes in: it’s simple, it’s
+baseline neural network for said dataset. That’s where <strong>emloop-tensorflow</strong> comes in: it’s simple, it’s
 fast and it pretty much does all the work for you. Here is how you set it up:</p>
-<div class="section" id="first-cxflow-tensorflow-model">
-<h2>First cxflow-tensorflow model<a class="headerlink" href="#first-cxflow-tensorflow-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="first-emloop-tensorflow-model">
+<h2>First emloop-tensorflow model<a class="headerlink" href="#first-emloop-tensorflow-model" title="Permalink to this headline">¶</a></h2>
 <p>Create a simple convolutional network by writing only a couple of lines.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
 <div class="highlight-python"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
  <span class="kn">import</span> <span class="nn">tensorflow.contrib.keras</span> <span class="kn">as</span> <span class="nn">K</span>
- <span class="kn">import</span> <span class="nn">cxflow_tensorflow</span> <span class="kn">as</span> <span class="nn">cxtf</span>
+ <span class="kn">import</span> <span class="nn">emloop_tensorflow</span> <span class="kn">as</span> <span class="nn">eltf</span>
 
 
- <span class="k">class</span> <span class="nc">SimpleConvNet</span><span class="p">(</span><span class="n">cxtf</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+ <span class="k">class</span> <span class="nc">SimpleConvNet</span><span class="p">(</span><span class="n">eltf</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
 
      <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
          <span class="n">images</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;images&#39;</span><span class="p">)</span>
@@ -206,18 +206,18 @@ favorite framework such as <a class="reference external" href="https://keras.io/
 </div>
 </div>
 <p>Finally run the training with:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>cxflow train &lt;path to config.yaml&gt;
+<div class="highlight-bash"><div class="highlight"><pre><span></span>emloop train &lt;path to config.yaml&gt;
 </pre></div>
 </div>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
 <p class="last">Full example may be found in our
-<a class="reference external" href="https://github.com/Cognexa/cxflow-examples/tree/master/mnist_convnet">cxflow examples repository &#64;GitHub</a>.</p>
+<a class="reference external" href="https://github.com/iterait/emloop-examples/tree/master/mnist_convnet">emloop examples repository &#64;GitHub</a>.</p>
 </div>
 </div>
 <div class="section" id="basic-configuration">
 <h2>Basic configuration<a class="headerlink" href="#basic-configuration" title="Permalink to this headline">¶</a></h2>
-<p>Most of the heavy lifting was done by the&nbsp;<strong>cxflow</strong>&nbsp;and&nbsp;<strong>cxflow-tensorflow</strong> – just as it should be!
+<p>Most of the heavy lifting was done by the&nbsp;<strong>emloop</strong>&nbsp;and&nbsp;<strong>emloop-tensorflow</strong> – just as it should be!
 Only the model itself and a few unavoidable configuration options had to be specified. In this
 section, we will go through the basic configuration options in greater detail.</p>
 <div class="section" id="inputs-outputs">
@@ -240,7 +240,7 @@ The respective tensors are expected to be found in the created TF graph.</p>
 </div>
 <div class="section" id="optimizer">
 <h3>Optimizer<a class="headerlink" href="#optimizer" title="Permalink to this headline">¶</a></h3>
-<p>By default, <strong>cxflow-tensorflow</strong> creates a TF optimizer specified in the configuration and attempts to
+<p>By default, <strong>emloop-tensorflow</strong> creates a TF optimizer specified in the configuration and attempts to
 minimize the model <code class="docutils literal"><span class="pre">loss</span></code>.
 Therefore, we need to both, specify the optimizer and include a tensor named <code class="docutils literal"><span class="pre">loss</span></code> in the graph.
 Arbitrary <a class="reference external" href="https://www.tensorflow.org/api_guides/python/train">TF Optimizer</a> may be referenced by its name.</p>
@@ -259,7 +259,7 @@ Arbitrary <a class="reference external" href="https://www.tensorflow.org/api_gui
 <h3>Model parameters<a class="headerlink" href="#model-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Note that the model (hyper-)parameters such as the number of layers were all hard-coded in our example.
 Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.</p>
-<p>In <strong>cxflow</strong>, model parameters may be defined and configured quite easily.
+<p>In <strong>emloop</strong>, model parameters may be defined and configured quite easily.
 For example, to introduce new <code class="docutils literal"><span class="pre">dense_size</span></code> parameter controlling the number of neurons in the fully connected layer,
 one would update the code as follows:</p>
 <div class="literal-block-wrapper docutils container" id="id6">
@@ -294,11 +294,11 @@ degrades?</p>
 </div>
 <div class="section" id="next-steps">
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
-<p>See our <a class="reference external" href="https://github.com/Cognexa/cxflow-examples">cxflow examples repository &#64;GitHub</a>.
-for additional examples or read the <a class="reference internal" href="cxflow_tensorflow/cxflow_tensorflow.html#cxflow_tensorflow.BaseModel" title="cxflow_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">cxflow_tensorflow.BaseModel</span></code></a> for a full list of customization options.</p>
-<p>This project contains additional utility functions and <strong>cxflow</strong> hooks documented in the
-<a class="reference internal" href="cxflow_tensorflow/index.html"><span class="doc">API Reference</span></a>.
-Make sure you don`t miss the <code class="xref py py-class docutils literal"><span class="pre">cxflow_tensorflow.hooks.WriteTensorboard</span></code> hook providing seamless integration
+<p>See our <a class="reference external" href="https://github.com/iterait/emloop-examples">emloop examples repository &#64;GitHub</a>.
+for additional examples or read the <a class="reference internal" href="emloop_tensorflow/emloop_tensorflow.html#emloop_tensorflow.BaseModel" title="emloop_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">emloop_tensorflow.BaseModel</span></code></a> for a full list of customization options.</p>
+<p>This project contains additional utility functions and <strong>emloop</strong> hooks documented in the
+<span class="xref std std-doc">emloop_tensorflow/index</span>.
+Make sure you don`t miss the <code class="xref py py-class docutils literal"><span class="pre">emloop_tensorflow.hooks.WriteTensorboard</span></code> hook providing seamless integration
 with <a class="reference external" href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard</a>.</p>
 </div>
 </div>
@@ -316,7 +316,7 @@ with <a class="reference external" href="https://www.tensorflow.org/get_started/
       
     </p>
     <p>
-        &copy; Copyright 2017, Cognexa Solutions s.r.o..<br/>
+        &copy; Copyright 2018, Iterait a.s..<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
     </p>
   </div>

@@ -1,0 +1,78 @@
+=================================
+``emloop_tensorflow.models.conv``
+=================================
+
+.. automodule:: emloop_tensorflow.models.conv
+
+
+.. currentmodule:: emloop_tensorflow.models.conv
+
+
+Functions
+=========
+
+- :py:func:`cnn_encoder`:
+  Build a convolutional neural network from the given ``encoder_config`` (sequence of block codes).
+
+- :py:func:`cnn_autoencoder`:
+  Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).
+
+- :py:func:`compute_pool_amount`:
+  Compute the amount of pooling in the given ``encoder_config``.
+
+
+.. autofunction:: cnn_encoder
+
+.. autofunction:: cnn_autoencoder
+
+.. autofunction:: compute_pool_amount
+
+
+Classes
+=======
+
+- :py:class:`UNPOOL_BLOCK`:
+  Un pooling block.
+
+
+
+.. autoclass:: UNPOOL_BLOCK
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: UNPOOL_BLOCK
+      :parts: 1
+
+   |
+
+
+
+Variables
+=========
+
+- :py:data:`CONV_BLOCKS`
+- :py:data:`POOL_BLOCKS`
+
+.. autodata:: CONV_BLOCKS
+   :annotation:
+
+   .. code-block:: guess
+
+      [<class 'emloop_tensorflow.models.conv_blocks.ConvBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.IncBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.ResBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.MaxPoolBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.AveragePoolBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.UnPoolBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.GlobalAveragePoolBlock'>]
+
+.. autodata:: POOL_BLOCKS
+   :annotation:
+
+   .. code-block:: guess
+
+      [<class 'emloop_tensorflow.models.conv_blocks.MaxPoolBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.AveragePoolBlock'>]

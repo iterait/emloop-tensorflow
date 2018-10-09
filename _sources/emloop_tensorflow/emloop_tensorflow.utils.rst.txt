@@ -1,0 +1,23 @@
+===========================
+``emloop_tensorflow.utils``
+===========================
+
+.. automodule:: emloop_tensorflow.utils
+
+
+.. currentmodule:: emloop_tensorflow.utils
+
+
+Functions
+=========
+
+- :py:func:`create_activation`:
+  Create TensorFlow activation function with the given name.
+
+- :py:func:`create_optimizer`:
+  Create TF optimizer according to the given config.
+
+
+.. autofunction:: create_activation
+
+.. autofunction:: create_optimizer
