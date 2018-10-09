@@ -43,7 +43,7 @@ references:
   add_rw_key: &add_rw_key
     add_ssh_keys:
       fingerprints:
-        - "04:f1:4a:89:30:eb:e6:d0:d7:e5:0b:fc:f4:72:12:d8"
+        - "3f:be:5a:c5:e5:95:14:a4:c1:e4:e2:34:5a:3c:b0:0d"
 
   doc: &doc
     run:
@@ -150,6 +150,7 @@ workflows:
             - test_ubuntu_latest
             - test_ubuntu_rolling
             - test_archlinux
+            - coverage
             - generate_documentation
 
   nightly-build:
