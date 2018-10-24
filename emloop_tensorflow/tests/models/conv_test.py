@@ -103,22 +103,35 @@ def test_sanity_auto():
                 eltf.models.cnn_autoencoder(x4, ['32c3', 'ap3s2'])
 
 
-def test_padding():
+# The image sizes for the following are not divisible by 9, but they are divisible by 4.
+@pytest.mark.parametrize("input_shape,padding_encoded_shape,fitted_encoded_shape", [
+    ((10, 100, 100, 3), (10, 12, 12, 48), (10, 25, 25, 48)),
+    ((10, 40, 80, 3), (10, 5, 9, 48), (10, 10, 20, 48)),
+])
+def test_padding(input_shape, padding_encoded_shape, fitted_encoded_shape):
     """Test cnn auto-encoder pads the input if needed and outputs the same shape anyways."""
     padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '48c3']
     fitted_encoder = ['3c3', 'mp2', '24c3', 'mp2', '48c3']  # pooling fits to the shape, no padding is required
     with tf.Graph().as_default(), tf.Session() as ses:
-        x4 = tf.ones((10, 100, 100, 3))  # 100 is not divisible by 9 -> padding will be required
+        input_x = tf.placeholder(tf.float32, shape=(None, None, None, 3))
         with tf.variable_scope('padded'):
-            _, decoded = eltf.models.cnn_autoencoder(x4, padding_encoder, use_bn=False)
+            padding_encoded, padding_decoded = \
+              eltf.models.cnn_autoencoder(input_x, padding_encoder, use_bn=False)
         with tf.variable_scope('fitted'):
-            encoded, _ = eltf.models.cnn_autoencoder(x4, fitted_encoder, use_bn=False)
+            fitted_encoded, fitted_decoded = \
+              eltf.models.cnn_autoencoder(input_x, fitted_encoder, use_bn=False)
         ses.run(tf.local_variables_initializer())
         ses.run(tf.global_variables_initializer())
-        encoded_value = encoded.eval(session=ses)
-        assert encoded_value.shape == (10, 25, 25, 48)
-        decoded_value = decoded.eval(session=ses)
-        assert decoded_value.shape == tuple(x4.get_shape().as_list())
+        # test padding encoder
+        padding_encoded_value = padding_encoded.eval(feed_dict={input_x: np.ones(input_shape)}, session=ses)
+        assert padding_encoded_value.shape == padding_encoded_shape
+        padding_decoded_value = padding_decoded.eval(feed_dict={input_x: np.ones(input_shape)}, session=ses)
+        assert padding_decoded_value.shape == input_shape
+        # test fitted encoder
+        fitted_encoded_value = fitted_encoded.eval(feed_dict={input_x: np.ones(input_shape)}, session=ses)
+        assert fitted_encoded_value.shape == fitted_encoded_shape
+        fitted_decoded_value = fitted_decoded.eval(feed_dict={input_x: np.ones(input_shape)}, session=ses)
+        assert fitted_decoded_value.shape == input_shape
 
 
 def test_model_integration():

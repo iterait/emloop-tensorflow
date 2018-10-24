@@ -198,33 +198,32 @@ def cnn_autoencoder(x: tf.Tensor,
         'and delete first pooling layer - you will save memory and gain the same result.'
 
     # save the original shape for further checks
-    original_shape = x.get_shape().as_list()
-    logging.debug('Constructing an auto-encoder for tensor of shape: %s', original_shape)
+    original_shape = tf.shape(x)
+    logging.debug('Constructing an auto-encoder for tensor of shape: %s', x.get_shape())
 
     # compute
     blocks_and_types = [get_block_instance(code, CONV_BLOCKS) for code in encoder_config]
     pool_product = compute_pool_amount(encoder_config)
-    padded = False
-    if pool_product > 1:
-        rows, cols = x.get_shape().as_list()[1:3]
-        target_rows = rows + pool_product - rows % pool_product if rows % pool_product > 0 else rows
-        target_cols = cols + pool_product - cols % pool_product if cols % pool_product > 0 else cols
-        if rows != target_rows or cols != target_cols:
-            padded = True
-            logging.debug('Padding from: %s', x.get_shape())
 
-            pad_top = (target_rows - rows) // 2
-            pad_bot = target_rows - pad_top - rows
-            pad_left = (target_cols - cols) // 2
-            pad_right = target_cols - pad_left - cols
-            logging.debug('Paddings: left=%d, right=%d, top=%d, bottom=%d', pad_top, pad_bot, pad_left, pad_right)
+    rows = original_shape[1]
+    cols = original_shape[2]
+    rows_not_divisible = tf.cast(rows % pool_product > 0, dtype=tf.int32)
+    target_rows = rows + pool_product * rows_not_divisible - rows % pool_product
+    cols_not_divisible = tf.cast(cols % pool_product > 0, dtype=tf.int32)
+    target_cols = cols + pool_product * cols_not_divisible - cols % pool_product
 
-            x = tf.concat([tf.zeros_like(x[:, :pad_top, :, :], dtype=x.dtype), x,
-                           tf.zeros_like(x[:, :pad_bot, :, :], dtype=x.dtype)], axis=1)
-            x = tf.concat([tf.zeros_like(x[:, :, :pad_left, :], dtype=x.dtype), x,
-                           tf.zeros_like(x[:, :, :pad_right, :], dtype=x.dtype)], axis=2)
+    logging.debug('Padding from: %s', x.get_shape())
+    pad_top = (target_rows - rows) // 2
+    pad_bot = target_rows - pad_top - rows
+    pad_left = (target_cols - cols) // 2
+    pad_right = target_cols - pad_left - cols
+    logging.debug('Paddings: left=%d, right=%d, top=%d, bottom=%d', pad_top, pad_bot, pad_left, pad_right)
 
-            logging.debug('\t%s', x.get_shape())
+    x = tf.concat([tf.zeros_like(x[:, :pad_top, :, :], dtype=x.dtype), x,
+                   tf.zeros_like(x[:, :pad_bot, :, :], dtype=x.dtype)], axis=1)
+    x = tf.concat([tf.zeros_like(x[:, :, :pad_left, :], dtype=x.dtype), x,
+                   tf.zeros_like(x[:, :, :pad_right, :], dtype=x.dtype)], axis=2)
+    logging.debug('\t%s', x.get_shape())
 
     skip_connections = [] if skip_connections else None
     # build an encoder
@@ -243,7 +242,7 @@ def cnn_autoencoder(x: tf.Tensor,
                                   skip_connections, use_bn, use_ln)
 
     logging.debug('Shape of the padded auto-encoder: %s', decoded_raw.get_shape())
-    decoded = decoded_raw[:, pad_top:-pad_bot, pad_left:-pad_right, :] if padded else decoded_raw
+    decoded = decoded_raw[:, pad_top:pad_top+rows, pad_left:pad_left+cols, :]
     logging.debug('Shape of the final slice: %s', decoded.get_shape())
 
     return encoded, decoded
