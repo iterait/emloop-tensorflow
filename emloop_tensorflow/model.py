@@ -103,7 +103,9 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE) as scope:
-                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+                    self._is_training = tf.placeholder_with_default(tf.constant(False, tf.bool),
+                                                                    shape=[],
+                                                                    name=BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
