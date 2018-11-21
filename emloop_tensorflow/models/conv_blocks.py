@@ -66,7 +66,6 @@ class ConvBlock(ConvBaseBlock):
                 raise ValueError('Conv block with time kernel size {} can be applied only to 5-dim tensors '
                                  '({} were given).'.format(self._time_kernel, len(x.shape)))
             time_kernel = (self._time_kernel,)
-
         x = self._conv_fn(x, num_outputs=self._channels, kernel_size=time_kernel+(self._kernel, self._kernel),
                           stride=self._extra_dim+(self._stride, self._stride), scope='inner')
         x = self._bn_fn(x)
@@ -174,7 +173,7 @@ class SeparableConvBlock(ConvBaseBlock):
 
     **code**: ``(num_filters)sep(kernel_size)[s(stride)]``
 
-    **examples**: ``64sep3``, ``64sep3s2``, ``64sep3-5s2``
+    **examples**: ``64sep3``, ``64sep3s2``
     """
 
     def __init__(self, **kwargs):
@@ -184,7 +183,7 @@ class SeparableConvBlock(ConvBaseBlock):
                          **kwargs)
 
     def _handle_parsed_args(self, channels: str, kernel: str,
-                            __, stride: Union[str, int]) -> None:
+                            _, stride: Union[str, int]) -> None:
         """
         Handle parsed arguments.
 
@@ -196,7 +195,7 @@ class SeparableConvBlock(ConvBaseBlock):
         self._channels, self._kernel, self._stride = int(channels), int(kernel), int(stride)
 
     def apply(self, x: tf.Tensor) -> tf.Tensor:
-        if len(self._extra_dim) >= 1:
+        if len(x.get_shape()) > 4:
             raise ValueError('SeparableConvBlock only supports inputs with rank 4 \
                               (i.e. batch_size, height, width, channels)')
 
@@ -207,7 +206,7 @@ class SeparableConvBlock(ConvBaseBlock):
 
     def inverse_code(self) -> str:
         if self._stride > 1:
-            raise ValueError('Inverse code for conv block is not defined for stride `{}`'.format(self._stride))
+            raise ValueError(f'Inverse code for separable conv block is not defined for stride `{self._stride}`')
         return self._code
 
 
