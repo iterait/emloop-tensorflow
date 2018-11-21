@@ -6,10 +6,11 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 from .blocks import get_block_instance
-from .conv_blocks import ConvBlock, IncBlock, ResBlock, MaxPoolBlock, AveragePoolBlock, UnPoolBlock, \
-    GlobalAveragePoolBlock
+from .conv_blocks import ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock, AveragePoolBlock, \
+    UnPoolBlock, GlobalAveragePoolBlock
 
-CONV_BLOCKS = [ConvBlock, IncBlock, ResBlock, MaxPoolBlock, AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock]
+CONV_BLOCKS = [ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock,
+               AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock]
 """CNN blocks recognized by the functions in the ``conv`` module."""
 
 POOL_BLOCKS = [MaxPoolBlock, AveragePoolBlock]

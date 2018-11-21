@@ -1,6 +1,7 @@
 from typing import Tuple, Callable, Optional, Union
 
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
 
 from ..ops import repeat
 from .blocks import BaseBlock
@@ -162,6 +163,52 @@ class ResBlock(ConvBaseBlock):
         if self._stride > 1:
             raise ValueError('Inverse code for res block is not defined for stride `{}`'.format(self._stride))
         return self._code
+
+
+class SeparableConvBlock(ConvBaseBlock):
+    """
+    2D depthwise separable convolutional block, as described in
+    'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'
+    (https://arxiv.org/pdf/1704.04861.pdf)
+
+    **code**: ``(num_filters)sep(kernel_size)[s(stride)]``
+
+    **examples**: ``64sep3``, ``64sep3s2``
+    """
+
+    def __init__(self, **kwargs):
+        """Try to parse and create new :py:class:`SeparableConvBlock`."""
+        super().__init__(regexp='([1-9][0-9]*)sep([1-9][0-9]*)(s([1-9][0-9]*))?',
+                         defaults=(None, None, None, 1),
+                         **kwargs)
+
+    def _handle_parsed_args(self, channels: str, kernel: str,
+                            _, stride: Union[str, int]) -> None:
+        """
+        Handle parsed arguments.
+
+        :param channels: number of output channels
+        :param kernel: kernel size
+        :param _: void parameter, needed because function signature must match the groups in regexp from constructor
+        :param stride: stride (default 1)
+        """
+        self._channels, self._kernel, self._stride = int(channels), int(kernel), int(stride)
+
+    def apply(self, x: tf.Tensor) -> tf.Tensor:
+        if len(x.get_shape()) > 4:
+            raise ValueError('SeparableConvBlock only supports inputs with rank 4 \
+                              (i.e. batch_size, height, width, channels)')
+
+        x = slim.separable_conv2d(x, num_outputs=self._channels, kernel_size=(self._kernel, self._kernel),
+                                  stride=(self._stride, self._stride), scope='inner')
+
+        return self._ln_fn(self._bn_fn(x))
+
+    def inverse_code(self) -> str:
+        if self._stride > 1:
+            raise ValueError(f'Inverse code for separable conv block is not defined for stride `{self._stride}`')
+        return self._code
+
 
 
 class PoolBaseBlock(BaseBlock):
