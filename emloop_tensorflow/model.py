@@ -44,7 +44,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  dataset: Optional[el.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
-                 restore_fallback: Optional[str]=None,
+                 restore_fallback: Optional[str]=None, clip_gradient: Optional[float]=None,
                  **kwargs):
         """
         Create new emloop trainable TensorFlow model.
@@ -81,6 +81,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param loss_name: loss tensor name
         :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
         :param restore_fallback: ignored arg. (allows training from configs saved by emloop where it is added)
+        :param clip_gradient: limit the absolute value of the gradient; set to None for no clipping
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
@@ -89,6 +90,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
+        self._clip_gradient = clip_gradient
         self._loss_name = loss_name
         self._train_ops = []
         self._graph = self._saver = None
@@ -354,7 +356,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         By default the train ops are constructed in the following way:
             - optimizer is created from the ``model.optimizer`` configuration dict
-            - REGULARIZATION_LOSSSES collection is summed to ``regularization_loss``
+            - REGULARIZATION_LOSSES collection is summed to ``regularization_loss``
             - gradients minimizing the respective tower losses and ``regularization_loss`` are computed
             - for each number of non-empty towers
                 - gradients of the respective towers are averaged and applied
@@ -385,6 +387,14 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         for tower in self._towers:
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tf.reduce_mean(tower.loss) + regularization_loss))
+
+        # gradient clipping
+        if self._clip_gradient is not None:
+            for tower_grads_vars in grads_and_vars:
+                for i, (grad, var) in enumerate(tower_grads_vars):
+                    if grad is not None:
+                        tower_grads_vars[i] = (tf.clip_by_value(grad, -self._clip_gradient, self._clip_gradient), var)
+
         for i in range(len(self._towers)):
             with tf.control_dependencies(dependencies[i]):
                 optimizer.apply_gradients(average_gradients(grads_and_vars[:(i + 1)]),
