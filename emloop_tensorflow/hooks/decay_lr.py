@@ -29,7 +29,7 @@ class DecayLR(EveryNEpoch):
         :caption: multiply ``learning_rate`` variable by 0.999 each 5th epoch
 
         hooks:
-          - emloop_tensorflow.hooks.DecayLR
+          - emloop_tensorflow.hooks.DecayLR:
               decay_value: 0.999
               n_epochs: 5
 

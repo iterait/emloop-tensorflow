@@ -22,7 +22,7 @@ release = pkg_resources.get_distribution("emloop-tensorflow").version
 
 html_static_path.append("_static")
 
-html_context.update(analytics_id="UA-108931454-1")
+html_context.update(analytics_id="UA-129185891-2")
 
 html_theme_options.update({
     # Navigation bar title. (Default: ``project`` value)
