@@ -29,7 +29,7 @@ class DecayLR(EveryNEpoch):
         :caption: multiply ``learning_rate`` variable by 0.999 each 5th epoch
 
         hooks:
-          - emloop_tensorflow.hooks.DecayLR
+          - emloop_tensorflow.hooks.DecayLR:
               decay_value: 0.999
               n_epochs: 5
 
@@ -123,8 +123,7 @@ class DecayLROnPlateau(el.hooks.OnPlateau, DecayLR):
     """
 
     def __init__(self, decay_value: float=0.1, **kwargs):
-        el.hooks.OnPlateau.__init__(self, **kwargs)
-        DecayLR.__init__(self, decay_value=decay_value, **kwargs)
+        super().__init__(decay_value=decay_value, **kwargs)
         self._prevent_decay = 0
 
     def _on_plateau_action(self, **kwargs) -> None:

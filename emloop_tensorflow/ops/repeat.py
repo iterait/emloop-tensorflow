@@ -14,7 +14,7 @@ def repeat(tensor: tf.Tensor, repeats: int, axis: int) -> tf.Tensor:
     :param axis: axis to repeat
     :return: tensor with repeated elements
     """
-    shape = tensor.get_shape().as_list()
+    shape = tf.shape(tensor)
 
     dims = np.arange(len(tensor.shape))
     prepare_perm = np.hstack(([axis], np.delete(dims, axis)))

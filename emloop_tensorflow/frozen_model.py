@@ -20,10 +20,12 @@ class FrozenModel(el.AbstractModel):
 
     .. code-block:: yaml
         :caption: using frozen model
+
         # ...
         model:
           class: emloop_tensorflow.FrozenModel
           # ...
+
     """
 
     def __init__(self,
@@ -111,8 +113,7 @@ class FrozenModel(el.AbstractModel):
         The model name can be derived if the ``restore_from`` is a directory containing exactly one checkpoint or if
         its base name specifies a checkpoint.
 
-        :param restore_from: path to directory from which the model is restored, optionally with model name as the last
-        part
+        :param restore_from: path to directory from which the model is restored, optionally including model filename
         """
         logging.info('Restoring model from `{}`'.format(restore_from))
         restore_model_name = None

@@ -18,6 +18,7 @@ from emloop_tensorflow import BaseModel
 from emloop_tensorflow.third_party.tensorflow.freeze_graph import freeze_graph
 
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
+_OPTIMIZER_CLIPPING = {'class': 'tensorflow.train.GradientDescentOptimizer', 'learning_rate': 1}
 _OPTIMIZER_NO_MODULE = {'class': 'AdamOptimizer', 'learning_rate': 0.1}
 _IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
@@ -266,6 +267,16 @@ def test_run_custom_loss():
         trainable_model.run(batch, train=True)
     after_value = trainable_model.var.eval(session=trainable_model.session)
     assert np.allclose([0] * 10, after_value)
+
+
+def test_run_gradient_clipping():
+    """Test gradient is clipped."""
+    trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER_CLIPPING, clip_gradient=1e-6)
+    batch = {'input': [[1]*10], 'target': [[0]*10]}
+    orig_value = trainable_model.var.eval(session=trainable_model.session)
+    trainable_model.run(batch, train=True)
+    after_value = trainable_model.var.eval(session=trainable_model.session)
+    assert np.allclose(orig_value, after_value, atol=1.e-6)
 
 
 def test_mainloop_model_training(tmpdir):
