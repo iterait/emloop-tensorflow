@@ -13,7 +13,7 @@ autoapi_modules = {
 # General information about the project.                         
 project = 'emloop-tensorflow' 
 copyright = '2018, Iterait a.s.'                     
-author = 'Blazek Adam, Belohlavek Petr, Matzner Filip'
+author = 'Blazek Adam, Belohlavek Petr, Matzner Filip, Bedrich Pisl'
 
 # The short X.Y version.
 version = '.'.join(pkg_resources.get_distribution("emloop-tensorflow").version.split('.')[:2])
@@ -37,6 +37,7 @@ html_theme_options.update({
         ("Tutorial", "tutorial"),
         ("Model Regularization", "regularization"),
         ("Multi GPU models", "multi_gpu"),
+        ("Advanced", "advanced"),
         ("API Reference", "emloop_tensorflow/index"),
     ],
 })

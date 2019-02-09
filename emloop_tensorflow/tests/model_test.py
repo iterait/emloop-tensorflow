@@ -419,6 +419,21 @@ def test_regularization():
     regularized_model2.run(good_batch, train=True)
 
 
+def test_profiling(tmpdir):
+    """Test whether profile is created."""
+    model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER, profile=True, keep_profiles=10)
+    batch = {'input': [[1]*10], 'target': [[0]*10]}
+
+    # test if one can train one model while the other remains intact
+    for _ in range(1000):
+        model.run(batch, train=True)
+
+    for i in range(10):
+        assert path.exists(f"{tmpdir}/profile_{i}.json")
+
+    assert not path.exists(f"{tmpdir}/profile_11.json")
+
+
 #######################
 # TF Base Model Saver #
 #######################
