@@ -2,7 +2,7 @@ import math
 import logging
 from os import path
 from abc import ABCMeta
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Dict
 from glob import glob
 
 import numpy as np
@@ -11,7 +11,7 @@ import tensorflow as tf
 
 from .third_party.tensorflow.freeze_graph import freeze_graph
 from .third_party.tensorflow.average_gradients import average_gradients
-from .utils import create_optimizer
+from .utils import create_optimizer, Profiler
 from .graph_tower import GraphTower
 
 DEFAULT_LOSS_NAME = 'loss'
@@ -44,8 +44,8 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  dataset: Optional[el.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
-                 restore_fallback: Optional[str]=None,
-                 **kwargs):
+                 restore_fallback: Optional[str]=None, clip_gradient: Optional[float]=None, profile: bool=False,
+                 keep_profiles: int=5, **kwargs):
         """
         Create new emloop trainable TensorFlow model.
 
@@ -81,6 +81,9 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param loss_name: loss tensor name
         :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
         :param restore_fallback: ignored arg. (allows training from configs saved by emloop where it is added)
+        :param clip_gradient: limit the absolute value of the gradient; set to None for no clipping
+        :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir
+        :param keep_profiles: if true, profile the speed of model inference and save profiles to the specified log_dir
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
@@ -89,21 +92,31 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         self._dataset = dataset
         self._log_dir = log_dir
         self._freeze_graph = freeze
+        self._clip_gradient = clip_gradient
         self._loss_name = loss_name
         self._train_ops = []
         self._graph = self._saver = None
         self._towers = [GraphTower(i, inputs, outputs, loss_name) for i in range(n_gpus)]
         if n_gpus == 0:
             self._towers.append(GraphTower(-1, inputs, outputs, loss_name))
-
         logging.info('\tCreating TF model on %s GPU devices', n_gpus)
         self._graph = tf.Graph()
         self._session = self._create_session(session_config)
+
+        if profile and not log_dir:
+            raise ValueError('log_dir has to be specified with profile set to True')
+
+        self._profile = profile
+        if profile:
+            self._profiler = Profiler(log_dir, keep_profiles, self._session)
+
         dependencies = []
         with self._graph.as_default():
             if restore_from is None:
                 with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE) as scope:
-                    self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+                    self._is_training = tf.placeholder_with_default(tf.constant(False, tf.bool),
+                                                                    shape=[],
+                                                                    name=BaseModel.TRAINING_FLAG_NAME)
                     for tower in self._towers:
                         with tower:
                             self._create_model(**kwargs)
@@ -219,12 +232,14 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 for output_name in self.output_names:
                     fetches.append(tower[output_name])
 
+        run_fn = self._profiler.run if self._profile else self._session.run
+
         # run the computational graph for one batch and allow buffering in the meanwhile
         if stream is not None:
             with stream.allow_buffering:
-                outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+                outputs = run_fn(fetches, feed_dict)
         else:
-            outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+            outputs = run_fn(fetches, feed_dict)
 
         if train:
             outputs = outputs[1:]
@@ -296,8 +311,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         The model name can be derived if the ``restore_from`` is a directory containing exactly one checkpoint or if
         its base name specifies a checkpoint.
 
-        :param restore_from: path to directory from which the model is restored, optionally with model name as the last
-        part
+        :param restore_from: path to directory from which the model is restored, optionally including model filename
         """
 
         logging.info('Restoring model from `{}`'.format(restore_from))
@@ -352,7 +366,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
         By default the train ops are constructed in the following way:
             - optimizer is created from the ``model.optimizer`` configuration dict
-            - REGULARIZATION_LOSSSES collection is summed to ``regularization_loss``
+            - REGULARIZATION_LOSSES collection is summed to ``regularization_loss``
             - gradients minimizing the respective tower losses and ``regularization_loss`` are computed
             - for each number of non-empty towers
                 - gradients of the respective towers are averaged and applied
@@ -383,6 +397,14 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         for tower in self._towers:
             with tower:
                 grads_and_vars.append(optimizer.compute_gradients(tf.reduce_mean(tower.loss) + regularization_loss))
+
+        # gradient clipping
+        if self._clip_gradient is not None:
+            for tower_grads_vars in grads_and_vars:
+                for i, (grad, var) in enumerate(tower_grads_vars):
+                    if grad is not None:
+                        tower_grads_vars[i] = (tf.clip_by_value(grad, -self._clip_gradient, self._clip_gradient), var)
+
         for i in range(len(self._towers)):
             with tf.control_dependencies(dependencies[i]):
                 optimizer.apply_gradients(average_gradients(grads_and_vars[:(i + 1)]),

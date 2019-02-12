@@ -8,6 +8,7 @@ import tensorflow as tf
 
 from .graph_tower import GraphTower
 from .model import BaseModel
+from .utils import Profiler
 
 
 class FrozenModel(el.AbstractModel):
@@ -20,23 +21,27 @@ class FrozenModel(el.AbstractModel):
 
     .. code-block:: yaml
         :caption: using frozen model
+
         # ...
         model:
           class: emloop_tensorflow.FrozenModel
           # ...
+
     """
 
-    def __init__(self,
-                 inputs: List[str], outputs: List[str], restore_from: str,
-                 session_config: Optional[dict]=None, n_gpus: int=0, **_):
+    def __init__(self, inputs: List[str], outputs: List[str], restore_from: str, log_dir: Optional[str]=None,
+                 session_config: Optional[dict]=None, n_gpus: int=0, profile: bool=False, keep_profiles: int=5, **_):
         """
         Initialize new :py:class:`FrozenModel` instance.
 
+        :param log_dir: output directory
         :param inputs: model input names
         :param outputs: model output names
         :param restore_from: restore model path (either a dir or a .pb file)
         :param session_config: TF session configuration dict
         :param n_gpus: number of GPUs to use (either 0 or 1)
+        :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir
+        :param keep_profiles: how many profiles are saved
         """
         super().__init__(None, '', restore_from)
         assert 0 <= n_gpus <= 1, 'FrozenModel can be used only with n_gpus=0 or n_gpus=1'
@@ -57,6 +62,13 @@ class FrozenModel(el.AbstractModel):
                 self._is_training = self._graph.get_tensor_by_name(BaseModel.TRAINING_FLAG_NAME + ':0')
             except KeyError:
                 self._is_training = tf.placeholder(tf.bool, [], BaseModel.TRAINING_FLAG_NAME)
+
+        if profile and not log_dir:
+            raise ValueError('log_dir has to be specified with profile set to True')
+
+        self._profile = profile
+        if profile:
+            self._profiler = Profiler(log_dir, keep_profiles, self._session)
 
     def run(self, batch: el.Batch, train: bool=False, stream: el.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
@@ -81,7 +93,10 @@ class FrozenModel(el.AbstractModel):
         for output_name in self.output_names:
             fetches.append(self._tower[output_name])
 
-        outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
+        if self._profile:
+            outputs = self._profiler.run(fetches=fetches, feed_dict=feed_dict)
+        else:
+            outputs = self._session.run(fetches=fetches, feed_dict=feed_dict)
 
         return dict(zip(self.output_names, outputs))
 
@@ -111,8 +126,7 @@ class FrozenModel(el.AbstractModel):
         The model name can be derived if the ``restore_from`` is a directory containing exactly one checkpoint or if
         its base name specifies a checkpoint.
 
-        :param restore_from: path to directory from which the model is restored, optionally with model name as the last
-        part
+        :param restore_from: path to directory from which the model is restored, optionally including model filename
         """
         logging.info('Restoring model from `{}`'.format(restore_from))
         restore_model_name = None

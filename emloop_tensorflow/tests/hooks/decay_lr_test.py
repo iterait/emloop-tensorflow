@@ -3,6 +3,7 @@ Test module for emloop_tensorflow.hooks.DecayLR hook.
 """
 import pytest
 import tensorflow as tf
+import logging
 
 from emloop_tensorflow.hooks import DecayLR, DecayLROnPlateau
 
@@ -138,3 +139,13 @@ def test_wait(mock_object_decaylr_wait, model, epoch_data):
         hook.after_epoch(epoch_id=i, epoch_data=epoch_data)
         hook._on_plateau_action()
     assert mock_object_decaylr_wait.call_count == 2
+
+
+def test_variables_dont_raise_warning(model, caplog):
+    """
+    Test if initialization of ``DecayLROnPlateau`` does not raise warnings for variables that are specific for
+    parent hooks only (not shared among both). See emloop issue #14 for more details.
+    """
+    caplog.set_level(logging.WARNING)
+    DecayLROnPlateau(model=model, decay_type='multiply', long_term=4, short_term=3)
+    assert caplog.record_tuples == []

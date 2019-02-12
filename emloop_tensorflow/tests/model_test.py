@@ -18,6 +18,7 @@ from emloop_tensorflow import BaseModel
 from emloop_tensorflow.third_party.tensorflow.freeze_graph import freeze_graph
 
 _OPTIMIZER = {'class': 'tensorflow.python.training.adam.AdamOptimizer', 'learning_rate': 0.1}
+_OPTIMIZER_CLIPPING = {'class': 'tensorflow.train.GradientDescentOptimizer', 'learning_rate': 1}
 _OPTIMIZER_NO_MODULE = {'class': 'AdamOptimizer', 'learning_rate': 0.1}
 _IO = {'inputs': ['input', 'target'], 'outputs': ['output', 'loss']}
 
@@ -268,6 +269,16 @@ def test_run_custom_loss():
     assert np.allclose([0] * 10, after_value)
 
 
+def test_run_gradient_clipping():
+    """Test gradient is clipped."""
+    trainable_model = TrainableModel(dataset=None, log_dir='', **_IO, optimizer=_OPTIMIZER_CLIPPING, clip_gradient=1e-6)
+    batch = {'input': [[1]*10], 'target': [[0]*10]}
+    orig_value = trainable_model.var.eval(session=trainable_model.session)
+    trainable_model.run(batch, train=True)
+    after_value = trainable_model.var.eval(session=trainable_model.session)
+    assert np.allclose(orig_value, after_value, atol=1.e-6)
+
+
 def test_mainloop_model_training(tmpdir):
     """Test the model is being trained properly."""
     _, model, mainloop = create_simple_main_loop(130, tmpdir)
@@ -406,6 +417,21 @@ def test_regularization():
                                           outputs=['loss', 'output'], optimizer=_OPTIMIZER)
     good_batch = {'input': [[1]*10], 'target': [[0]*10], 'ratio': [1.0]}
     regularized_model2.run(good_batch, train=True)
+
+
+def test_profiling(tmpdir):
+    """Test whether profile is created."""
+    model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER, profile=True, keep_profiles=10)
+    batch = {'input': [[1]*10], 'target': [[0]*10]}
+
+    # test if one can train one model while the other remains intact
+    for _ in range(1000):
+        model.run(batch, train=True)
+
+    for i in range(10):
+        assert path.exists(f"{tmpdir}/profile_{i}.json")
+
+    assert not path.exists(f"{tmpdir}/profile_11.json")
 
 
 #######################
