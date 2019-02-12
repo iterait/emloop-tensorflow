@@ -64,6 +64,7 @@ Variables
       [<class 'emloop_tensorflow.models.conv_blocks.ConvBlock'>,
        <class 'emloop_tensorflow.models.conv_blocks.IncBlock'>,
        <class 'emloop_tensorflow.models.conv_blocks.ResBlock'>,
+       <class 'emloop_tensorflow.models.conv_blocks.SeparableConvBlock'>,
        <class 'emloop_tensorflow.models.conv_blocks.MaxPoolBlock'>,
        <class 'emloop_tensorflow.models.conv_blocks.AveragePoolBlock'>,
        <class 'emloop_tensorflow.models.conv_blocks.UnPoolBlock'>,

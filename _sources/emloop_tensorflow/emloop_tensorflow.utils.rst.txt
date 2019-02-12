@@ -21,3 +21,25 @@ Functions
 .. autofunction:: create_activation
 
 .. autofunction:: create_optimizer
+
+
+Classes
+=======
+
+- :py:class:`Profiler`:
+  Profiles tensorflow graphs and saves the profiles.
+
+
+
+.. autoclass:: Profiler
+   :show-inheritance:
+   :members:
+   :private-members:
+   :special-members:
+   :exclude-members: __weakref__
+
+   .. inheritance-diagram:: Profiler
+      :parts: 1
+
+   |
+

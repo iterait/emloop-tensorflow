@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Tutorial &#8212; emloop-tensorflow 0.1.0 documentation</title>
+    <title>Tutorial &#8212; emloop-tensorflow 0.5.1 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/highlight.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -34,8 +26,7 @@
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -48,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           emloop-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -58,6 +49,7 @@
                 <li><a href="#">Tutorial</a></li>
                 <li><a href="regularization.html">Model Regularization</a></li>
                 <li><a href="multi_gpu.html">Multi GPU models</a></li>
+                <li><a href="advanced.html">Advanced</a></li>
                 <li><a href="emloop_tensorflow/index.html">API Reference</a></li>
             
             
@@ -136,7 +128,7 @@ fast and it pretty much does all the work for you. Here is how you set it up:</p
 <p>Create a simple convolutional network by writing only a couple of lines.</p>
 <div class="literal-block-wrapper docutils container" id="id2">
 <div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id2" title="Permalink to this code">¶</a></div>
-<div class="highlight-python"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
  <span class="kn">import</span> <span class="nn">tensorflow.contrib.keras</span> <span class="kn">as</span> <span class="nn">K</span>
  <span class="kn">import</span> <span class="nn">emloop_tensorflow</span> <span class="kn">as</span> <span class="nn">eltf</span>
 
@@ -178,7 +170,7 @@ favorite framework such as <a class="reference external" href="https://keras.io/
 <p>Next, write a configuration file putting everything together.</p>
 <div class="literal-block-wrapper docutils container" id="id3">
 <div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id3" title="Permalink to this code">¶</a></div>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">dataset</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">datasets.MNISTDataset</span>
 
 <span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
@@ -206,7 +198,7 @@ favorite framework such as <a class="reference external" href="https://keras.io/
 </div>
 </div>
 <p>Finally run the training with:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>emloop train &lt;path to config.yaml&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>emloop train &lt;path to config.yaml&gt;
 </pre></div>
 </div>
 <div class="admonition tip">
@@ -228,7 +220,7 @@ Both&nbsp;<em>inputs</em>&nbsp;and&nbsp;<em>outputs</em>&nbsp;are nothing more t
 The respective tensors are expected to be found in the created TF graph.</p>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">configuring inputs and outputs</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>  <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
     <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
     <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
 <span class="hll">  <span class="l l-Scalar l-Scalar-Plain">inputs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">images</span><span class="p p-Indicator">,</span> <span class="nv">labels</span><span class="p p-Indicator">]</span>
@@ -241,12 +233,12 @@ The respective tensors are expected to be found in the created TF graph.</p>
 <div class="section" id="optimizer">
 <h3>Optimizer<a class="headerlink" href="#optimizer" title="Permalink to this headline">¶</a></h3>
 <p>By default, <strong>emloop-tensorflow</strong> creates a TF optimizer specified in the configuration and attempts to
-minimize the model <code class="docutils literal"><span class="pre">loss</span></code>.
-Therefore, we need to both, specify the optimizer and include a tensor named <code class="docutils literal"><span class="pre">loss</span></code> in the graph.
+minimize the model <code class="docutils literal notranslate"><span class="pre">loss</span></code>.
+Therefore, we need to both, specify the optimizer and include a tensor named <code class="docutils literal notranslate"><span class="pre">loss</span></code> in the graph.
 Arbitrary <a class="reference external" href="https://www.tensorflow.org/api_guides/python/train">TF Optimizer</a> may be referenced by its name.</p>
 <div class="literal-block-wrapper docutils container" id="id5">
 <div class="code-block-caption"><span class="caption-text">config.yaml</span><a class="headerlink" href="#id5" title="Permalink to this code">¶</a></div>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span>   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">convnet.SimpleConvNet</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">convnet.SimpleConvNet</span>
 <span class="hll">   <span class="l l-Scalar l-Scalar-Plain">optimizer</span><span class="p p-Indicator">:</span>
 </span><span class="hll">     <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">AdamOptimizer</span>
 </span><span class="hll">     <span class="l l-Scalar l-Scalar-Plain">learning_rate</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">0.001</span>
@@ -260,11 +252,11 @@ Arbitrary <a class="reference external" href="https://www.tensorflow.org/api_gui
 <p>Note that the model (hyper-)parameters such as the number of layers were all hard-coded in our example.
 Contrary to that, those parameters happen to frequently change as we search for the best performing configuration.</p>
 <p>In <strong>emloop</strong>, model parameters may be defined and configured quite easily.
-For example, to introduce new <code class="docutils literal"><span class="pre">dense_size</span></code> parameter controlling the number of neurons in the fully connected layer,
+For example, to introduce new <code class="docutils literal notranslate"><span class="pre">dense_size</span></code> parameter controlling the number of neurons in the fully connected layer,
 one would update the code as follows:</p>
 <div class="literal-block-wrapper docutils container" id="id6">
 <div class="code-block-caption"><span class="caption-text">convnet.py</span><a class="headerlink" href="#id6" title="Permalink to this code">¶</a></div>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="hll">    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dense_size</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll">    <span class="k">def</span> <span class="nf">_create_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dense_size</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 </span>        <span class="o">...</span>
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;dense3&#39;</span><span class="p">):</span>
             <span class="n">net</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()(</span><span class="n">net</span><span class="p">)</span>
@@ -274,7 +266,7 @@ one would update the code as follows:</p>
 </div>
 <div class="literal-block-wrapper docutils container" id="id7">
 <div class="code-block-caption"><span class="caption-text">passing the model parameters</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
-<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">model</span><span class="p p-Indicator">:</span>
   <span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">ConvNetExample</span>
   <span class="l l-Scalar l-Scalar-Plain">class</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">convnet.SimpleConvNet</span>
 <span class="hll">  <span class="l l-Scalar l-Scalar-Plain">dense_size</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">50</span>
@@ -282,12 +274,12 @@ one would update the code as follows:</p>
 </pre></div>
 </div>
 </div>
-<p>In fact, <strong>any</strong> parameter found in the configuration under the <code class="docutils literal"><span class="pre">model</span></code> section is directly forwarded to the
-<code class="docutils literal"><span class="pre">_create_model</span></code> function.
+<p>In fact, <strong>any</strong> parameter found in the configuration under the <code class="docutils literal notranslate"><span class="pre">model</span></code> section is directly forwarded to the
+<code class="docutils literal notranslate"><span class="pre">_create_model</span></code> function.
 This way, the whole model can be easily parametrized.</p>
 <div class="admonition tip">
 <p class="first admonition-title">Tip</p>
-<p class="last">Try to experiment with the <code class="docutils literal"><span class="pre">dense_size</span></code> parameter. How small the fully connected layer can be before the performance
+<p class="last">Try to experiment with the <code class="docutils literal notranslate"><span class="pre">dense_size</span></code> parameter. How small the fully connected layer can be before the performance
 degrades?</p>
 </div>
 </div>
@@ -295,10 +287,10 @@ degrades?</p>
 <div class="section" id="next-steps">
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
 <p>See our <a class="reference external" href="https://github.com/iterait/emloop-examples">emloop examples repository &#64;GitHub</a>.
-for additional examples or read the <a class="reference internal" href="emloop_tensorflow/emloop_tensorflow.html#emloop_tensorflow.BaseModel" title="emloop_tensorflow.BaseModel"><code class="xref py py-class docutils literal"><span class="pre">emloop_tensorflow.BaseModel</span></code></a> for a full list of customization options.</p>
+for additional examples or read the <a class="reference internal" href="emloop_tensorflow/emloop_tensorflow.html#emloop_tensorflow.BaseModel" title="emloop_tensorflow.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">emloop_tensorflow.BaseModel</span></code></a> for a full list of customization options.</p>
 <p>This project contains additional utility functions and <strong>emloop</strong> hooks documented in the
-<span class="xref std std-doc">emloop_tensorflow/index</span>.
-Make sure you don`t miss the <code class="xref py py-class docutils literal"><span class="pre">emloop_tensorflow.hooks.WriteTensorboard</span></code> hook providing seamless integration
+<a class="reference internal" href="emloop_tensorflow/index.html"><span class="doc">API Reference</span></a>.
+Make sure you don`t miss the <code class="xref py py-class docutils literal notranslate"><span class="pre">emloop_tensorflow.hooks.WriteTensorboard</span></code> hook providing seamless integration
 with <a class="reference external" href="https://www.tensorflow.org/get_started/summaries_and_tensorboard">TensorBoard</a>.</p>
 </div>
 </div>
@@ -317,17 +309,17 @@ with <a class="reference external" href="https://www.tensorflow.org/get_started/
     </p>
     <p>
         &copy; Copyright 2018, Iterait a.s..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.<br/>
     </p>
   </div>
 </footer>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129185891-2"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'UA-108931454-1');
+gtag('config', 'UA-129185891-2');
 </script>
 
 

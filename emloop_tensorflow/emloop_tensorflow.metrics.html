@@ -2,21 +2,13 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>emloop_tensorflow.metrics &#8212; emloop-tensorflow 0.1.0 documentation</title>
+    <title>emloop_tensorflow.metrics &#8212; emloop-tensorflow 0.5.1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/highlight.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.1.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -27,13 +19,14 @@
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="emloop_tensorflow.models" href="emloop_tensorflow.models.html" />
+    <link rel="prev" title="emloop_tensorflow.hooks" href="emloop_tensorflow.hooks.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body>
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -46,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           emloop-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -56,6 +49,7 @@
                 <li><a href="../tutorial.html">Tutorial</a></li>
                 <li><a href="../regularization.html">Model Regularization</a></li>
                 <li><a href="../multi_gpu.html">Multi GPU models</a></li>
+                <li><a href="../advanced.html">Advanced</a></li>
                 <li><a href="index.html">API Reference</a></li>
             
             
@@ -83,8 +77,16 @@
 <div class="container">
   <div class="row">
       <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
-<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">emloop_tensorflow.metrics</span></code></a><ul>
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<div class="side_nav">
+    <a href="emloop_tensorflow.hooks.html" title="Previous Chapter: emloop_tensorflow.hooks"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; emloop_tensorflow.hooks</span>
+    </a>
+    </div>
+<div class="side_nav">
+    <a href="emloop_tensorflow.models.html" title="Next Chapter: emloop_tensorflow.models"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">emloop_tensorflow.models &raquo;</span>
+    </a>
+    </div><ul>
+<li><a class="reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">emloop_tensorflow.metrics</span></code></a><ul>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
 </li>
@@ -109,14 +111,14 @@
     <div class="col-md-9 content">
       
   <div class="section" id="module-emloop_tensorflow.metrics">
-<span id="emloop-tensorflow-metrics"></span><h1><code class="docutils literal"><span class="pre">emloop_tensorflow.metrics</span></code><a class="headerlink" href="#module-emloop_tensorflow.metrics" title="Permalink to this headline">¶</a></h1>
+<span id="emloop-tensorflow-metrics"></span><h1><code class="docutils literal notranslate"><span class="pre">emloop_tensorflow.metrics</span></code><a class="headerlink" href="#module-emloop_tensorflow.metrics" title="Permalink to this headline">¶</a></h1>
 <p>Module with TF util functions computing various ml metrics.</p>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_stats" title="emloop_tensorflow.metrics.bin_stats"><code class="xref py py-func docutils literal"><span class="pre">bin_stats()</span></code></a>:
+<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_stats" title="emloop_tensorflow.metrics.bin_stats"><code class="xref py py-func docutils literal notranslate"><span class="pre">bin_stats()</span></code></a>:
 Calculate f1, precision and recall from binary classification expected and predicted values.</li>
-<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_dice" title="emloop_tensorflow.metrics.bin_dice"><code class="xref py py-func docutils literal"><span class="pre">bin_dice()</span></code></a>:
+<li><a class="reference internal" href="#emloop_tensorflow.metrics.bin_dice" title="emloop_tensorflow.metrics.bin_dice"><code class="xref py py-func docutils literal notranslate"><span class="pre">bin_dice()</span></code></a>:
 Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</li>
 </ul>
 <dl class="function">
@@ -128,14 +130,14 @@ Calculate Sorensen–Dice coefficient from the given binary classification expec
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
-<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
-<li><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – prefix of the output tensor names</li>
-<li><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/typing.html#typing.Optional" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>]) – suffix of the output tensor names</li>
+<li><strong>predictions</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
+<li><strong>labels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
+<li><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.7)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – prefix of the output tensor names</li>
+<li><strong>suffix</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.7)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – suffix of the output tensor names</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>]</p>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple of batched (f1, precision and recall) values</p>
@@ -149,18 +151,18 @@ Calculate Sorensen–Dice coefficient from the given binary classification expec
 <dt id="emloop_tensorflow.metrics.bin_dice">
 <code class="descclassname">emloop_tensorflow.metrics.</code><code class="descname">bin_dice</code><span class="sig-paren">(</span><em>predictions</em>, <em>labels</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/emloop_tensorflow/metrics/bin.html#bin_dice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#emloop_tensorflow.metrics.bin_dice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate Sorensen–Dice coefficient from the given binary classification expected and predicted values.</p>
-<p>The coefficient is defined as <span class="math">\(2*|X \cup Y| / (|X| + |Y|)\)</span>.</p>
+<p>The coefficient is defined as <span class="math notranslate nohighlight">\(2*|X \cup Y| / (|X| + |Y|)\)</span>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>predictions</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
-<li><strong>labels</strong> (<code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
+<li><strong>predictions</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, predictions) of predicted 0/1 classes</li>
+<li><strong>labels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – 2-d tensor (batch, labels) of expected 0/1 classes</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></p>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">batched Sørensen–Dice coefficients</p>
@@ -187,17 +189,17 @@ Calculate Sorensen–Dice coefficient from the given binary classification expec
     </p>
     <p>
         &copy; Copyright 2018, Iterait a.s..<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.9.<br/>
     </p>
   </div>
 </footer>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-108931454-1"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129185891-2"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'UA-108931454-1');
+gtag('config', 'UA-129185891-2');
 </script>
 
 
