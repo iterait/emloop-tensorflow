@@ -113,7 +113,7 @@ jobs:
 
   deploy:
     docker:
-      - image: archimg/base-devel
+      - image: archlinux/base
     working_directory: ~/emloop-tensorflow
     steps:
       - *arch_deps
