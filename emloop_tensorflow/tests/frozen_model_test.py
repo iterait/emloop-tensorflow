@@ -60,7 +60,7 @@ def test_frozen_model_run(tmpdir):
     dataset = SimpleDataset()
     model = TrainableModel(dataset=dataset, log_dir=tmpdir, **_IO, freeze=True, optimizer=_OPTIMIZER)
     mainloop = MainLoop(model=model, dataset=dataset, hooks=[StopAfter(epochs=1000)], skip_zeroth_epoch=False)
-    mainloop.run_training(None)
+    mainloop.run_training()
     model.save('')
 
     frozen_model = FrozenModel(inputs=['input'], outputs=['output'], restore_from=tmpdir)
