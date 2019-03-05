@@ -1,5 +1,6 @@
 # tensorflow>=1.3.0 to be installed manually
 # tensorflow-tensorboard>=0.1.5 to be installed manually
+tensorflow-estimator
 emloop>=0.1.0
 numpy>=1.13.1
 
