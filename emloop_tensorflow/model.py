@@ -44,8 +44,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  dataset: Optional[el.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
                  session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
                  optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
-                 restore_fallback: Optional[str]=None, clip_gradient: Optional[float]=None, profile: bool=False,
-                 keep_profiles: int=5, **kwargs):
+                 clip_gradient: Optional[float]=None, profile: bool=False, keep_profiles: int=5, **kwargs):
         """
         Create new emloop trainable TensorFlow model.
 
@@ -80,7 +79,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param freeze: freeze the graph after each save
         :param loss_name: loss tensor name
         :param monitor: monitor signal mean and variance of the tensors which names contain the specified value
-        :param restore_fallback: ignored arg. (allows training from configs saved by emloop where it is added)
         :param clip_gradient: limit the absolute value of the gradient; set to None for no clipping
         :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir
         :param keep_profiles: if true, profile the speed of model inference and save profiles to the specified log_dir
@@ -337,10 +335,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             logging.info('Restoring model from checkpoint `{}` located in directory `{}`'.format(restore_model_name,
                                                                                                  restore_from))
             self._restore_checkpoint(path.join(restore_from, restore_model_name))
-
-    @property
-    def restore_fallback(self) -> str:
-        return 'emloop_tensorflow.BaseModel'
 
     def _create_session(self, session_config: Optional[dict]) -> tf.Session:
         """

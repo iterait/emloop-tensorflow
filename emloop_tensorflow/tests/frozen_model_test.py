@@ -46,7 +46,6 @@ def test_frozen_model_misc(tmpdir):
     # restore from directory
     frozen_model = FrozenModel(**_IO, restore_from=tmpdir, session_config={'allow_soft_placement': True})
 
-    assert frozen_model.restore_fallback == 'emloop_tensorflow.FrozenModel'
     assert frozen_model.input_names == _IO['inputs']
     assert frozen_model.output_names == _IO['outputs']
 
