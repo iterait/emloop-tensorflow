@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>emloop_tensorflow.model &#8212; emloop-tensorflow 0.5.1 documentation</title>
+    <title>emloop_tensorflow.model &#8212; emloop-tensorflow 0.6.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/highlight.css" type="text/css" />
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html">
           emloop-tensorflow</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.5</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.6</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -141,8 +141,7 @@
                  <span class="n">dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">el</span><span class="o">.</span><span class="n">AbstractDataset</span><span class="p">],</span> <span class="n">log_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                  <span class="n">session_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_gpus</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">restore_from</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">loss_name</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="n">DEFAULT_LOSS_NAME</span><span class="p">,</span> <span class="n">monitor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">restore_fallback</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clip_gradient</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                 <span class="n">keep_profiles</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                 <span class="n">clip_gradient</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keep_profiles</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create new emloop trainable TensorFlow model.</span>
 
@@ -177,7 +176,6 @@
 <span class="sd">        :param freeze: freeze the graph after each save</span>
 <span class="sd">        :param loss_name: loss tensor name</span>
 <span class="sd">        :param monitor: monitor signal mean and variance of the tensors which names contain the specified value</span>
-<span class="sd">        :param restore_fallback: ignored arg. (allows training from configs saved by emloop where it is added)</span>
 <span class="sd">        :param clip_gradient: limit the absolute value of the gradient; set to None for no clipping</span>
 <span class="sd">        :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir</span>
 <span class="sd">        :param keep_profiles: if true, profile the speed of model inference and save profiles to the specified log_dir</span>
@@ -434,10 +432,6 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Restoring model from checkpoint `</span><span class="si">{}</span><span class="s1">` located in directory `</span><span class="si">{}</span><span class="s1">`&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">restore_model_name</span><span class="p">,</span>
                                                                                                  <span class="n">restore_from</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_restore_checkpoint</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">restore_from</span><span class="p">,</span> <span class="n">restore_model_name</span><span class="p">))</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">restore_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;emloop_tensorflow.BaseModel&#39;</span>
 
 <div class="viewcode-block" id="BaseModel._create_session"><a class="viewcode-back" href="../../emloop_tensorflow/emloop_tensorflow.html#emloop_tensorflow.BaseModel._create_session">[docs]</a>    <span class="k">def</span> <span class="nf">_create_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
