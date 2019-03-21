@@ -167,7 +167,6 @@ def test_run(mocker):
     """Test TF model run."""
     good_io = {'inputs': ['input', 'second_input'], 'outputs': ['output', 'sum']}
     model = SimpleModel(dataset=None, log_dir='', **good_io)
-    assert model.restore_fallback == 'emloop_tensorflow.BaseModel'
     valid_batch = {'input': [[1]*10], 'second_input': [[2]*10]}
 
     # test if outputs are correctly returned
