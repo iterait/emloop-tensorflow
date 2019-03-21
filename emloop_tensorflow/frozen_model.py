@@ -114,10 +114,6 @@ class FrozenModel(el.AbstractModel):
         """List of TF output tensor names."""
         return self._tower.output_names
 
-    @property
-    def restore_fallback(self) -> str:
-        return 'emloop_tensorflow.FrozenModel'
-
     @staticmethod
     def restore_frozen_model(restore_from: str) -> None:
         """

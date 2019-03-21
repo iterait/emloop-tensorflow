@@ -338,10 +338,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                                                                                                  restore_from))
             self._restore_checkpoint(path.join(restore_from, restore_model_name))
 
-    @property
-    def restore_fallback(self) -> str:
-        return 'emloop_tensorflow.BaseModel'
-
     def _create_session(self, session_config: Optional[dict]) -> tf.Session:
         """
         Create and return TF Session for this model.
