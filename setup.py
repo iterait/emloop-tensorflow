@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='emloop-tensorflow',
-      version='0.5.1',
+      version='0.6.0',
       description='TensorFlow extension for emloop.',
       long_description='Plugin that enables emloop to work with TensorFlow.',
       classifiers=[
