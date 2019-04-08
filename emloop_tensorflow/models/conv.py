@@ -7,10 +7,10 @@ import tensorflow.contrib.slim as slim
 
 from .blocks import get_block_instance
 from .conv_blocks import ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock, AveragePoolBlock, \
-    UnPoolBlock, GlobalAveragePoolBlock
+    UnPoolBlock, GlobalAveragePoolBlock, CoordConvBlock
 
 CONV_BLOCKS = [ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock,
-               AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock]
+               AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock, CoordConvBlock]
 """CNN blocks recognized by the functions in the ``conv`` module."""
 
 POOL_BLOCKS = [MaxPoolBlock, AveragePoolBlock]
@@ -55,6 +55,10 @@ def cnn_encoder(x: tf.Tensor,
     |                           | code                                                        | example                |
     +---------------------------+-------------------------------------------------------------+------------------------+
     | Convolutional layer       | (num_filters)c[(time_kernel_size)-](kernel_size)[s(stride)] | 64c3, 64c3s2, 64c3-3s2 |
+    +---------------------------+-------------------------------------------------------------+------------------------+
+    | CoordConv layer           | (num_filters)cc(kernel_size)[s(stride)]                     | 64cc3, 64cc3s2         |
+    +---------------------------+-------------------------------------------------------------+------------------------+
+    | Separable conv. layer     | (num_filters)sep(kernel_size)[s(stride)]                    | 64sep3, 64sep3s2       |
     +---------------------------+-------------------------------------------------------------+------------------------+
     | Average/Max pooling layer | (ap|mp)(kernel_size)[s(stride)]                             | mp2, ap3s2             |
     +---------------------------+-------------------------------------------------------------+------------------------+

@@ -3,7 +3,7 @@ from typing import Tuple, Callable, Optional, Union
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from ..ops import repeat
+from ..ops import repeat, get_coord_channels
 from .blocks import BaseBlock
 
 __all__ = ['ConvBaseBlock', 'ConvBlock', 'ResBlock', 'IncBlock', 'PoolBaseBlock', 'MaxPoolBlock', 'AveragePoolBlock',
@@ -68,6 +68,48 @@ class ConvBlock(ConvBaseBlock):
             time_kernel = (self._time_kernel,)
         x = self._conv_fn(x, num_outputs=self._channels, kernel_size=time_kernel+(self._kernel, self._kernel),
                           stride=self._extra_dim+(self._stride, self._stride), scope='inner')
+        x = self._bn_fn(x)
+        x = self._ln_fn(x)
+        return x
+
+    def inverse_code(self) -> str:
+        if self._stride > 1:
+            raise ValueError('Inverse code for conv block is not defined for stride `{}`'.format(self._stride))
+        return self._code
+
+
+class CoordConvBlock(ConvBaseBlock):
+    """
+    2D convolutional layer with added coord channels (see https://arxiv.org/pdf/1807.03247.pdf)
+
+    **code**: ``(num_filters)cc(kernel_size)[s(stride)]``
+
+    **examples**: ``64cc3``, ``64cc3s2``
+    """
+
+    def __init__(self, **kwargs):
+        """Try to parse and create new :py:class:`CoordConvBlock`."""
+        super().__init__(regexp='([1-9][0-9]*)cc([1-9][0-9]*)(s([1-9][0-9]*))?',
+                         defaults=(None, None, None, 1),
+                         **kwargs)
+
+    def _handle_parsed_args(self, channels: str, kernel: str, _, stride: Union[str, int]) -> None:
+        """
+        Handle parsed arguments.
+
+        :param channels: number of output channels
+        :param kernel: spatial kernel size
+        :param stride: spatial stride (default 1)
+        """
+        self._channels, self._kernel, self._stride = int(channels), int(kernel), int(stride)
+
+    def apply(self, x: tf.Tensor) -> tf.Tensor:
+        if len(x.shape) != 4:
+            raise ValueError('CoordConv block supports only 4-dim tensors.')
+        coords = get_coord_channels(x)
+        x = tf.concat([x, coords], axis=-1)
+        x = self._conv_fn(x, num_outputs=self._channels, kernel_size=(self._kernel, self._kernel),
+                          stride=(self._stride, self._stride), scope='inner')
         x = self._bn_fn(x)
         x = self._ln_fn(x)
         return x
@@ -208,7 +250,6 @@ class SeparableConvBlock(ConvBaseBlock):
         if self._stride > 1:
             raise ValueError(f'Inverse code for separable conv block is not defined for stride `{self._stride}`')
         return self._code
-
 
 
 class PoolBaseBlock(BaseBlock):

@@ -8,7 +8,7 @@ import pytest
 
 from emloop_tensorflow.models.blocks import UnrecognizedCodeError, BaseBlock, Block
 from emloop_tensorflow.models.conv_blocks import ConvBlock, ResBlock, IncBlock, AveragePoolBlock, \
-    MaxPoolBlock, UnPoolBlock, GlobalAveragePoolBlock
+    MaxPoolBlock, UnPoolBlock, GlobalAveragePoolBlock, CoordConvBlock
 
 _VALID_CODES = {ResBlock: ['32res', '32ress2', '64ress3'],
                 AveragePoolBlock: ['ap2', 'ap3s2'],
@@ -16,7 +16,8 @@ _VALID_CODES = {ResBlock: ['32res', '32ress2', '64ress3'],
                 MaxPoolBlock: ['mp2', 'mp3s2'],
                 UnPoolBlock: ['up2', 'up3'],
                 IncBlock: ['32inc', '64inc'],
-                ConvBlock: ['32c3', '64c5s2', '64c3-5s2', '63c3-3']}
+                ConvBlock: ['32c3', '64c5s2', '64c3-5s2', '63c3-3'],
+                CoordConvBlock: ['32cc3', '64cc3s2']}
 
 _INVALID_CODES = {ResBlock: ['32ress', 'res', '32res2', '32residual', 'res32', '32res 32res 32res', 'res32s0', '12inc'],
                   AveragePoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'mp2', 'up3'],
@@ -25,7 +26,8 @@ _INVALID_CODES = {ResBlock: ['32ress', 'res', '32res2', '32residual', 'res32', '
                   MaxPoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'ap2', 'up3'],
                   UnPoolBlock: ['map2', 'up3s2', '3ap', 'mp', 'mp2 32c3', 'mp0', '3c', '24ress2', 'mp2', 'ap3'],
                   IncBlock: ['32incs2', 'inc12', 'inception32', '64i', '54inc 54inc', '0inc', '32c'],
-                  ConvBlock: ['32c', '32cs2', 'c3', '64cs', '32c3 32c3', '0c3', '3c0', 'mp2', '32c3-3-3']}
+                  ConvBlock: ['32c', '32cs2', 'c3', '64cs', '32c3 32c3', '0c3', '3c0', 'mp2', '32c3-3-3'],
+                  CoordConvBlock: ['cc3', '64cc', '0cc3']}
 
 
 def test_sanity():
@@ -66,6 +68,8 @@ def test_apply():
         with tf.Session() as ses:
             for block_type, codes in _VALID_CODES.items():
                 for code in codes:
+                    if block_type == CoordConvBlock and len(shape) == 5:
+                        continue  # coord conv does not work for 5dim tensors
                     block = block_type(code=code, **kwargs)
                     with tf.variable_scope('block_{}'.format(block_ix)):
                         x = tf.ones(shape)
