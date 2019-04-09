@@ -59,11 +59,13 @@ def test_dims():
         is_training = tf.constant(False)
         x4 = tf.ones((10, 100, 100, 3))
         x5 = tf.ones((10, 15, 100, 100, 3))
-        for x in [x4, x5]:
+        config_base = ['12c3', '16inc', '12ress2', 'mp2']
+        for x, config in [(x4, ['3cc3']+config_base), (x5, config_base)]:
             with tf.variable_scope('dim'+str(len(x.get_shape().as_list()))):
-                out = eltf.models.cnn_encoder(x, ['12c3', '16inc', '12ress2', 'mp2'], is_training)
+                out = eltf.models.cnn_encoder(x, config, is_training)
                 with tf.variable_scope('same_dim'):
-                    same_dim_out = eltf.models.cnn_encoder(x, ['12c3', '16inc', '12res', '3c3'], is_training)
+                    config = config[:-2]+['3res']
+                    same_dim_out = eltf.models.cnn_encoder(x, config, is_training)
                 ses.run(tf.local_variables_initializer())
                 ses.run(tf.global_variables_initializer())
                 value = out.eval(session=ses)
@@ -110,7 +112,7 @@ def test_sanity_auto():
 ])
 def test_padding(input_shape, padding_encoded_shape, fitted_encoded_shape):
     """Test cnn auto-encoder pads the input if needed and outputs the same shape anyways."""
-    padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '48c3']
+    padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '4cc3', '48c3']
     fitted_encoder = ['3c3', 'mp2', '24c3', 'mp2', '48c3']  # pooling fits to the shape, no padding is required
     with tf.Graph().as_default(), tf.Session() as ses:
         input_x = tf.placeholder(tf.float32, shape=(None, None, None, 3))

@@ -7,10 +7,10 @@ import tensorflow.contrib.slim as slim
 
 from .blocks import get_block_instance
 from .conv_blocks import ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock, AveragePoolBlock, \
-    UnPoolBlock, GlobalAveragePoolBlock
+    UnPoolBlock, GlobalAveragePoolBlock, CoordConvBlock
 
 CONV_BLOCKS = [ConvBlock, IncBlock, ResBlock, SeparableConvBlock, MaxPoolBlock,
-               AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock]
+               AveragePoolBlock, UnPoolBlock, GlobalAveragePoolBlock, CoordConvBlock]
 """CNN blocks recognized by the functions in the ``conv`` module."""
 
 POOL_BLOCKS = [MaxPoolBlock, AveragePoolBlock]
@@ -38,14 +38,14 @@ def compute_pool_amount(encoder_config: Sequence[str]):
 
 def cnn_encoder(x: tf.Tensor,
                 encoder_config: Sequence[str],
-                is_training: Optional[tf.Tensor]=None,
-                activation: Callable[[tf.Tensor], tf.Tensor]=tf.nn.relu,
-                conv_kwargs: Optional[dict]=None,
-                bn_kwargs: Optional[dict]=None,
-                ln_kwargs: Optional[dict]=None,
-                skip_connections: Optional[List[tf.Tensor]]=None,
-                use_bn: bool=False,
-                use_ln: bool=False) -> tf.Tensor:
+                is_training: Optional[tf.Tensor] = None,
+                activation: Callable[[tf.Tensor], tf.Tensor] = tf.nn.relu,
+                conv_kwargs: Optional[dict] = None,
+                bn_kwargs: Optional[dict] = None,
+                ln_kwargs: Optional[dict] = None,
+                skip_connections: Optional[List[tf.Tensor]] = None,
+                use_bn: bool = False,
+                use_ln: bool = False) -> tf.Tensor:
     """
     Build a convolutional neural network from the given ``encoder_config`` (sequence of block codes).
 
@@ -55,6 +55,10 @@ def cnn_encoder(x: tf.Tensor,
     |                           | code                                                        | example                |
     +---------------------------+-------------------------------------------------------------+------------------------+
     | Convolutional layer       | (num_filters)c[(time_kernel_size)-](kernel_size)[s(stride)] | 64c3, 64c3s2, 64c3-3s2 |
+    +---------------------------+-------------------------------------------------------------+------------------------+
+    | CoordConv layer           | (num_filters)cc(kernel_size)[s(stride)]                     | 64cc3, 64cc3s2         |
+    +---------------------------+-------------------------------------------------------------+------------------------+
+    | Separable conv. layer     | (num_filters)sep(kernel_size)[s(stride)]                    | 64sep3, 64sep3s2       |
     +---------------------------+-------------------------------------------------------------+------------------------+
     | Average/Max pooling layer | (ap|mp)(kernel_size)[s(stride)]                             | mp2, ap3s2             |
     +---------------------------+-------------------------------------------------------------+------------------------+
@@ -158,14 +162,14 @@ def cnn_encoder(x: tf.Tensor,
 
 def cnn_autoencoder(x: tf.Tensor,
                     encoder_config: Sequence[str],
-                    is_training: Optional[tf.Tensor]=None,
-                    activation: Callable[[tf.Tensor], tf.Tensor]=tf.nn.relu,
-                    conv_kwargs: Optional[dict]=None,
-                    bn_kwargs: Optional[dict]=None,
-                    ln_kwargs: Optional[dict]=None,
-                    skip_connections: bool=True,
-                    use_bn: bool=False,
-                    use_ln: bool=False) -> Tuple[tf.Tensor, tf.Tensor]:
+                    is_training: Optional[tf.Tensor] = None,
+                    activation: Callable[[tf.Tensor], tf.Tensor] = tf.nn.relu,
+                    conv_kwargs: Optional[dict] = None,
+                    bn_kwargs: Optional[dict] = None,
+                    ln_kwargs: Optional[dict] = None,
+                    skip_connections: bool = True,
+                    use_bn: bool = False,
+                    use_ln: bool = False) -> Tuple[tf.Tensor, tf.Tensor]:
     """
     Build a convolutional auto-encoder from the given ``encoder_config`` (sequence of layer/block codes).
 
