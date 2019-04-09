@@ -112,7 +112,7 @@ def test_sanity_auto():
 ])
 def test_padding(input_shape, padding_encoded_shape, fitted_encoded_shape):
     """Test cnn auto-encoder pads the input if needed and outputs the same shape anyways."""
-    padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '48c3']
+    padding_encoder = ['3c3', 'mp3', '24c3', 'mp3', '4cc3', '48c3']
     fitted_encoder = ['3c3', 'mp2', '24c3', 'mp2', '48c3']  # pooling fits to the shape, no padding is required
     with tf.Graph().as_default(), tf.Session() as ses:
         input_x = tf.placeholder(tf.float32, shape=(None, None, None, 3))

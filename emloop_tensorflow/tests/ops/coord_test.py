@@ -34,4 +34,5 @@ def test_get_coord_channels_dim():
     dim5 = tf.placeholder(tf.float32, shape=[None, None, 3], name='inputs5')
     with pytest.raises(AssertionError):
         _ = get_coord_channels(dim3)
+    with pytest.raises(AssertionError):
         _ = get_coord_channels(dim5)

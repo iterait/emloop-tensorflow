@@ -104,9 +104,7 @@ class CoordConvBlock(ConvBaseBlock):
         self._channels, self._kernel, self._stride = int(channels), int(kernel), int(stride)
 
     def apply(self, x: tf.Tensor) -> tf.Tensor:
-        if len(x.shape) != 4:
-            raise ValueError('CoordConv block supports only 4-dim tensors.')
-        coords = get_coord_channels(x)
+        coords = get_coord_channels(x)  # allows 4-dim tensors only
         x = tf.concat([x, coords], axis=-1)
         x = self._conv_fn(x, num_outputs=self._channels, kernel_size=(self._kernel, self._kernel),
                           stride=(self._stride, self._stride), scope='inner')
