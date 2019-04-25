@@ -14,7 +14,7 @@ references:
     run:
       name: Install dependencies on Arch Linux.
       command: |
-        pacman -Syu --noconfirm python python-pip git curl python-tensorflow
+        pacman -Syu --noconfirm --needed python python-pip git curl python-tensorflow base-devel
         pip install coveralls coverage
 
   install: &install
