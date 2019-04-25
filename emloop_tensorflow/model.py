@@ -256,15 +256,10 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         num_outputs = len(self.output_names)
         stacked_outputs = [np.concatenate(outputs[i::num_outputs]) for i in range(num_outputs)]
 
-        for i, output in enumerate(stacked_outputs):
-            if len(output) != batch_size:
-                raise ValueError('Input-output batch size mismatch. Input: {} Output: {} for `{}`'
-                                 .format(batch_size, len(output), self.output_names[i]))
-
         extra_outputs_names = list(map(lambda x: x.name.split(':')[0], self._extra_outputs))
         return dict(zip(self.output_names+extra_outputs_names, stacked_outputs+extra_outputs))
 
-    def save(self, name_suffix: str='') -> str:
+    def save(self, name_suffix: str = '') -> str:
         """
         Save current tensorflow graph to a checkpoint named with the given name suffix.
 
