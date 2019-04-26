@@ -228,11 +228,6 @@ def test_run_bad_outputs():
     with pytest.raises(ValueError):
         scalar_output_model.run(batch)  # scalar (non-batched) output
 
-    batch_output_model = TrainableModel(dataset=None, log_dir='', inputs=['input', 'target'],
-                                         outputs=['loss', 'batched_output'], optimizer=_OPTIMIZER)
-    with pytest.raises(ValueError):
-        batch_output_model.run(batch)  # batch size mismatch
-
 
 def test_run_custom_loss():
     CUSTOM_LOSS = 'custom_loss'
