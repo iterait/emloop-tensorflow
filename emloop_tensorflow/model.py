@@ -42,9 +42,10 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
     def __init__(self,  # pylint: disable=too-many-arguments
                  dataset: Optional[el.AbstractDataset], log_dir: Optional[str], inputs: List[str], outputs: List[str],
-                 session_config: Optional[dict]=None, n_gpus: int=0, restore_from: Optional[str]=None,
-                 optimizer=None, freeze=False, loss_name: str=DEFAULT_LOSS_NAME, monitor: Optional[str]=None,
-                 clip_gradient: Optional[float]=None, profile: bool=False, keep_profiles: int=5, **kwargs):
+                 session_config: Optional[dict] = None, n_gpus: int = 0, restore_from: Optional[str] = None,
+                 optimizer: dict = None, freeze: bool = False, loss_name: str = DEFAULT_LOSS_NAME,
+                 monitor: Optional[str] = None, clip_gradient: Optional[float] = None, profile: bool = False,
+                 keep_profiles: int = 5, quantize: bool = False, quantize_delay: int = 0, *args, **kwargs):
         """
         Create new emloop trainable TensorFlow model.
 
@@ -67,6 +68,15 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             Layer activation means and variances (named ``signal_mean`` and ``signal_variance``) will be include
             in the output.
 
+        .. warning::
+            Quantization aware training is rather experimental. You may run into many different issues among which
+            using unsupported ops is the most common one. Apart from specifying the quantize flag,
+            you need to register input and output tensors for the quantized graph with `_register_quantize_input` and
+            `_register_quantize_output` methods called from `_create_model` method.
+            For now, only TF 1.14 or 1.15 is supported. Both QA training graph with
+            fake quantization nodes and fully quantized .tfile flat buffer will be saved. By the way, the inputs
+            should be in [0, 255] range, otherwise they will be scaled badly. In conclusion, do not try this at home.
+
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
         :param inputs: model input names
@@ -82,10 +92,27 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param clip_gradient: limit the absolute value of the gradient; set to None for no clipping
         :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir
         :param keep_profiles: if true, profile the speed of model inference and save profiles to the specified log_dir
+        :param quantize: perform quantization-aware training from tf.contrib.quantize
+        :param quantize_delay: delay quantization-aware training by the specified number of iterations
+        :param args: additional args forwarded to :py:meth:`_create_model`
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
+        if quantize and n_gpus > 1:
+            raise ValueError('Uh oh... quantization with n_gpus>1 is not exactly a great idea.'
+                             'Most likely, it will not work or your PC will explode. Nothing can be ruled out.')
+        if quantize and restore_from is not None:
+            raise ValueError('Restoring a fake-quantized graph and trying to quantize it again or restoring a '
+                             'non-quantized graph with quantize=True... That does not sound right, huh?')
+        if quantize:
+            logging.warning('Quantization trainign is experimental atm, please read the warning in the docs first.')
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
-
+        self._args = args
+        self._session_config = session_config
+        self._kwargs = kwargs
+        self._quantize = quantize
+        self._quantize_delay = quantize_delay
+        self._quantize_inputs = []
+        self._quantize_outputs = []
         self._extra_outputs = []
         self._dataset = dataset
         self._log_dir = log_dir
@@ -170,7 +197,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             logging.debug('Trainable variables: %s', [var.name for var in train_vars])
             logging.info('Number of parameters: %s', sum([np.prod(var.get_shape().as_list()) for var in train_vars
                                                           if var.shape.is_fully_defined()]))
-
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
@@ -274,7 +300,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         frozen_graph_path = path.join(self._log_dir, 'model{}.pb'.format(name_suffix))
 
         tf.train.write_graph(self._session.graph_def, '', graph_path, as_text=False)
-
         self._saver.save(self._session, checkpoint_path)
 
         if self._freeze_graph:
@@ -284,7 +309,48 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                              output_node_names=self.output_names,
                              output_graph=frozen_graph_path)
 
+        if self._quantize:
+            logging.info('Quantizing and saving the model')
+            # Okay, this is a bit tricky, we need to create a new eval graph, restore the variables
+            # create a TFLiteConverter from session and then we can quantize the thing
+            session_config = None
+            if self._session_config:
+                session_config = tf.ConfigProto(**self._session_config)
+            with tf.Graph().as_default() as eval_graph, tf.Session(config=session_config).as_default() as eval_sess:
+                # lets clear the quantize inputs and outputs in order to prevent stacking
+                # of inputs and outputs from multiple _create_model calls
+                self._quantize_inputs = []
+                self._quantize_outputs = []
+                with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE):  # lets create the model as usual
+                    self._create_model(**self._kwargs)
+                tf.contrib.quantize.create_eval_graph(input_graph=eval_graph)
+
+            # copy the current variables to the eval graph
+            logging.info('Copying variables to the eval graph, this may take a while')
+            for target_var in eval_graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
+                source_tensor = self.graph.get_tensor_by_name(target_var.name)
+                eval_sess.run(target_var.assign(self.session.run(source_tensor)))
+
+            logging.info(f'Converting model with inputs {self._quantize_inputs} and outputs f{self._quantize_outputs}')
+            converter = tf.lite.TFLiteConverter.from_session(eval_sess, self._quantize_inputs, self._quantize_outputs)
+            converter.inference_type = tf.uint8
+            # TODO: this will work only for inputs scaled to [0, positive_num] ... the user was warned though ...
+            converter.quantized_input_stats = {input_array: (0.0, 1.0) for input_array in converter.get_input_arrays()}
+            quantized = converter.convert()
+            quantized_model_path = path.join(self._log_dir, 'quantized.tflite')
+            with open(quantized_model_path, "wb") as f:
+                f.write(quantized)
+            logging.info(f'Saving the quantized model to {quantized_model_path}')
+
         return checkpoint_path
+
+    def _register_quantize_input(self, input: tf.Tensor) -> None:
+        """Register the given input for quantization."""
+        self._quantize_inputs.append(input)
+
+    def _register_quantize_output(self, output: tf.Tensor) -> None:
+        """Register the given output for quantization."""
+        self._quantize_outputs.append(output)
 
     def _restore_checkpoint(self, checkpoint_path: str) -> None:
         """
@@ -377,6 +443,10 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             raise ValueError('Optimizer config was not specified although it is required for creating the train op. '
                              'Please specify the configuration in `model.optimizer`.')
         grads_and_vars = []
+        if self._quantize:
+            logging.info(f'Applying quantization aware training updates with {self._quantize_delay} delay')
+            tf.contrib.quantize.create_training_graph(input_graph=self.graph, quant_delay=self._quantize_delay)
+
         optimizer = create_optimizer(optimizer_config)
         regularization_losses = self.graph.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         regularization_loss = tf.reduce_sum(tf.stack(regularization_losses))
