@@ -75,7 +75,8 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             `_register_quantize_output` methods called from `_create_model` method.
             For now, only TF 1.14 or 1.15 is supported. Both QA training graph with
             fake quantization nodes and fully quantized .tfile flat buffer will be saved. By the way, the inputs
-            should be in [0, 255] range, otherwise they will be scaled badly. In conclusion, do not try this at home.
+            should be in [0, 255] range, otherwise they will be scaled badly. In conclusion,
+            user's discretion is advised.
 
         :param dataset: dataset to be trained with
         :param log_dir: path to the logging directory (wherein models should be saved)
@@ -98,11 +99,9 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
         """
         if quantize and n_gpus > 1:
-            raise ValueError('Uh oh... quantization with n_gpus>1 is not exactly a great idea.'
-                             'Most likely, it will not work or your PC will explode. Nothing can be ruled out.')
+            raise ValueError('Quantization with n_gpus>1 is not supported at the moment.')
         if quantize and restore_from is not None:
-            raise ValueError('Restoring a fake-quantized graph and trying to quantize it again or restoring a '
-                             'non-quantized graph with quantize=True... That does not sound right, huh?')
+            raise ValueError('Restoring (to be) quantized model is not supported at the moment.')
         if quantize:
             logging.warning('Quantization trainign is experimental atm, please read the warning in the docs first.')
         super().__init__(dataset=dataset, log_dir=log_dir, restore_from=restore_from)
