@@ -337,9 +337,9 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             converter.quantized_input_stats = {input_array: (0.0, 1.0) for input_array in converter.get_input_arrays()}
             quantized = converter.convert()
             quantized_model_path = path.join(self._log_dir, 'quantized.tflite')
-            with open(quantized_model_path, "wb") as f:
-                f.write(quantized)
-            logging.info(f'Saving the quantized model to {quantized_model_path}')
+            with open(quantized_model_path, "wb") as file:
+                file.write(quantized)
+            logging.info(f'Saving the quantized model to `{quantized_model_path}`')
 
         return checkpoint_path
 
