@@ -320,8 +320,12 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                 # of inputs and outputs from multiple _create_model calls
                 self._quantize_inputs = []
                 self._quantize_outputs = []
+                old_is_training = self._is_training  # some models may use self._is_training so we need to re-create it
                 with tf.variable_scope(tf.get_variable_scope(), reuse=tf.AUTO_REUSE):  # lets create the model as usual
-                    self._create_model(**self._kwargs)
+                    self._is_training = tf.constant(False, name=BaseModel.TRAINING_FLAG_NAME)
+                    with self._towers[0]:  # we enforce either n_gpus=0 or n_gpus=1 so this is safe
+                        self._create_model(**self._kwargs)
+                self._is_training = old_is_training
                 tf.contrib.quantize.create_eval_graph(input_graph=eval_graph)
 
             # copy the current variables to the eval graph
