@@ -8,7 +8,7 @@ references:
       command: |
         apt-get update -qy
         apt-get install -y git python3-dev python3-pip curl
-        pip3 install coveralls coverage tensorflow==1.15
+        pip3 install coveralls coverage tensorflow==1.14
 
   arch_deps: &arch_deps
     run:
