@@ -9,6 +9,8 @@ Status](https://coveralls.io/repos/github/iterait/emloop-tensorflow/badge.svg?br
 
 TensorFlow extension for [emloop framework](https://github.com/iterait/emloop) allowing to train models defined in TensorFlow.
 
+**At the moment, only TF 1.15 can be used as the migration to 2.0 is not done yet**
+
 ## Installation
 
 1. Install TensorFlow according to the [official instructions](https://www.tensorflow.org/install/)

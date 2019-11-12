@@ -8,14 +8,16 @@ references:
       command: |
         apt-get update -qy
         apt-get install -y git python3-dev python3-pip curl
-        pip3 install coveralls coverage tensorflow
+        pip3 install coveralls coverage tensorflow==1.15
 
   arch_deps: &arch_deps
     run:
       name: Install dependencies on Arch Linux.
       command: |
-        pacman -Syu --noconfirm --needed python python-pip git curl python-tensorflow base-devel
+        pacman -Syu --noconfirm --needed python python-pip git curl base-devel
         pip install coveralls coverage
+        # re-install system 2.0 tensorflow with 1.15 version
+        pip install tensorflow==1.15
 
   install: &install
     run:
