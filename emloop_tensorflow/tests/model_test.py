@@ -90,6 +90,28 @@ class TrainableModel(BaseModel):
         self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1, name=self._loss_name)
 
 
+class BigModel(BaseModel):
+    """Bigger TF model for partial initialization."""
+
+    def _create_model(self, **kwargs):
+        """Create simple trainable TF model."""
+        self.input = tf.placeholder(tf.float32, shape=[None, 10], name='input')
+        self.target = tf.placeholder(tf.float32, shape=[None, 10], name='target')
+
+        self.var_0 = tf.get_variable(name='var', shape=[10], dtype=tf.float32,
+                                   initializer=tf.constant_initializer([2] * 10))
+
+        self.var_1 = tf.get_variable(name='var_1', shape=[10], dtype=tf.float32,
+                                   initializer=tf.constant_initializer([2] * 10))
+
+        self.hidden = tf.multiply(self.input, self.var_0, name='hidden')
+        self.output = tf.multiply(self.hidden, self.var_1, name='output')
+        tf.constant(0, name='scalar_output')
+        tf.constant([1, 2, 3], name='batched_output')
+
+        self.loss = tf.reduce_mean(tf.squared_difference(self.target, self.output), axis=-1, name=self._loss_name)
+
+
 class RegularizedModel(TrainableModel):
     """Trainable TF model with regularization loss."""
 
@@ -305,6 +327,51 @@ def test_restore_1(tmpdir):
     var = restored_model.graph.get_tensor_by_name('var:0')
     var_value = var.eval(session=restored_model.session)
     assert np.allclose(saved_var_value, var_value)
+
+
+def test_init_from(tmpdir):
+    """Test variable initialization from saved model."""
+    trainable_model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER)
+    batch = {'input': [[1] * 10], 'target': [[0] * 10]}
+    for _ in range(1000):
+        trainable_model.run(batch, train=True)
+    saved_var_value = trainable_model.var.eval(session=trainable_model.session)
+    trainable_model.save('1')
+
+    init_model = os.path.join(tmpdir, 'model_1.ckpt')
+    restored_model = TrainableModel(dataset=None, log_dir='', init_from=init_model, **_IO, optimizer=_OPTIMIZER)
+
+    # check that variables are initialized properly
+    var = restored_model.graph.get_tensor_by_name('var:0')
+    var_value = var.eval(session=restored_model.session)
+    assert np.allclose(saved_var_value, var_value)
+
+
+def test_init_from_partial(tmpdir):
+    """Test partial variable initialization from model. \
+    Part of the new created variables is initialized from saved model, part is not."""
+    trainable_model = TrainableModel(dataset=None, log_dir=tmpdir, **_IO, optimizer=_OPTIMIZER)
+    batch = {'input': [[1] * 10], 'target': [[0] * 10]}
+    for _ in range(1000):
+        trainable_model.run(batch, train=True)
+    saved_var_value = trainable_model.var.eval(session=trainable_model.session)
+    trainable_model.save('1')
+
+    init_model = os.path.join(tmpdir, 'model_1.ckpt')
+    restored_model = BigModel(dataset=None, log_dir='', init_from=init_model, **_IO, optimizer=_OPTIMIZER)
+
+    var = restored_model.graph.get_tensor_by_name('var:0')
+    var_value = var.eval(session=restored_model.session)
+    
+    # check restored variables are really restored
+    assert np.allclose(saved_var_value, var_value)
+    # check restored variables are not as initialized
+    assert not np.allclose([2] * 10, var_value)
+    
+    # check not restored variables are kept same
+    var_1 = restored_model.graph.get_tensor_by_name('var_1:0')
+    var_1_value = var_1.eval(session=restored_model.session)
+    assert np.allclose([2] * 10, var_1_value)
 
 
 def test_restore_2_with_spec(tmpdir):

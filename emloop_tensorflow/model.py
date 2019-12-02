@@ -489,7 +489,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """
         raise NotImplementedError('`_create_model` method must be implemented in order to construct a new model.')
 
-    def _initialize_variables(self, **kwargs) -> None:
+    def _initialize_variables(self, init_from: Optional[str] = None, **kwargs) -> None:
         """
         Initialize variables of your TensorFlow model.
 
@@ -503,3 +503,18 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         """
         self._session.run(tf.global_variables_initializer())
         self._session.run(tf.local_variables_initializer())
+
+        if init_from:
+            logging.info('Initializing variables from %s', init_from)
+            session_config = None
+            if self._session_config:
+                session_config = tf.ConfigProto(**self._session_config)
+            with tf.Graph().as_default() as graph, tf.Session(config=session_config).as_default() as sess:
+                saver = tf.train.import_meta_graph(init_from + '.meta')
+                saver.restore(sess, init_from)
+                for target_var in self.graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
+                    try:
+                        source_tensor = graph.get_tensor_by_name(target_var.name)
+                        self.session.run(target_var.assign(sess.run(source_tensor)))
+                    except KeyError:
+                        logging.warning(f'Could not initialize {target_var.name} as it is missing in the source graph')
