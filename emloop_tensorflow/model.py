@@ -45,7 +45,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
                  session_config: Optional[dict] = None, n_gpus: int = 0, restore_from: Optional[str] = None,
                  optimizer: dict = None, freeze: bool = False, loss_name: str = DEFAULT_LOSS_NAME,
                  monitor: Optional[str] = None, clip_gradient: Optional[float] = None, profile: bool = False,
-                 keep_profiles: int = 5, quantize: bool = False, quantize_delay: int = 0, *args, **kwargs):
+                 keep_profiles: int = 5, quantize: bool = False, quantize_model_name: str = 'quantized', quantize_delay: int = 0, *args, **kwargs):
         """
         Create new emloop trainable TensorFlow model.
 
@@ -94,6 +94,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         :param profile: if true, profile the speed of model inference and save profiles to the specified log_dir
         :param keep_profiles: if true, profile the speed of model inference and save profiles to the specified log_dir
         :param quantize: perform quantization-aware training from tf.contrib.quantize
+        :param quantize_model_name: quantize model name
         :param quantize_delay: delay quantization-aware training by the specified number of iterations
         :param args: additional args forwarded to :py:meth:`_create_model`
         :param kwargs: additional kwargs forwarded to :py:meth:`_create_model`
@@ -109,6 +110,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
         self._session_config = session_config
         self._kwargs = kwargs
         self._quantize = quantize
+        self._quantize_model_name = quantize_model_name
         self._quantize_delay = quantize_delay
         self._quantize_inputs = []
         self._quantize_outputs = []
@@ -340,7 +342,7 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             # TODO: this will work only for inputs scaled to [0, positive_num] ... the user was warned though ...
             converter.quantized_input_stats = {input_array: (0.0, 1.0) for input_array in converter.get_input_arrays()}
             quantized = converter.convert()
-            quantized_model_path = path.join(self._log_dir, 'quantized.tflite')
+            quantized_model_path = path.join(self._log_dir, f'{self._quantize_model_name}.tflite')
             with open(quantized_model_path, "wb") as file:
                 file.write(quantized)
             logging.info(f'Saving the quantized model to `{quantized_model_path}`')
