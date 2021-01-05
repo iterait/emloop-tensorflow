@@ -11,11 +11,14 @@ from .model import BaseModel
 from .utils import Profiler
 import numpy as np
 
+
+
 class TFLiteModel(el.AbstractModel):
     """
     :py:class:`TFLiteModel` is **emloop** compatible abstraction for loading and running TFLite graphs
     (.tflite files).
 
+    Use this model class to infer UINT8 quantized .tflite model (not compiled for EdgeTpu).
     In order to use it, just change the ``model.class`` configuration and invoke any **emloop** command such as
     ``emloop eval ...``.
 
@@ -25,11 +28,22 @@ class TFLiteModel(el.AbstractModel):
         # ...
         model:
           class: emloop_tensorflow.TFLiteModel
+          restore_from: <path-to-tflite-file>
+          quantize_stats:
+            input_0:
+              scale: in0
+              shift: in0 
+            output_0:
+              scale: out0
+              shift: out0
+            output_1:  
+              scale: out1
+              shift: out1
           # ...
 
     """
 
-    def __init__(self, inputs, outputs, restore_from: str, dataset, log_dir: Optional[str]=None, n_gpus=0,
+    def __init__(self, restore_from: str, dataset, log_dir: Optional[str]=None, n_gpus=0,
                  quantize_stats:Optional[dict] = None, **_):
         """
         Initialize new :py:class:`TFLiteModel` instance.
@@ -37,9 +51,9 @@ class TFLiteModel(el.AbstractModel):
         :param log_dir: output directory
         :param restore_from: restore model path (either a dir or a .tflite file)
         """
-        self.quantize_stats = quantize_stats
+        self._quantize_stats = quantize_stats
         super().__init__(None, '', restore_from)
-        self._interpreter, self._inputs, self._outputs = self.restore_tflite_model(restore_from, inputs, outputs)
+        self._interpreter, self._inputs, self._outputs = self.restore_tflite_model(restore_from)
 
     def run(self, batch: el.Batch, train: bool=False, stream: el.datasets.StreamWrapper=None) -> Mapping[str, object]:
         """
@@ -60,28 +74,27 @@ class TFLiteModel(el.AbstractModel):
         for input_name, input_detail in self._inputs.items():
             if input_name not in batch:
                 raise ValueError(f'Missing {input_name} in the input batch')
-            if self.quantize_stats and input_name in self.quantize_stats:
+            if self._quantize_stats and input_name in self._quantize_stats:
                 input_data = np.uint8(batch[input_name])
             else:
                 input_data = np.float32(batch[input_name])
             self._interpreter.set_tensor(input_detail['index'], input_data)
 
         self._interpreter.invoke()
-
-        def dequant(tensor, tensor_name):
-            if self.quantize_stats and tensor_name in self.quantize_stats:
-                return self.quantize_stats[tensor_name]['scale']*\
-                       (np.float32(tensor)+self.quantize_stats[tensor_name]['shift'])
-            else:
-                return tensor
-
-        results = {output_name: dequant(self._interpreter.get_tensor(output_detail['index']), output_name)
-                   for output_name, output_detail in self._outputs.items()}
-        return results
+        return {output_name: self._dequant(self._interpreter.get_tensor(output_detail['index']), output_name)
+                for output_name, output_detail in self._outputs.items()}
 
     def save(self, name_suffix: str = '') -> str:
         """Save the model (not implemented)."""
         raise NotImplementedError('TFLite model cannot be saved.')
+
+    def _dequant(self, tensor, tensor_name):
+        """Dequantize model output"""
+        if self._quantize_stats and tensor_name in self._quantize_stats:
+            return self._quantize_stats[tensor_name]['scale']*\
+                (np.float32(tensor) + self._quantize_stats[tensor_name]['shift'])
+        else:
+            return tensor
 
     @property
     def input_names(self) -> List[str]:  # pylint: disable=invalid-sequence-index
@@ -94,7 +107,7 @@ class TFLiteModel(el.AbstractModel):
         return self._outputs.keys()
 
     @staticmethod
-    def restore_tflite_model(restore_from: str, input_names, output_names) -> None:
+    def restore_tflite_model(restore_from: str) -> None:
         """
         Restore TFLite model from the given ``restore_from`` path.
 
@@ -103,37 +116,29 @@ class TFLiteModel(el.AbstractModel):
 
         :param restore_from: path to directory from which the model is restored, optionally including model filename
         """
-        logging.info('Restoring TFLite model from `{}`'.format(restore_from))
-        restore_model_name = None
-        if not path.isdir(restore_from):
-            restore_model_name = path.basename(restore_from)
-            restore_from = path.dirname(restore_from)
-        if not path.isdir(restore_from):
-            raise ValueError('TFLite model restore path `{}` is not a directory.'.format(restore_from))
-
-        # attempt to derive the model name
-        if restore_model_name is None:
-            tflite_files = glob('{}/*.tflite'.format(restore_from))
-            if len(tflite_files) == 0:
-                raise ValueError('No `{}/*.tflite` files found.'.format(restore_from))
+        logging.info(f'Restoring TFLite model from {restore_from}')
+        if restore_from.endswith('.tflite'):
+            model_path = restore_from
+        else:
+            if not path.isdir(restore_from):
+                restore_from = path.dirname(restore_from)
+            tflite_files = glob(f'{restore_from}/*.tflite')
+            if not tflite_files:
+                raise ValueError(f'No `{restore_from}/*.tflite` files found.')
             elif len(tflite_files) == 1:
-                logging.info('Restoring model from TFLite model`{}`'.format(tflite_files[0]))
-                restore_model_name = path.basename(tflite_files[0])
+                model_path = tflite_files[0]
             else:
-                raise ValueError('There are multiple TFLite model files found in the directory {}. '
-                                 'Please specify the full TFLite model path.'.format(restore_from))
-
-        logging.info('Restoring model from TFLite model `{}` located in directory `{}`'
-                     .format(restore_model_name, restore_from))
-        model_path = path.join(restore_from, restore_model_name)
+                raise ValueError(f'There are multiple TFLite model files found in the directory {restore_from}.'
+                                 'Please specify the full TFLite model path.')
+        logging.info(f'Restoring model from TFLite model `{model_path}`')
 
         # restore the graph
         interpreter = tf.lite.Interpreter(model_path=model_path)
         interpreter.allocate_tensors()
 
         # Get input and output tensors.
-        inputs = {input_name: input_detail
-                       for input_name, input_detail in zip(input_names, interpreter.get_input_details())}
-        outputs = {output_name: output_detail
-                        for output_name, output_detail in zip(output_names, interpreter.get_output_details())}
+        inputs = {input_detail['name']: input_detail
+                       for input_detail in interpreter.get_input_details()}
+        outputs = {output_detail['name']: output_detail
+                        for output_detail in interpreter.get_output_details()}
         return interpreter, inputs, outputs
