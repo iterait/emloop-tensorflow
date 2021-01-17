@@ -49,7 +49,7 @@ class WriteTensorBoard(el.AbstractHook):
     """Action executed on missing variable."""
 
     def __init__(self, model: BaseModel, output_dir: str, image_variables: Optional[Iterable[str]] = None,
-                 flush_secs: int = 10, visualize_graph: bool = False, on_unknown_type: str = 'ignore',
+                 flush_secs: int = 10, visualize_graph: bool = False, on_unknown_type: str = 'warn',
                  on_missing_variable: str = 'error', **kwargs):
         """
         Create new WriteTensorBoard hook.
@@ -105,7 +105,7 @@ class WriteTensorBoard(el.AbstractHook):
                     result = value['nanmean']
 
                 result_type = type(result)
-                if np.issubdtype(result_type, float) or np.issubdtype(result_type, int):
+                if np.issubdtype(result_type, np.floating) or np.issubdtype(result_type, np.signedinteger):
                     summaries.append(tf.Summary.Value(tag='{}/{}'.format(stream_name, variable), simple_value=result))
                 else:
                     err_message = 'Variable `{}` in stream `{}` has to be of type `int` or `float` ' \
