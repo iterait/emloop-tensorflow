@@ -332,14 +332,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
 
             # copy the current variables to the eval graph
             logging.info('Copying variables to the eval graph, this may take a while')
-            for op1 in self.graph.get_operations():
-                if 'encoder' in op1.name and 'inner/weights/Initializer/random_uniform/mul' in op1.name:
-                    print(op1.name, op1.outputs)
-
-            for op1 in eval_graph.get_operations():
-                if 'encoder' in op1.name and 'inner/weights/Initializer/random_uniform/mul' in op1.name:
-                    print(op1.name, op1.outputs)
-
             for target_var in eval_graph.get_collection(tf.GraphKeys.GLOBAL_VARIABLES):
                 source_tensor = self.graph.get_tensor_by_name(target_var.name)
                 eval_sess.run(target_var.assign(self.session.run(source_tensor)))
@@ -349,7 +341,6 @@ class BaseModel(el.AbstractModel, metaclass=ABCMeta):  # pylint: disable=too-man
             converter.inference_type = tf.uint8
             # TODO: this will work only for inputs scaled to [0, positive_num] ... the user was warned though ...
             converter.quantized_input_stats = {input_array: (0.0, 1.0) for input_array in converter.get_input_arrays()}
-            converter.default_ranges_stats=(0, 1)
             quantized = converter.convert()
             quantized_model_path = path.join(self._log_dir, f'{self._quantize_model_name}.tflite')
             with open(quantized_model_path, "wb") as file:

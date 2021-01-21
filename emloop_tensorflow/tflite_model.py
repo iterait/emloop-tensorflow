@@ -3,14 +3,13 @@ from os import path
 from glob import glob
 from typing import List, Mapping, Optional
 
+import numpy as np
 import emloop as el
 import tensorflow as tf
 
 from .graph_tower import GraphTower
 from .model import BaseModel
 from .utils import Profiler
-import numpy as np
-
 
 
 class TFLiteModel(el.AbstractModel):
@@ -138,7 +137,7 @@ class TFLiteModel(el.AbstractModel):
 
         # Get input and output tensors.
         inputs = {input_detail['name']: input_detail
-                       for input_detail in interpreter.get_input_details()}
+                  for input_detail in interpreter.get_input_details()}
         outputs = {output_detail['name']: output_detail
-                        for output_detail in interpreter.get_output_details()}
+                   for output_detail in interpreter.get_output_details()}
         return interpreter, inputs, outputs
