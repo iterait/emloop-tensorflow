@@ -35,6 +35,6 @@ setup(name='emloop-tensorflow',
       include_package_data=True,
       zip_safe=False,
       setup_requires=['pytest-runner'],
-      tests_require=['pytest'],
+      tests_require=['pytest', 'pytest-mock'],
       install_requires=[line for line in open('requirements.txt', 'r').readlines() if not line.startswith('#')],
      )
