@@ -12,9 +12,9 @@ from .model import BaseModel
 from .utils import Profiler
 
 
-class TFLiteModel(el.AbstractModel):
+class QuantizedTFLiteModel(el.AbstractModel):
     """
-    :py:class:`TFLiteModel` is **emloop** compatible abstraction for loading and running TFLite graphs
+    :py:class:`QuantizedTFLiteModel` is **emloop** compatible abstraction for loading and running TFLite graphs
     (.tflite files).
 
     Use this model class to infer UINT8 quantized .tflite model (not compiled for EdgeTpu).
@@ -26,16 +26,16 @@ class TFLiteModel(el.AbstractModel):
 
         # ...
         model:
-          class: emloop_tensorflow.TFLiteModel
+          class: emloop_tensorflow.QuantizedTFLiteModel
           restore_from: <path-to-tflite-file>
           quantize_stats:
             input_0:
               scale: in0
-              shift: in0 
+              shift: in0
             output_0:
               scale: out0
               shift: out0
-            output_1:  
+            output_1:
               scale: out1
               shift: out1
           # ...
@@ -45,7 +45,7 @@ class TFLiteModel(el.AbstractModel):
     def __init__(self, restore_from: str, dataset, log_dir: Optional[str]=None, n_gpus=0,
                  quantize_stats:Optional[dict] = None, **_):
         """
-        Initialize new :py:class:`TFLiteModel` instance.
+        Initialize new :py:class:`QuantizedTFLiteModel` instance.
 
         :param log_dir: output directory
         :param restore_from: restore model path (either a dir or a .tflite file)
